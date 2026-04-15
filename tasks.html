@@ -1,0 +1,2124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<script src="auth.js"></script>
+<script src="profile.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMSuite — 任務管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>
+/* ━━━ RESET ━━━ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+button{cursor:pointer;border:none;background:none;font:inherit}
+input,select,textarea{font:inherit;border:none;outline:none;background:none;width:100%}
+a{text-decoration:none;color:inherit}
+svg{display:block;flex-shrink:0}
+[contenteditable]{outline:none}
+
+/* ━━━ TOKENS ━━━ */
+:root {
+  --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
+  --b1:#1e1c2e; --b2:#2a2840; --b3:#3a3852;
+  --t1:#f0edfb; --t2:#9490b0; --t3:#58547a; --t4:#35324a;
+  --purple:#c084fc; --purple-d:rgba(192,132,252,.13); --purple-g:rgba(192,132,252,.06);
+  --cyan:#38bdf8;   --cyan-d:rgba(56,189,248,.13);
+  --teal:#2dd4bf;   --teal-d:rgba(45,212,191,.13);
+  --green:#4ade80;  --green-d:rgba(74,222,128,.13);
+  --amber:#fbbf24;  --amber-d:rgba(251,191,36,.13);
+  --orange:#fb923c; --orange-d:rgba(251,146,60,.13);
+  --pink:#f472b6;   --pink-d:rgba(244,114,182,.13);
+  --red:#f87171;    --red-d:rgba(248,113,113,.13);
+  --grad-main:linear-gradient(135deg,#c084fc 0%,#38bdf8 100%);
+  --grad-fire:linear-gradient(135deg,#f472b6 0%,#fb923c 100%);
+  --grad-life:linear-gradient(135deg,#4ade80 0%,#2dd4bf 100%);
+  --sb-w:228px; --hdr-h:58px; --r:10px; --r-sm:6px;
+  --hdr-bg:rgba(8,8,15,.9); --ghost-op:.05;
+  --drawer-w:480px;
+}
+[data-theme="light"] {
+  --bg:#f4f2fb; --s1:#fff; --s2:#edeaf7; --s3:#e2dff2; --s4:#d5d0ea;
+  --b1:#dbd6f0; --b2:#ccc6e4; --b3:#b8b2d8;
+  --t1:#18142a; --t2:#5a5475; --t3:#9088aa; --t4:#b8b0cc;
+  --purple-d:rgba(192,132,252,.14); --cyan-d:rgba(56,189,248,.14);
+  --teal-d:rgba(45,212,191,.14); --green-d:rgba(74,222,128,.14);
+  --amber-d:rgba(251,191,36,.14); --orange-d:rgba(251,146,60,.14);
+  --pink-d:rgba(244,114,182,.14); --red-d:rgba(248,113,113,.14);
+  --hdr-bg:rgba(244,242,251,.92); --ghost-op:.07;
+}
+
+body,
+.sidebar,.hdr,.task-card,.search,.icon-btn,.filter-tab {
+  transition: background-color .28s ease, border-color .28s ease, color .2s ease;
+}
+
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E")}
+
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
+  min-height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5}
+
+/* ━━━ SIDEBAR ━━━ */
+.sidebar{width:var(--sb-w);min-height:100vh;background:var(--s1);
+  border-right:1px solid var(--b1);display:flex;flex-direction:column;
+  flex-shrink:0;position:relative;z-index:20}
+.logo{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
+  padding:0 20px;border-bottom:1px solid var(--b1)}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;
+  flex-shrink:0;box-shadow:0 0 18px rgba(192,132,252,.35)}
+.logo-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--t1)}
+.logo-label em{font-style:normal;background:var(--grad-main);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:1px}
+.nav-section{font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--t4);padding:12px 10px 5px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;
+  border-radius:var(--r-sm);color:var(--t3);font-size:13.5px;font-weight:500;
+  cursor:pointer;transition:all .15s;text-decoration:none}
+.nav-item:hover{color:var(--t1);background:var(--s2)}
+.nav-item.active{color:var(--t1);background:var(--purple-g);
+  border-left:2px solid var(--purple);padding-left:10px}
+.ni{color:var(--t4);transition:color .15s;flex-shrink:0}
+.nav-item.active .ni{color:var(--purple)}
+.nav-item:hover .ni{color:var(--t2)}
+.nav-chip{margin-left:auto;font-family:'Fira Code',monospace;font-size:10px;font-weight:500;
+  padding:1px 7px;border-radius:10px;background:var(--s3);color:var(--t2);border:1px solid var(--b2)}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--b1)}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:var(--r-sm);cursor:pointer;transition:background .15s}
+.user-row:hover{background:var(--s2)}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:14px;color:#fff;flex-shrink:0;background:var(--grad-main)}
+.user-name{font-size:13px;font-weight:600;color:var(--t1)}
+.user-role{font-size:11px;color:var(--t3)}
+
+/* ━━━ MAIN ━━━ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;position:relative}
+.hdr{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
+  padding:0 24px;background:var(--hdr-bg);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--b1);flex-shrink:0;position:relative;z-index:10}
+.hdr-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;
+  letter-spacing:.02em;color:var(--t1);display:flex;align-items:baseline;gap:10px;white-space:nowrap}
+.hdr-title span{font-size:12px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--t3);font-family:'Plus Jakarta Sans',sans-serif}
+.hdr-space{flex:1}
+.icon-btn{width:34px;height:34px;border-radius:var(--r-sm);display:flex;align-items:center;
+  justify-content:center;color:var(--t3);transition:all .15s;border:1px solid transparent}
+.icon-btn:hover{background:var(--s3);color:var(--t1);border-color:var(--b2)}
+.btn-primary{display:flex;align-items:center;gap:7px;padding:8px 16px;
+  background:var(--grad-main);border-radius:var(--r-sm);font-size:13px;font-weight:600;
+  color:#fff;transition:opacity .15s;white-space:nowrap}
+.btn-primary:hover{opacity:.88}
+
+/* ━━━ VIEW TOGGLE ━━━ */
+.view-toggle{display:flex;background:var(--s2);border:1px solid var(--b2);
+  border-radius:var(--r-sm);padding:3px;gap:2px}
+.vt-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:5px;
+  font-size:12px;font-weight:600;color:var(--t3);transition:all .15s;white-space:nowrap}
+.vt-btn:hover{color:var(--t2)}
+.vt-btn.active{background:var(--s4);color:var(--t1);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+
+/* ━━━ CONTENT ━━━ */
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+
+/* ━━━ FILTER BAR ━━━ */
+.filter-bar{display:flex;align-items:center;gap:10px;padding:10px 24px;
+  border-bottom:1px solid var(--b1);flex-shrink:0}
+
+/* Search */
+.fb-search{display:flex;align-items:center;gap:8px;background:var(--s2);
+  border:1px solid var(--b2);border-radius:var(--r-sm);padding:6px 12px;
+  transition:border-color .15s,box-shadow .15s;min-width:190px}
+.fb-search:focus-within{border-color:rgba(192,132,252,.5);box-shadow:0 0 0 3px rgba(192,132,252,.07)}
+.fb-search svg{flex-shrink:0;color:var(--t4)}
+.fb-search input{background:transparent;border:none;outline:none;color:var(--t1);
+  font-size:13px;font-family:inherit;width:100%}
+.fb-search input::placeholder{color:var(--t4)}
+
+/* Quick-filter pill tags */
+.fb-quick{display:flex;align-items:center;gap:4px}
+.fb-qtag{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;
+  font-size:12px;font-weight:600;color:var(--t3);border:1px solid var(--b2);
+  transition:all .15s;white-space:nowrap;background:transparent}
+.fb-qtag:hover{color:var(--t1);border-color:var(--b3);background:var(--s2)}
+.fb-qtag.active{color:var(--purple);border-color:rgba(192,132,252,.5);background:var(--purple-d)}
+.fb-qtag.active-today{color:var(--amber);border-color:rgba(251,191,36,.5);background:var(--amber-d)}
+.fb-qtag.active-high{color:var(--red);border-color:rgba(248,113,113,.45);background:var(--red-d)}
+
+/* Spacer */
+.fb-space{flex:1}
+
+/* Advanced filter button */
+.fb-adv-btn{display:flex;align-items:center;gap:7px;padding:6px 13px;
+  border-radius:var(--r-sm);font-size:12px;font-weight:600;color:var(--t3);
+  border:1px solid var(--b2);transition:all .15s;background:transparent;position:relative}
+.fb-adv-btn:hover{color:var(--t1);border-color:var(--b3);background:var(--s2)}
+.fb-adv-btn.open{color:var(--purple);border-color:rgba(192,132,252,.5);background:var(--purple-d)}
+.fb-adv-badge{position:absolute;top:-4px;right:-4px;width:8px;height:8px;
+  border-radius:50%;background:var(--purple);border:2px solid var(--bg);display:none}
+.fb-adv-badge.show{display:block}
+
+/* Advanced filter expandable panel */
+.adv-panel{display:none;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 24px 12px;border-bottom:1px solid var(--b1);
+  background:var(--s1);animation:up .15s both}
+.adv-panel.show{display:flex}
+.filter-select{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
+  padding:6px 10px;color:var(--t2);font-size:12px;font-weight:500;cursor:pointer;
+  transition:border-color .15s;appearance:none;padding-right:28px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2358547a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center}
+.filter-select:focus{border-color:var(--purple);outline:none}
+.filter-select option{background:var(--s2);color:var(--t1)}
+.filter-sep{width:1px;height:20px;background:var(--b2)}
+.filter-clear{font-size:12px;font-weight:500;color:var(--t3);
+  padding:5px 10px;border-radius:var(--r-sm);transition:all .15s;display:flex;align-items:center;gap:5px}
+.filter-clear:hover{color:var(--t1);background:var(--s3)}
+.filter-count{font-family:'Fira Code',monospace;font-size:10px;padding:2px 7px;
+  border-radius:8px;background:var(--purple-d);color:var(--purple)}
+
+/* ━━━ KANBAN VIEW ━━━ */
+.view-kanban{flex:1;overflow-x:auto;overflow-y:hidden;padding:20px 24px;
+  display:flex;gap:16px;align-items:flex-start}
+.view-kanban::-webkit-scrollbar{height:6px}
+.view-kanban::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+.kb-col{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:0;
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;
+  max-height:calc(100vh - 200px)}
+.kb-col-hdr{display:flex;align-items:center;gap:8px;padding:13px 14px;
+  border-bottom:1px solid var(--b1);flex-shrink:0}
+.kb-col-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.kb-col-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--t1);flex:1}
+.kb-col-count{font-family:'Fira Code',monospace;font-size:10px;padding:2px 7px;
+  border-radius:8px;background:var(--s3);color:var(--t3)}
+
+.kb-cards{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.kb-cards::-webkit-scrollbar{width:3px}
+.kb-cards::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+
+.task-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r-sm);
+  padding:12px 13px 12px 17px;cursor:pointer;transition:all .18s;animation:cardIn .3s both;
+  position:relative;overflow:hidden}
+.task-card:hover{border-color:var(--b3);background:var(--s3);transform:translateY(-1px);
+  box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.task-card.selected{border-color:var(--purple);background:var(--purple-g)}
+
+/* ─ Priority colour bar (left edge) ─ */
+.task-card::before{content:'';position:absolute;left:0;top:0;bottom:0;
+  width:4px;transition:background .2s}
+.prio-bar-urgent::before,.prio-bar-high::before{background:var(--red)}
+.prio-bar-medium::before{background:var(--amber)}
+.prio-bar-low::before{background:var(--green)}
+.prio-bar-none::before{background:var(--b2)}
+
+/* ─ in_progress: cyan glow ─ */
+.task-card.s-in_progress{border-color:rgba(56,189,248,.28);
+  box-shadow:0 0 0 1px rgba(56,189,248,.1)}
+.task-card.s-in_progress:hover{border-color:rgba(56,189,248,.5);
+  box-shadow:0 4px 16px rgba(0,0,0,.25),0 0 0 1px rgba(56,189,248,.22)}
+
+/* ─ in_review: amber edge ─ */
+.task-card.s-in_review{border-color:rgba(251,191,36,.22)}
+.task-card.s-in_review:hover{border-color:rgba(251,191,36,.4)}
+
+/* ─ done: dimmed + green bar override ─ */
+.task-card.s-done{opacity:.62}
+.task-card.s-done:hover{opacity:.85}
+.task-card.s-done::before{background:var(--teal)!important}
+
+/* Card inner layout */
+.tc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:7px}
+.tc-title-row{display:flex;align-items:flex-start;gap:5px;flex:1;min-width:0}
+.tc-play{display:inline-flex;align-items:center;justify-content:center;
+  width:14px;height:14px;border-radius:3px;background:rgba(56,189,248,.18);
+  color:var(--cyan);flex-shrink:0;margin-top:2px}
+.tc-title{font-size:13px;font-weight:500;color:var(--t1);line-height:1.45;flex:1;min-width:0}
+.tc-title.done{text-decoration:line-through;color:var(--t3)}
+.tc-review-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;
+  padding:1px 7px;border-radius:10px;background:rgba(251,146,60,.15);
+  color:var(--orange);border:1px solid rgba(251,146,60,.3);white-space:nowrap;
+  margin-left:5px;flex-shrink:0;align-self:center}
+
+/* Project name — italic micro pill */
+.tc-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tc-proj{font-size:10.5px;color:var(--t4);display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:4px;background:var(--s3);font-style:italic}
+.tc-proj-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+/* Footer */
+.tc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:9px}
+.tc-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;color:#fff;flex-shrink:0}
+.tc-due{font-family:'Fira Code',monospace;font-size:10.5px;color:var(--t4)}
+.tc-due.overdue{color:var(--red)}
+
+/* Mini progress bar */
+.tc-mini-bar{display:flex;align-items:center;gap:5px}
+.tc-mini-track{width:34px;height:3px;border-radius:2px;background:var(--b2);
+  overflow:hidden;flex-shrink:0}
+.tc-mini-fill{height:100%;border-radius:2px;background:var(--grad-life);transition:width .3s}
+.tc-mini-text{font-family:'Fira Code',monospace;font-size:10px;color:var(--t4)}
+
+.kb-add-btn{display:flex;align-items:center;gap:6px;padding:10px 14px;
+  width:100%;border-top:1px solid var(--b1);font-size:12px;color:var(--t4);
+  transition:all .15s;flex-shrink:0}
+.kb-add-btn:hover{color:var(--t2);background:var(--s2)}
+
+/* ━━━ TABLE VIEW ━━━ */
+.view-table{flex:1;overflow:auto;padding:20px 24px}
+.view-table::-webkit-scrollbar{width:6px;height:6px}
+.view-table::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+.task-table{width:100%;border-collapse:collapse}
+.task-table th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--t4);padding:10px 16px;text-align:left;border-bottom:1px solid var(--b1);
+  white-space:nowrap;position:sticky;top:0;background:var(--bg);z-index:2}
+.task-table td{padding:11px 16px;border-bottom:1px solid var(--b1);vertical-align:middle}
+.task-table tr:last-child td{border-bottom:none}
+.task-table tr:hover td{background:var(--s1)}
+.task-table tr.selected td{background:var(--purple-g)}
+.task-table tr{cursor:pointer;transition:background .12s}
+
+.tt-name{display:flex;align-items:center;gap:10px}
+.tt-prio-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tt-title{font-size:13px;font-weight:500;color:var(--t1)}
+.tt-proj{font-size:11px;color:var(--t3)}
+.tt-status-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  padding:3px 10px;border-radius:12px;white-space:nowrap}
+.tt-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;color:#fff}
+.tt-date{font-family:'Fira Code',monospace;font-size:11.5px;color:var(--t3)}
+.tt-date.overdue{color:var(--red)}
+
+/* ━━━ DRAWER ━━━ */
+.drawer-overlay{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,0);
+  pointer-events:none;transition:background .3s}
+.drawer-overlay.open{background:rgba(0,0,0,.4);pointer-events:all}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:var(--drawer-w);z-index:50;
+  background:var(--s1);border-left:1px solid var(--b1);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);
+  box-shadow:-8px 0 40px rgba(0,0,0,.35)}
+.drawer.open{transform:translateX(0)}
+.drawer-hdr{display:flex;align-items:center;gap:10px;padding:0 20px;
+  height:var(--hdr-h);border-bottom:1px solid var(--b1);flex-shrink:0}
+.drawer-close{width:30px;height:30px;border-radius:var(--r-sm);display:flex;align-items:center;
+  justify-content:center;color:var(--t3);transition:all .15s}
+.drawer-close:hover{background:var(--s3);color:var(--t1)}
+.drawer-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;
+  letter-spacing:.04em;color:var(--t1);flex:1}
+.drawer-body{flex:1;overflow-y:auto;padding:0}
+.drawer-body::-webkit-scrollbar{width:4px}
+.drawer-body::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+
+/* Drawer sections */
+.dr-section{padding:18px 20px;border-bottom:1px solid var(--b1)}
+.dr-section:last-child{border-bottom:none}
+.dr-task-title{font-size:16px;font-weight:600;color:var(--t1);line-height:1.4;
+  width:100%;background:transparent;border:none;resize:none;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  padding:4px 6px;margin:-4px -6px;border-radius:4px;
+  transition:background .15s}
+.dr-task-title:hover,.dr-task-title:focus{background:var(--s2);outline:none}
+
+/* Property rows */
+.dr-props{display:flex;flex-direction:column;gap:0}
+.dr-prop{display:flex;align-items:center;min-height:36px;border-radius:var(--r-sm);
+  padding:4px 8px;transition:background .12s;margin:0 -8px}
+.dr-prop:hover{background:var(--s2)}
+.dr-prop-label{font-size:12px;color:var(--t3);font-weight:500;width:100px;flex-shrink:0;
+  display:flex;align-items:center;gap:6px}
+.dr-prop-label svg{flex-shrink:0}
+.dr-prop-val{flex:1;font-size:13px;color:var(--t1)}
+
+/* Status select in drawer */
+.dr-status-sel{background:transparent;border:none;font-size:12px;font-weight:600;
+  padding:4px 8px;border-radius:20px;cursor:pointer;appearance:none;
+  padding-right:24px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2358547a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 4px center}
+.dr-status-sel option{background:var(--s2);color:var(--t1)}
+
+/* Priority tags */
+.priority-tag{display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;
+  transition:all .15s;border:1px solid transparent}
+.pt-urgent{background:var(--red-d);color:var(--red);border-color:rgba(248,113,113,.25)}
+.pt-high{background:var(--orange-d);color:var(--orange);border-color:rgba(251,146,60,.25)}
+.pt-medium{background:var(--amber-d);color:var(--amber);border-color:rgba(251,191,36,.25)}
+.pt-low{background:var(--green-d);color:var(--green);border-color:rgba(74,222,128,.25)}
+.pt-none{background:var(--s3);color:var(--t3);border-color:var(--b2)}
+
+/* Project link */
+.dr-proj-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;
+  font-weight:500;padding:4px 10px;border-radius:var(--r-sm);
+  background:var(--s2);border:1px solid var(--b2);color:var(--t2);
+  transition:all .15s;cursor:pointer}
+.dr-proj-link:hover{border-color:var(--purple);color:var(--purple)}
+.dr-proj-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* Assignee avatar */
+.dr-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:#fff;flex-shrink:0}
+.dr-av-info{display:flex;flex-direction:column;gap:1px}
+.dr-av-name{font-size:12px;font-weight:600;color:var(--t1)}
+.dr-av-role{font-size:10px;color:var(--t3)}
+
+/* Date inputs */
+.dr-date-input{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
+  padding:5px 10px;color:var(--t1);font-size:12px;font-family:'Fira Code',monospace;
+  transition:border-color .15s;width:auto}
+.dr-date-input:focus{border-color:var(--purple);outline:none}
+.dr-date-input::-webkit-calendar-picker-indicator{filter:invert(.5)}
+
+/* URL inputs */
+.dr-url-wrap{display:flex;align-items:center;gap:8px;flex:1}
+.dr-url-input{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
+  padding:6px 10px;color:var(--t2);font-size:12px;font-family:'Fira Code',monospace;
+  transition:border-color .15s;flex:1}
+.dr-url-input:focus{border-color:var(--cyan);outline:none;color:var(--t1)}
+.dr-url-link{width:28px;height:28px;border-radius:var(--r-sm);display:flex;align-items:center;
+  justify-content:center;color:var(--t4);border:1px solid var(--b2);
+  transition:all .15s;flex-shrink:0;cursor:pointer;background:var(--s2)}
+.dr-url-link:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* Docs section */
+.dr-doc-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.dr-doc-item{display:flex;align-items:center;gap:8px;padding:7px 10px;
+  background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
+  font-size:12px;color:var(--t2);transition:all .15s}
+.dr-doc-item:hover{border-color:var(--b3);color:var(--t1)}
+.dr-doc-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;flex-shrink:0;background:var(--s3)}
+.dr-doc-name{flex:1;font-size:12px}
+.dr-doc-del{color:var(--t4);transition:color .15s;padding:2px 4px;border-radius:3px}
+.dr-doc-del:hover{color:var(--red)}
+.dr-add-doc-btn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t3);
+  padding:6px 10px;border-radius:var(--r-sm);border:1px dashed var(--b2);
+  transition:all .15s;margin-top:8px;width:100%;justify-content:center}
+.dr-add-doc-btn:hover{border-color:var(--b3);color:var(--t2);background:var(--s2)}
+
+/* Sub-tasks */
+.dr-subtask-list{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.dr-subtask-item{display:flex;align-items:center;gap:9px;padding:7px 10px;
+  border-radius:var(--r-sm);transition:background .12s;group}
+.dr-subtask-item:hover{background:var(--s2)}
+.dr-subtask-cb{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--b3);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;background:transparent}
+.dr-subtask-cb.checked{background:var(--teal);border-color:var(--teal)}
+.dr-subtask-text{flex:1;font-size:13px;color:var(--t1);background:transparent;border:none;
+  font-family:'Plus Jakarta Sans',sans-serif;transition:color .15s}
+.dr-subtask-text.done{color:var(--t4);text-decoration:line-through}
+.dr-subtask-del{color:var(--t4);opacity:0;transition:all .12s;padding:2px 4px;border-radius:3px}
+.dr-subtask-item:hover .dr-subtask-del{opacity:1}
+.dr-subtask-del:hover{color:var(--red);opacity:1}
+.dr-add-subtask{display:flex;align-items:center;gap:8px;padding:7px 10px;
+  border-radius:var(--r-sm);font-size:12px;color:var(--t3);transition:all .15s;
+  margin-top:4px}
+.dr-add-subtask:hover{background:var(--s2);color:var(--t2)}
+.dr-add-subtask-input{flex:1;background:var(--s2);border:1px solid var(--b2);
+  border-radius:var(--r-sm);padding:6px 10px;font-size:12px;color:var(--t1);
+  display:none}
+.dr-add-subtask-input.show{display:block}
+
+/* Pomodoro button */
+.pomo-btn{display:flex;align-items:center;gap:10px;width:100%;padding:13px 16px;
+  background:var(--grad-fire);border-radius:var(--r-sm);color:#fff;
+  font-size:13px;font-weight:600;transition:opacity .15s;justify-content:center}
+.pomo-btn:hover{opacity:.88}
+.pomo-btn-wrap{padding:18px 20px}
+
+/* Last edited */
+.dr-last-edit{font-family:'Fira Code',monospace;font-size:10.5px;color:var(--t4)}
+
+/* Description */
+.dr-desc{width:100%;background:transparent;border:none;resize:none;
+  color:var(--t2);font-size:13px;line-height:1.65;
+  font-family:'Plus Jakarta Sans',sans-serif;min-height:80px;
+  padding:4px 6px;margin:-4px -6px;border-radius:4px;transition:background .15s}
+.dr-desc:hover,.dr-desc:focus{background:var(--s2);outline:none;color:var(--t1)}
+.dr-desc:empty::before{content:attr(placeholder);color:var(--t4)}
+
+/* Section headers inside drawer */
+.dr-sec-hdr{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--t4);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.dr-sec-hdr::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+/* ━━━ GAMIFICATION ━━━ */
+
+/* EXP float badge */
+@keyframes expFloat{
+  0%  {opacity:0;transform:translate(-50%,0) scale(.6)}
+  15% {opacity:1;transform:translate(-50%,-10px) scale(1)}
+  80% {opacity:1;transform:translate(-50%,-44px)}
+  100%{opacity:0;transform:translate(-50%,-64px) scale(.85)}
+}
+.exp-badge{
+  position:fixed;z-index:250;pointer-events:none;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;
+  color:#fbbf24;letter-spacing:.04em;
+  text-shadow:0 0 16px rgba(251,191,36,.8),0 0 32px rgba(251,191,36,.3);
+  animation:expFloat 1.7s cubic-bezier(.16,1,.3,1) both;
+}
+
+/* Card completing animation */
+@keyframes cardComplete{
+  0%  {transform:scale(1);opacity:1;filter:brightness(1)}
+  30% {transform:scale(.96);filter:brightness(1.15)}
+  100%{transform:scale(.82) translateX(-18px);opacity:0;filter:brightness(1)}
+}
+.task-card.completing{
+  animation:cardComplete .52s cubic-bezier(.4,0,.6,1) both!important;
+  pointer-events:none;z-index:10;
+}
+
+/* Level / XP sidebar block */
+.level-block{border-top:1px solid var(--b1);padding:10px 10px 6px}
+.level-row{display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:var(--r-sm);margin-bottom:8px;cursor:default;
+  background:linear-gradient(135deg,rgba(192,132,252,.07) 0%,rgba(251,191,36,.07) 100%);
+  border:1px solid rgba(251,191,36,.18)}
+.level-num{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;
+  line-height:1;flex-shrink:0;
+  background:linear-gradient(135deg,#c084fc,#fbbf24);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.level-info{flex:1;min-width:0}
+.level-title-text{font-size:12px;font-weight:700;color:var(--t1);line-height:1.3}
+.level-sub-text{font-size:10px;color:var(--t3);margin-top:1px}
+.xp-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.xp-lbl{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t4)}
+.xp-num{font-family:'Fira Code',monospace;font-size:9px;color:var(--t3)}
+.xp-track{height:3px;background:var(--b1);border-radius:2px;overflow:hidden}
+.xp-fill{height:100%;border-radius:2px;
+  background:linear-gradient(90deg,#c084fc,#fbbf24);
+  transition:width .9s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 0 6px rgba(251,191,36,.4)}
+
+/* Level-up modal */
+.levelup-overlay{
+  position:fixed;inset:0;z-index:500;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  background:rgba(0,0,0,0);backdrop-filter:blur(0px);
+  transition:background .35s,backdrop-filter .35s;
+  pointer-events:none;
+}
+.levelup-overlay.show{background:rgba(0,0,0,.78);backdrop-filter:blur(12px);pointer-events:all}
+@keyframes luCard{
+  0%  {opacity:0;transform:scale(.45) translateY(80px)}
+  65% {opacity:1;transform:scale(1.05) translateY(-6px)}
+  100%{opacity:1;transform:scale(1) translateY(0)}
+}
+@keyframes luPulse{
+  0%,100%{box-shadow:0 0 30px rgba(251,191,36,.2),0 28px 70px rgba(0,0,0,.55)}
+  50%    {box-shadow:0 0 70px rgba(251,191,36,.55),0 28px 70px rgba(0,0,0,.55)}
+}
+@keyframes luNum{
+  0%  {transform:scale(0) rotate(-8deg);opacity:0}
+  70% {transform:scale(1.18) rotate(3deg);opacity:1}
+  100%{transform:scale(1)  rotate(0);opacity:1}
+}
+@keyframes luBadge{
+  0%  {transform:scale(0) rotate(-20deg);opacity:0}
+  65% {transform:scale(1.15) rotate(5deg);opacity:1}
+  100%{transform:scale(1) rotate(0);opacity:1}
+}
+@keyframes starBurst{
+  0%  {transform:translate(0,0) scale(0);opacity:1}
+  100%{transform:translate(var(--sx),var(--sy)) scale(1);opacity:0}
+}
+.levelup-card{
+  position:relative;overflow:hidden;
+  background:var(--s1);border:1px solid rgba(251,191,36,.35);border-radius:22px;
+  padding:48px 56px;text-align:center;max-width:360px;width:100%;
+  opacity:0;pointer-events:none;
+  box-shadow:0 0 30px rgba(251,191,36,.2),0 28px 70px rgba(0,0,0,.55);
+}
+.levelup-card.appear{
+  animation:luCard .65s cubic-bezier(.16,1,.3,1) both,luPulse 3s 1.2s ease-in-out infinite;
+  opacity:1;pointer-events:all;
+}
+.lu-badge-wrap{display:inline-flex;align-items:center;justify-content:center;
+  width:82px;height:82px;border-radius:50%;margin-bottom:18px;
+  background:linear-gradient(135deg,rgba(192,132,252,.2),rgba(251,191,36,.25));
+  border:2px solid rgba(251,191,36,.45);
+  animation:luBadge .5s .25s cubic-bezier(.16,1,.3,1) both;}
+.lu-level-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.lu-big-num{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:88px;
+  line-height:.85;background:linear-gradient(135deg,#c084fc,#fbbf24);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:10px;animation:luNum .5s .42s cubic-bezier(.16,1,.3,1) both}
+.lu-title{font-size:17px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.lu-sub{font-size:13px;color:var(--t3);margin-bottom:8px}
+.lu-xp-note{font-family:'Fira Code',monospace;font-size:11px;color:var(--teal);margin-bottom:28px}
+.lu-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 30px;border-radius:var(--r);
+  background:linear-gradient(135deg,#c084fc,#fbbf24);color:#fff;font-weight:700;font-size:14px;
+  transition:opacity .15s,transform .15s;box-shadow:0 0 22px rgba(251,191,36,.35)}
+.lu-btn:hover{opacity:.88;transform:scale(1.04)}
+.lu-star{position:absolute;pointer-events:none;font-size:14px;
+  animation:starBurst .75s cubic-bezier(.2,0,.8,1) both;}
+
+/* ━━━ TOAST ━━━ */
+.toast{position:fixed;bottom:24px;right:28px;z-index:100;
+  background:var(--s3);border:1px solid var(--b3);border-radius:var(--r);
+  padding:11px 18px;font-size:13px;font-weight:600;color:var(--t1);
+  display:flex;align-items:center;gap:10px;
+  transform:translateY(12px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 8px 32px rgba(0,0,0,.4);pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0}
+
+/* Empty col */
+.kb-empty{text-align:center;padding:28px 16px;color:var(--t4);font-size:12px}
+
+/* Add task inline input */
+.kb-inline-add{display:flex;flex-direction:column;gap:8px;padding:10px;
+  border-top:1px solid var(--b1);display:none}
+.kb-inline-add.show{display:flex}
+.kb-inline-input{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
+  padding:8px 11px;color:var(--t1);font-size:13px;transition:border-color .15s}
+.kb-inline-input:focus{border-color:var(--purple);outline:none}
+.kb-inline-actions{display:flex;gap:6px}
+.kb-inline-ok{padding:5px 12px;background:var(--purple);color:#fff;border-radius:var(--r-sm);
+  font-size:12px;font-weight:600;transition:opacity .15s}
+.kb-inline-ok:hover{opacity:.85}
+.kb-inline-cancel{padding:5px 12px;color:var(--t3);border-radius:var(--r-sm);
+  font-size:12px;font-weight:600;transition:all .15s}
+.kb-inline-cancel:hover{background:var(--s3);color:var(--t2)}
+
+/* Priority dropdown */
+.prio-dropdown{position:absolute;z-index:80;background:var(--s2);border:1px solid var(--b2);
+  border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:160px;overflow:hidden;
+  display:none}
+.prio-dropdown.open{display:block;animation:up .15s both}
+.prio-option{display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:13px;
+  cursor:pointer;transition:background .12s;color:var(--t1)}
+.prio-option:hover{background:var(--s3)}
+
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes drawerIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+
+/* table done row strikethrough */
+.tt-title.done-row{text-decoration:line-through;color:var(--t3)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">PM</div>
+    <div class="logo-label">PM<em>Suite</em></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">工作區</div>
+    <a class="nav-item" href="index.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      總覽
+    </a>
+    <a class="nav-item" href="projects.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>
+      專案
+    </a>
+    <a class="nav-item active" href="tasks.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      任務
+      <span class="nav-chip" id="navChip">9</span>
+    </a>
+    <a class="nav-item" href="project-detail.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      看板
+    </a>
+    <a class="nav-item" href="sprint-review.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Sprint Review
+    </a>
+    <div class="nav-section">工具</div>
+    <a class="nav-item" href="pomodoro-timer.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
+      番茄鐘
+    </a>
+    <a class="nav-item" href="personal-space.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M3 21c0-4.2 4-7 9-7s9 2.8 9 7"/><path d="M16.5 3.5c1-1 2.5-.5 3 1s-.5 2.5-1.5 2.5"/></svg>
+      個人中心
+    </a>
+    <a class="nav-item" href="#">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      文件
+    </a>
+    <a class="nav-item" href="profile.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      設定
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <!-- Level / XP block -->
+    <div class="level-block" id="levelBlock">
+      <div class="level-row">
+        <div class="level-num" id="sidebarLevel">1</div>
+        <div class="level-info">
+          <div class="level-title-text" id="sidebarTitle">見習 PM</div>
+          <div class="level-sub-text" id="sidebarSub">0 / 200 EXP</div>
+        </div>
+      </div>
+      <div class="xp-row">
+        <span class="xp-lbl">經驗值</span>
+        <span class="xp-num" id="sidebarXpNum">0 / 200</span>
+      </div>
+      <div class="xp-track"><div class="xp-fill" id="sidebarXpFill" style="width:0%"></div></div>
+    </div>
+    <div class="user-row">
+      <div class="av">王</div>
+      <div>
+        <div class="user-name">王小明</div>
+        <div class="user-role">Project Manager</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-title">任務管理 <span id="hdrCount">9 個任務</span></div>
+    <div class="hdr-space"></div>
+    <div class="view-toggle">
+      <button class="vt-btn active" id="btnKanban" onclick="setView('kanban')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+        看板
+      </button>
+      <button class="vt-btn" id="btnTable" onclick="setView('table')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        清單
+      </button>
+    </div>
+    <button class="btn-primary" onclick="openNewTaskModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      新增任務
+    </button>
+    <button class="icon-btn" onclick="toggleTheme()" title="切換主題">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </header>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <!-- Search -->
+    <div class="fb-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="filterSearch" placeholder="搜尋任務…" oninput="applyFilters()" autocomplete="off">
+    </div>
+
+    <!-- Quick filters -->
+    <div class="fb-quick">
+      <button class="fb-qtag" id="qf-mine" onclick="toggleQuickFilter('mine')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        我的任務
+      </button>
+      <button class="fb-qtag" id="qf-today" onclick="toggleQuickFilter('today')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        今日截止
+      </button>
+      <button class="fb-qtag" id="qf-high" onclick="toggleQuickFilter('high')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+        高優先級
+      </button>
+    </div>
+
+    <div class="fb-space"></div>
+
+    <!-- Advanced filter toggle -->
+    <button class="fb-adv-btn" id="advFilterBtn" onclick="toggleAdvFilter()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+      進階篩選
+      <div class="fb-adv-badge" id="advBadge"></div>
+    </button>
+
+    <span class="filter-count" id="filterCount" style="display:none"></span>
+  </div>
+
+  <!-- ADVANCED FILTER PANEL (collapsed by default) -->
+  <div class="adv-panel" id="advPanel">
+    <select class="filter-select" id="filterProject" onchange="applyFilters()">
+      <option value="">所有專案</option>
+    </select>
+    <select class="filter-select" id="filterPriority" onchange="applyFilters()">
+      <option value="">所有優先級</option>
+      <option value="urgent">🔴 緊急</option>
+      <option value="high">🟠 高</option>
+      <option value="medium">🟡 中</option>
+      <option value="low">🟢 低</option>
+      <option value="none">⚪ 無</option>
+    </select>
+    <select class="filter-select" id="filterAssignee" onchange="applyFilters()">
+      <option value="">所有負責人</option>
+    </select>
+    <div class="filter-sep"></div>
+    <button class="filter-clear" onclick="clearFilters()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      清除全部
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <!-- KANBAN VIEW -->
+    <div class="view-kanban" id="viewKanban"></div>
+    <!-- TABLE VIEW -->
+    <div class="view-table" id="viewTable" style="display:none"></div>
+  </div>
+</div>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- TASK DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-hdr">
+    <button class="drawer-close" onclick="closeDrawer()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="drawer-title">任務詳情</div>
+    <div class="dr-last-edit" id="drLastEdit"></div>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<!-- PRIORITY DROPDOWN -->
+<div class="prio-dropdown" id="prioDropdown">
+  <div class="prio-option" onclick="setPriority('urgent')"><span style="color:var(--red)">●</span> 緊急</div>
+  <div class="prio-option" onclick="setPriority('high')"><span style="color:var(--orange)">●</span> 高</div>
+  <div class="prio-option" onclick="setPriority('medium')"><span style="color:var(--amber)">●</span> 中</div>
+  <div class="prio-option" onclick="setPriority('low')"><span style="color:var(--green)">●</span> 低</div>
+  <div class="prio-option" onclick="setPriority('none')"><span style="color:var(--t4)">●</span> 無</div>
+</div>
+
+<!-- LEVEL-UP MODAL -->
+<div class="levelup-overlay" id="levelupOverlay">
+  <div class="levelup-card" id="levelupCard">
+    <div class="lu-badge-wrap">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    </div>
+    <div class="lu-level-label">LEVEL UP!</div>
+    <div class="lu-big-num" id="luNum">2</div>
+    <div class="lu-title" id="luTitle">任務新手</div>
+    <div class="lu-sub" id="luSub">繼續完成任務來提升等級</div>
+    <div class="lu-xp-note" id="luXpNote">+100 EXP 本次獲得</div>
+    <button class="lu-btn" onclick="closeLevelup()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      太棒了！
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg">已自動儲存</span>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  MOCK DATA
+// ═══════════════════════════════════════════════════
+const MEMBERS = {
+  u1: { id:'u1', name:'王小明', initial:'王', role:'前端工程師', grad:'linear-gradient(135deg,#c084fc,#38bdf8)' },
+  u2: { id:'u2', name:'李大華', initial:'李', role:'後端工程師', grad:'linear-gradient(135deg,#38bdf8,#2dd4bf)' },
+  u3: { id:'u3', name:'陳美玲', initial:'陳', role:'設計師',     grad:'linear-gradient(135deg,#f472b6,#fb923c)' },
+  u4: { id:'u4', name:'張志偉', initial:'張', role:'後端工程師', grad:'linear-gradient(135deg,#4ade80,#2dd4bf)' },
+};
+
+const PROJECTS_META = {
+  p1:{ id:'p1', name:'電商平台重構', color:'#c084fc', dot:'#c084fc' },
+  p2:{ id:'p2', name:'行動 App 開發', color:'#f472b6', dot:'#f472b6' },
+  p3:{ id:'p3', name:'資料分析儀表板', color:'#38bdf8', dot:'#38bdf8' },
+  p4:{ id:'p4', name:'API 閘道器升級', color:'#2dd4bf', dot:'#2dd4bf' },
+};
+
+const INITIAL_TASKS = [
+  { id:'t1', title:'設計首頁 Banner 輪播元件', projectId:'p1', status:'todo', priority:'high',
+    assigneeId:'u3', startDate:'2026-04-10', dueDate:'2026-04-17',
+    description:'設計並實作首頁 Banner 輪播元件，支援自動播放、手動切換、行動裝置觸控手勢。',
+    todoItems:[
+      {id:'ti1',text:'確認設計規格',completed:true},
+      {id:'ti2',text:'建立元件骨架',completed:false},
+      {id:'ti3',text:'實作輪播動畫',completed:false}
+    ],
+    relatedDocs:['設計稿 Figma','UX 規格書.pdf'],
+    testUrl:'https://staging.example.com', prodUrl:'', updatedAt:'2026-04-09T14:30:00Z' },
+
+  { id:'t2', title:'API 錯誤訊息國際化', projectId:'p1', status:'todo', priority:'medium',
+    assigneeId:'u2', startDate:'', dueDate:'2026-04-20',
+    description:'將 API 所有錯誤訊息進行 i18n 處理，支援繁中、簡中、英文三種語系。',
+    todoItems:[], relatedDocs:[], testUrl:'', prodUrl:'', updatedAt:'2026-04-08T09:00:00Z' },
+
+  { id:'t3', title:'行動端推播通知整合', projectId:'p2', status:'todo', priority:'urgent',
+    assigneeId:'u4', startDate:'', dueDate:'2026-04-15',
+    description:'整合 Firebase Cloud Messaging，實作推播通知功能，包含前景/背景通知處理。',
+    todoItems:[
+      {id:'ti4',text:'FCM SDK 設定',completed:false},
+      {id:'ti5',text:'通知模板設計',completed:false}
+    ],
+    relatedDocs:['FCM 文件.pdf'], testUrl:'', prodUrl:'', updatedAt:'2026-04-07T16:00:00Z' },
+
+  { id:'t4', title:'購物車 API 效能優化', projectId:'p1', status:'in_progress', priority:'high',
+    assigneeId:'u2', startDate:'2026-04-05', dueDate:'2026-04-18',
+    description:'對購物車相關 API 進行效能分析與優化，目標降低 P95 延遲至 200ms 以下。',
+    todoItems:[
+      {id:'ti6',text:'DB 索引分析',completed:true},
+      {id:'ti7',text:'Redis 快取層建置',completed:true},
+      {id:'ti8',text:'負載測試',completed:false}
+    ],
+    relatedDocs:['效能報告.pdf'],
+    testUrl:'https://api-staging.example.com', prodUrl:'https://api.example.com', updatedAt:'2026-04-09T18:00:00Z' },
+
+  { id:'t5', title:'用戶分析報表頁面', projectId:'p3', status:'in_progress', priority:'medium',
+    assigneeId:'u1', startDate:'2026-04-08', dueDate:'2026-04-22',
+    description:'開發用戶行為分析報表頁面，整合圖表庫顯示活躍用戶、留存率、轉換率等指標。',
+    todoItems:[
+      {id:'ti9',text:'圖表庫選型',completed:true},
+      {id:'ti10',text:'API 串接',completed:false},
+      {id:'ti11',text:'響應式排版',completed:false}
+    ],
+    relatedDocs:['設計稿 Figma','數據需求文件.pdf'],
+    testUrl:'https://analytics-staging.example.com', prodUrl:'', updatedAt:'2026-04-10T10:00:00Z' },
+
+  { id:'t6', title:'認證系統 JWT Refresh Token', projectId:'p1', status:'in_review', priority:'urgent',
+    assigneeId:'u2', startDate:'2026-04-01', dueDate:'2026-04-12',
+    description:'實作 JWT Refresh Token 機制，提升認證安全性並延長登入有效期。',
+    todoItems:[
+      {id:'ti12',text:'設計 Token 策略',completed:true},
+      {id:'ti13',text:'實作 Refresh 端點',completed:true},
+      {id:'ti14',text:'Code Review',completed:false}
+    ],
+    relatedDocs:['安全性規格.pdf'],
+    testUrl:'https://auth-staging.example.com', prodUrl:'', updatedAt:'2026-04-09T20:00:00Z' },
+
+  { id:'t7', title:'API 閘道器版本升級', projectId:'p4', status:'in_review', priority:'high',
+    assigneeId:'u4', startDate:'', dueDate:'2026-04-14',
+    description:'將 API Gateway 從 v2 升級至 v3，更新路由規則、限流設定與安全策略。',
+    todoItems:[], relatedDocs:['升級計劃書.pdf','版本差異文件.pdf'],
+    testUrl:'https://gw-staging.example.com', prodUrl:'https://gw.example.com', updatedAt:'2026-04-08T14:00:00Z' },
+
+  { id:'t8', title:'用戶登入頁面重設計', projectId:'p1', status:'done', priority:'medium',
+    assigneeId:'u3', startDate:'2026-03-25', dueDate:'2026-04-05',
+    description:'重新設計用戶登入頁面，改善 UX 流程，加入社交登入選項（Google/GitHub）。',
+    todoItems:[
+      {id:'ti15',text:'設計稿定稿',completed:true},
+      {id:'ti16',text:'前端實作',completed:true},
+      {id:'ti17',text:'社交登入整合',completed:true}
+    ],
+    relatedDocs:['設計稿 Figma'],
+    testUrl:'', prodUrl:'https://example.com/login', updatedAt:'2026-04-05T11:00:00Z' },
+
+  { id:'t9', title:'離線快取功能', projectId:'p2', status:'done', priority:'high',
+    assigneeId:'u1', startDate:'2026-03-20', dueDate:'2026-04-08',
+    description:'實作 App 離線模式，使用 Service Worker 快取關鍵資源，確保基本功能在無網路時可用。',
+    todoItems:[], relatedDocs:[], testUrl:'', prodUrl:'', updatedAt:'2026-04-08T17:00:00Z' },
+];
+
+// ═══════════════════════════════════════════════════
+//  ZUSTAND-LIKE STORE (localStorage-backed)
+// ═══════════════════════════════════════════════════
+function createStore(initial) {
+  const STORAGE_KEY = 'projectos-tasks-v1';
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) {}
+
+  let state = {
+    tasks: saved?.tasks ?? Object.fromEntries(initial.map(t => [t.id, t])),
+    // Gamification (persisted)
+    gamification: saved?.gamification ?? {
+      experience: 0, level: 1, totalCompleted: 0, streak: 0,
+    },
+    // UI state (not persisted)
+    selectedTaskId: null,
+    viewMode: 'kanban',
+    filters: { projectId: '', priority: '', assigneeId: '', search: '', quickFilters: new Set() },
+  };
+
+  const subscribers = new Set();
+
+  function persist() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        tasks: state.tasks,
+        gamification: state.gamification,
+      }));
+    } catch(e) {}
+  }
+
+  return {
+    getState: () => state,
+    setState(updater) {
+      const patch = typeof updater === 'function' ? updater(state) : updater;
+      state = { ...state, ...patch };
+      persist();
+      subscribers.forEach(fn => fn(state));
+    },
+    subscribe(fn) {
+      subscribers.add(fn);
+      return () => subscribers.delete(fn);
+    },
+  };
+}
+
+const store = createStore(INITIAL_TASKS);
+
+// ═══════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0;
+    return (c==='x'?r:r&0x3|0x8).toString(16);
+  });
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function fmtRelative(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff/60000);
+  if (m < 1)  return '剛剛';
+  if (m < 60) return `${m} 分鐘前`;
+  const h = Math.floor(m/60);
+  if (h < 24) return `${h} 小時前`;
+  return fmtDate(iso);
+}
+
+function isOverdue(iso) {
+  return iso && new Date(iso) < new Date() && store.getState().tasks;
+}
+
+const PRIORITY_META = {
+  urgent:{ label:'緊急', cls:'pt-urgent', color:'var(--red)',    dot:'#f87171' },
+  high:  { label:'高',   cls:'pt-high',   color:'var(--orange)', dot:'#fb923c' },
+  medium:{ label:'中',   cls:'pt-medium', color:'var(--amber)',  dot:'#fbbf24' },
+  low:   { label:'低',   cls:'pt-low',    color:'var(--green)',  dot:'#4ade80' },
+  none:  { label:'無',   cls:'pt-none',   color:'var(--t3)',     dot:'#35324a' },
+};
+
+const STATUS_META = {
+  todo:        { label:'待辦', dot:'var(--t3)',    bg:'rgba(100,100,100,.15)', color:'var(--t2)' },
+  in_progress: { label:'進行中', dot:'var(--purple)', bg:'var(--purple-d)', color:'var(--purple)' },
+  in_review:   { label:'審查中', dot:'var(--amber)', bg:'var(--amber-d)',   color:'var(--amber)'  },
+  done:        { label:'已完成', dot:'var(--teal)',  bg:'var(--teal-d)',    color:'var(--teal)'   },
+};
+
+const COLUMNS = ['todo','in_progress','in_review','done'];
+const COL_TITLES = { todo:'待辦', in_progress:'進行中', in_review:'審查中', done:'已完成' };
+
+function getFilteredTasks() {
+  const { tasks, filters } = store.getState();
+  const today = new Date().toDateString();
+  return Object.values(tasks).filter(t => {
+    // Advanced dropdown filters
+    if (filters.projectId  && t.projectId  !== filters.projectId)  return false;
+    if (filters.priority   && t.priority   !== filters.priority)   return false;
+    if (filters.assigneeId && t.assigneeId !== filters.assigneeId) return false;
+    // Search
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      const proj = PROJECTS_META[t.projectId];
+      if (!t.title.toLowerCase().includes(q) &&
+          !(proj?.name.toLowerCase().includes(q)) &&
+          !(t.description||'').toLowerCase().includes(q)) return false;
+    }
+    // Quick filters (all active must match)
+    if (filters.quickFilters.has('mine')  && t.assigneeId !== 'u1')  return false;
+    if (filters.quickFilters.has('today') &&
+        !(t.dueDate && new Date(t.dueDate).toDateString() === today)) return false;
+    if (filters.quickFilters.has('high')  &&
+        t.priority !== 'urgent' && t.priority !== 'high')            return false;
+    return true;
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════
+let toastTimer = null;
+function showToast(msg = '已自動儲存') {
+  clearTimeout(toastTimer);
+  const el = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  el.classList.add('show');
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER KANBAN
+// ═══════════════════════════════════════════════════
+function renderKanban() {
+  const container = document.getElementById('viewKanban');
+  const tasks = getFilteredTasks();
+  const { selectedTaskId } = store.getState();
+
+  container.innerHTML = COLUMNS.map(status => {
+    const colTasks = tasks.filter(t => t.status === status)
+      .sort((a,b) => {
+        const po = {urgent:0,high:1,medium:2,low:3,none:4};
+        return po[a.priority] - po[b.priority];
+      });
+    const sm = STATUS_META[status];
+    const pm = PRIORITY_META;
+
+    const cardsHTML = colTasks.length === 0
+      ? `<div class="kb-empty">暫無任務</div>`
+      : colTasks.map(t => {
+          const member  = MEMBERS[t.assigneeId];
+          const proj    = PROJECTS_META[t.projectId];
+          const pMeta   = pm[t.priority] || pm.none;
+          const done    = t.todoItems.filter(ti => ti.completed).length;
+          const total   = t.todoItems.length;
+          const pct     = total > 0 ? Math.round(done / total * 100) : 0;
+          const overdue = t.dueDate && new Date(t.dueDate) < new Date() && status !== 'done';
+          const isDone  = status === 'done';
+          const isIP    = status === 'in_progress';
+          const isIR    = status === 'in_review';
+
+          // Play icon for in_progress
+          const playIcon = isIP
+            ? `<span class="tc-play"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>`
+            : '';
+
+          // Review badge
+          const reviewBadge = isIR
+            ? `<span class="tc-review-badge">待審核</span>`
+            : '';
+
+          return `
+          <div class="task-card prio-bar-${t.priority||'none'} s-${status}${selectedTaskId===t.id?' selected':''}"
+               onclick="openDrawer('${t.id}')" data-id="${t.id}">
+            <div class="tc-top">
+              <div class="tc-title-row">
+                ${playIcon}
+                <div class="tc-title${isDone?' done':''}">${escHtml(t.title)}${reviewBadge}</div>
+              </div>
+            </div>
+            ${proj ? `<div class="tc-meta">
+              <div class="tc-proj">
+                <div class="tc-proj-dot" style="background:${proj.dot}"></div>
+                ${escHtml(proj.name)}
+              </div>
+            </div>` : ''}
+            <div class="tc-footer">
+              <div style="display:flex;align-items:center;gap:6px">
+                ${member ? `<div class="tc-av" style="background:${member.grad}" title="${member.name}">${member.initial}</div>` : ''}
+                ${total > 0 ? `<div class="tc-mini-bar">
+                  <div class="tc-mini-track"><div class="tc-mini-fill" style="width:${pct}%"></div></div>
+                  <span class="tc-mini-text">${done}/${total}</span>
+                </div>` : ''}
+              </div>
+              <div class="tc-due${overdue?' overdue':''}">${t.dueDate ? fmtDate(t.dueDate) : ''}</div>
+            </div>
+          </div>`;
+        }).join('');
+
+    return `
+    <div class="kb-col">
+      <div class="kb-col-hdr">
+        <div class="kb-col-dot" style="background:${sm.dot}"></div>
+        <div class="kb-col-title">${COL_TITLES[status]}</div>
+        <div class="kb-col-count">${colTasks.length}</div>
+      </div>
+      <div class="kb-cards">${cardsHTML}</div>
+      <div class="kb-inline-add" id="inlineAdd-${status}">
+        <input class="kb-inline-input" id="inlineInput-${status}" placeholder="任務名稱…"
+               onkeydown="handleInlineKey(event,'${status}')">
+        <div class="kb-inline-actions">
+          <button class="kb-inline-ok" onclick="confirmInlineAdd('${status}')">新增</button>
+          <button class="kb-inline-cancel" onclick="hideInlineAdd('${status}')">取消</button>
+        </div>
+      </div>
+      <button class="kb-add-btn" onclick="showInlineAdd('${status}')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        新增任務
+      </button>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER TABLE
+// ═══════════════════════════════════════════════════
+function renderTable() {
+  const container = document.getElementById('viewTable');
+  const tasks = getFilteredTasks().sort((a,b) => {
+    const so = {todo:0,in_progress:1,in_review:2,done:3};
+    return (so[a.status]||0) - (so[b.status]||0);
+  });
+  const { selectedTaskId } = store.getState();
+
+  if (tasks.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--t4);font-size:13px">無符合條件的任務</div>`;
+    return;
+  }
+
+  container.innerHTML = `
+  <table class="task-table">
+    <thead>
+      <tr>
+        <th>任務名稱</th>
+        <th>專案</th>
+        <th>狀態</th>
+        <th>優先級</th>
+        <th>負責人</th>
+        <th>截止日期</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${tasks.map(t => {
+        const member = MEMBERS[t.assigneeId];
+        const proj = PROJECTS_META[t.projectId];
+        const pm = PRIORITY_META[t.priority] || PRIORITY_META.none;
+        const sm = STATUS_META[t.status] || STATUS_META.todo;
+        const overdue = t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done';
+        const done2  = t.todoItems.filter(ti=>ti.completed).length;
+        const total2 = t.todoItems.length;
+        const pct2   = total2 > 0 ? Math.round(done2/total2*100) : 0;
+        return `
+        <tr onclick="openDrawer('${t.id}')" class="${selectedTaskId===t.id?'selected':''}">
+          <td>
+            <div class="tt-name">
+              <div class="tt-prio-dot" style="background:${pm.dot}"></div>
+              <div>
+                <div class="tt-title${t.status==='done'?' done-row':''}">${escHtml(t.title)}${t.status==='in_review'?'<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;background:rgba(251,146,60,.15);color:var(--orange);border:1px solid rgba(251,146,60,.3);margin-left:6px;">待審核</span>':''}</div>
+                ${total2 > 0 ? `<div style="display:flex;align-items:center;gap:5px;margin-top:4px">
+                  <div style="width:48px;height:3px;border-radius:2px;background:var(--b2);overflow:hidden">
+                    <div style="width:${pct2}%;height:100%;border-radius:2px;background:var(--grad-life)"></div>
+                  </div>
+                  <span style="font-family:'Fira Code',monospace;font-size:10px;color:var(--t4)">${done2}/${total2}</span>
+                </div>` : ''}
+              </div>
+            </div>
+          </td>
+          <td>
+            ${proj ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--t4);padding:2px 8px;border-radius:4px;background:var(--s3);font-style:italic">
+              <span style="width:5px;height:5px;border-radius:50%;background:${proj.dot};flex-shrink:0;font-style:normal"></span>
+              ${escHtml(proj.name)}
+            </span>` : '—'}
+          </td>
+          <td>
+            <span class="tt-status-badge" style="background:${sm.bg};color:${sm.color}">
+              <span style="width:5px;height:5px;border-radius:50%;background:${sm.dot};display:inline-block;flex-shrink:0"></span>
+              ${sm.label}
+            </span>
+          </td>
+          <td>
+            <span class="priority-tag ${pm.cls}">
+              ${pm.label}
+            </span>
+          </td>
+          <td>
+            ${member ? `<div style="display:flex;align-items:center;gap:7px">
+              <div class="tt-av" style="background:${member.grad}">${member.initial}</div>
+              <span style="font-size:12px;color:var(--t2)">${member.name}</span>
+            </div>` : '<span style="color:var(--t4);font-size:12px">未指派</span>'}
+          </td>
+          <td>
+            <span class="tt-date${overdue?' overdue':''}">${t.dueDate ? fmtDate(t.dueDate) : '—'}</span>
+          </td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ═══════════════════════════════════════════════════
+//  EDITOR STAMP HELPER
+// ═══════════════════════════════════════════════════
+function renderEditStamp(task) {
+  const el = document.getElementById('drLastEdit');
+  if (!el) return;
+  const editor = task.lastEditedBy;
+  const timeStr = fmtRelative(task.updatedAt);
+  if (editor) {
+    const avStyle = editor.photoURL
+      ? `style="width:16px;height:16px;border-radius:50%;object-fit:cover;flex-shrink:0"`
+      : `style="width:16px;height:16px;border-radius:50%;background:${editor.grad};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0"`;
+    const avContent = editor.photoURL
+      ? `<img src="${editor.photoURL}" ${avStyle}>`
+      : `<div ${avStyle}>${editor.initial}</div>`;
+    el.innerHTML = `<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t3)">${avContent}<span>${escHtml(editor.name)}</span><span style="color:var(--t4)">· ${timeStr}</span></span>`;
+  } else {
+    el.textContent = timeStr;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER DRAWER
+// ═══════════════════════════════════════════════════
+function renderDrawer() {
+  const { selectedTaskId, tasks } = store.getState();
+  const task = tasks[selectedTaskId];
+  if (!task) return;
+
+  const member = MEMBERS[task.assigneeId];
+  const proj = PROJECTS_META[task.projectId];
+  const pm = PRIORITY_META[task.priority] || PRIORITY_META.none;
+  const sm = STATUS_META[task.status] || STATUS_META.todo;
+
+  renderEditStamp(task);
+
+  const body = document.getElementById('drawerBody');
+  body.innerHTML = `
+  <!-- TITLE -->
+  <div class="dr-section">
+    <textarea class="dr-task-title" rows="2" id="drTitle"
+      onblur="autoSave('title', this.value)">${escHtml(task.title)}</textarea>
+  </div>
+
+  <!-- CORE PROPERTIES -->
+  <div class="dr-section">
+    <div class="dr-props">
+
+      <div class="dr-prop">
+        <div class="dr-prop-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          狀態
+        </div>
+        <div class="dr-prop-val">
+          <select class="dr-status-sel" id="drStatus"
+            style="background:${sm.bg};color:${sm.color}"
+            onchange="autoSave('status', this.value)">
+            <option value="todo"        ${task.status==='todo'?'selected':''}>待辦</option>
+            <option value="in_progress" ${task.status==='in_progress'?'selected':''}>進行中</option>
+            <option value="in_review"   ${task.status==='in_review'?'selected':''}>審查中</option>
+            <option value="done"        ${task.status==='done'?'selected':''}>已完成</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="dr-prop">
+        <div class="dr-prop-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          優先級
+        </div>
+        <div class="dr-prop-val">
+          <button class="priority-tag ${pm.cls}" id="drPriorityTag"
+            onclick="togglePrioDropdown(event)">${pm.label}</button>
+        </div>
+      </div>
+
+      <div class="dr-prop">
+        <div class="dr-prop-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>
+          專案
+        </div>
+        <div class="dr-prop-val">
+          ${proj ? `<button class="dr-proj-link" onclick="location.href='project-detail.html'">
+            <div class="dr-proj-dot" style="background:${proj.dot}"></div>
+            ${escHtml(proj.name)}
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </button>` : '<span style="color:var(--t4);font-size:12px">未指定</span>'}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PEOPLE & DATES -->
+  <div class="dr-section">
+    <div class="dr-props">
+
+      <div class="dr-prop">
+        <div class="dr-prop-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          負責人
+        </div>
+        <div class="dr-prop-val">
+          ${member ? `<div style="display:flex;align-items:center;gap:9px">
+            <div class="dr-av" style="background:${member.grad}">${member.initial}</div>
+            <div class="dr-av-info">
+              <div class="dr-av-name">${member.name}</div>
+              <div class="dr-av-role">${member.role}</div>
+            </div>
+          </div>` : '<span style="color:var(--t4);font-size:12px">未指派</span>'}
+        </div>
+      </div>
+
+      <div class="dr-prop">
+        <div class="dr-prop-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          開始日期
+        </div>
+        <div class="dr-prop-val">
+          <input type="date" class="dr-date-input" value="${task.startDate||''}"
+            onblur="autoSave('startDate', this.value)">
+        </div>
+      </div>
+
+      <div class="dr-prop">
+        <div class="dr-prop-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          截止日期
+        </div>
+        <div class="dr-prop-val">
+          <input type="date" class="dr-date-input" value="${task.dueDate||''}"
+            onblur="autoSave('dueDate', this.value)">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DESCRIPTION -->
+  <div class="dr-section">
+    <div class="dr-sec-hdr">描述</div>
+    <textarea class="dr-desc" rows="3" placeholder="新增任務描述…"
+      onblur="autoSave('description', this.value)">${escHtml(task.description||'')}</textarea>
+  </div>
+
+  <!-- URLS -->
+  <div class="dr-section">
+    <div class="dr-sec-hdr">網址</div>
+    <div class="dr-props">
+      <div class="dr-prop">
+        <div class="dr-prop-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          測試網址
+        </div>
+        <div class="dr-url-wrap">
+          <input type="url" class="dr-url-input" placeholder="https://staging…"
+            value="${escHtml(task.testUrl||'')}"
+            onblur="autoSave('testUrl', this.value)">
+          ${task.testUrl ? `<a href="${escHtml(task.testUrl)}" target="_blank" class="dr-url-link">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>` : ''}
+        </div>
+      </div>
+      <div class="dr-prop">
+        <div class="dr-prop-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          正式網址
+        </div>
+        <div class="dr-url-wrap">
+          <input type="url" class="dr-url-input" placeholder="https://prod…"
+            value="${escHtml(task.prodUrl||'')}"
+            onblur="autoSave('prodUrl', this.value)">
+          ${task.prodUrl ? `<a href="${escHtml(task.prodUrl)}" target="_blank" class="dr-url-link">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>` : ''}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATED DOCS -->
+  <div class="dr-section">
+    <div class="dr-sec-hdr">相關文件</div>
+    <div class="dr-doc-list" id="drDocList">
+      ${(task.relatedDocs||[]).map((doc, i) => `
+      <div class="dr-doc-item" id="doc-${i}">
+        <div class="dr-doc-icon">${doc.endsWith('.pdf') ? '📄' : '🎨'}</div>
+        <div class="dr-doc-name">${escHtml(doc)}</div>
+        <button class="dr-doc-del" onclick="removeDoc(${i})" title="移除">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`).join('')}
+    </div>
+    <div id="drDocAddWrap" style="margin-top:8px">
+      <button class="dr-add-doc-btn" onclick="showAddDocInput()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        新增文件
+      </button>
+      <div id="drDocInput" style="display:none;gap:6px;margin-top:6px">
+        <input id="drDocInputField" class="kb-inline-input" placeholder="文件名稱 (如：設計稿 Figma)"
+          onkeydown="if(event.key==='Enter')confirmAddDoc();if(event.key==='Escape')hideAddDocInput()">
+        <div class="kb-inline-actions" style="margin-top:6px">
+          <button class="kb-inline-ok" onclick="confirmAddDoc()">新增</button>
+          <button class="kb-inline-cancel" onclick="hideAddDocInput()">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB-TASKS -->
+  <div class="dr-section">
+    <div class="dr-sec-hdr">
+      子項目
+      <span style="font-size:11px;color:var(--t3);font-weight:400;letter-spacing:0;text-transform:none">
+        ${(task.todoItems||[]).filter(ti=>ti.completed).length}/${(task.todoItems||[]).length} 完成
+      </span>
+    </div>
+    <div class="dr-subtask-list" id="drSubtaskList">
+      ${(task.todoItems||[]).map((ti, i) => `
+      <div class="dr-subtask-item" id="sti-${ti.id}">
+        <div class="dr-subtask-cb${ti.completed?' checked':''}"
+             onclick="toggleTodo('${ti.id}')">
+          ${ti.completed ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+        </div>
+        <input class="dr-subtask-text${ti.completed?' done':''}" value="${escHtml(ti.text)}"
+          onblur="updateTodoText('${ti.id}', this.value)"
+          onkeydown="if(event.key==='Enter')this.blur()">
+        <button class="dr-subtask-del" onclick="deleteTodo('${ti.id}')" title="刪除">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`).join('')}
+    </div>
+    <div id="drAddSubtask">
+      <div class="dr-add-subtask" onclick="showAddSubtask()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        新增子項目
+      </div>
+      <div id="drAddSubtaskInput" style="display:none;padding:4px 0">
+        <input class="kb-inline-input" id="drSubtaskField" placeholder="子項目名稱…"
+          onkeydown="if(event.key==='Enter')confirmAddSubtask();if(event.key==='Escape')hideAddSubtask()">
+        <div class="kb-inline-actions" style="margin-top:6px">
+          <button class="kb-inline-ok" onclick="confirmAddSubtask()">新增</button>
+          <button class="kb-inline-cancel" onclick="hideAddSubtask()">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POMODORO BUTTON -->
+  <div class="pomo-btn-wrap">
+    <button class="pomo-btn" onclick="startPomodoro()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
+      開始此任務的番茄鐘
+    </button>
+  </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+//  STORE ACTIONS
+// ═══════════════════════════════════════════════════
+function autoSave(field, value) {
+  const { selectedTaskId, tasks } = store.getState();
+  if (!selectedTaskId || !tasks[selectedTaskId]) return;
+  const oldVal  = tasks[selectedTaskId][field];
+  if (oldVal === value) return;
+
+  const isDoneTransition = field === 'status' && value === 'done' && oldVal !== 'done';
+  const taskPriority     = tasks[selectedTaskId].priority;
+
+  const stamp = window.PMProfile?.getEditorStamp() || {};
+  store.setState(s => ({
+    tasks: {
+      ...s.tasks,
+      [selectedTaskId]: {
+        ...s.tasks[selectedTaskId],
+        [field]: value,
+        updatedAt:    stamp.at || new Date().toISOString(),
+        lastEditedBy: stamp,
+      }
+    }
+  }));
+
+  renderEditStamp(store.getState().tasks[selectedTaskId]);
+  showToast('已自動儲存');
+
+  if (isDoneTransition) {
+    // Let gamification handle re-render after card exit animation
+    onTaskDone(selectedTaskId, taskPriority);
+  } else {
+    renderKanban();
+    renderTable();
+  }
+}
+
+function toggleTodo(todoId) {
+  const { selectedTaskId, tasks } = store.getState();
+  const task = tasks[selectedTaskId];
+  if (!task) return;
+  const stamp = window.PMProfile?.getEditorStamp() || {};
+  store.setState(s => ({
+    tasks: {
+      ...s.tasks,
+      [selectedTaskId]: {
+        ...s.tasks[selectedTaskId],
+        todoItems: s.tasks[selectedTaskId].todoItems.map(ti =>
+          ti.id === todoId ? { ...ti, completed: !ti.completed } : ti
+        ),
+        updatedAt:    stamp.at || new Date().toISOString(),
+        lastEditedBy: stamp,
+      }
+    }
+  }));
+  renderDrawer();
+  renderKanban();
+  renderTable();
+  showToast('已自動儲存');
+}
+
+function updateTodoText(todoId, text) {
+  const { selectedTaskId } = store.getState();
+  const stamp = window.PMProfile?.getEditorStamp() || {};
+  store.setState(s => ({
+    tasks: {
+      ...s.tasks,
+      [selectedTaskId]: {
+        ...s.tasks[selectedTaskId],
+        todoItems: s.tasks[selectedTaskId].todoItems.map(ti =>
+          ti.id === todoId ? { ...ti, text } : ti
+        ),
+        updatedAt:    stamp.at || new Date().toISOString(),
+        lastEditedBy: stamp,
+      }
+    }
+  }));
+  renderEditStamp(store.getState().tasks[selectedTaskId]);
+  showToast('已自動儲存');
+}
+
+function deleteTodo(todoId) {
+  const { selectedTaskId } = store.getState();
+  store.setState(s => ({
+    tasks: {
+      ...s.tasks,
+      [selectedTaskId]: {
+        ...s.tasks[selectedTaskId],
+        todoItems: s.tasks[selectedTaskId].todoItems.filter(ti => ti.id !== todoId),
+        updatedAt: new Date().toISOString(),
+      }
+    }
+  }));
+  renderDrawer();
+  renderKanban();
+  renderTable();
+}
+
+function confirmAddSubtask() {
+  const input = document.getElementById('drSubtaskField');
+  const text = input.value.trim();
+  if (!text) return;
+  const { selectedTaskId } = store.getState();
+  store.setState(s => {
+    const task = s.tasks[selectedTaskId];
+    return {
+      tasks: {
+        ...s.tasks,
+        [selectedTaskId]: {
+          ...task,
+          todoItems: [...task.todoItems, {
+            id: uuidv4(), text, completed: false,
+            position: task.todoItems.length,
+            createdAt: new Date().toISOString(),
+          }],
+          updatedAt: new Date().toISOString(),
+        }
+      }
+    };
+  });
+  input.value = '';
+  renderDrawer();
+  renderKanban();
+  renderTable();
+  showToast('已新增子項目');
+}
+
+function removeDoc(index) {
+  const { selectedTaskId } = store.getState();
+  store.setState(s => {
+    const docs = [...(s.tasks[selectedTaskId].relatedDocs || [])];
+    docs.splice(index, 1);
+    return {
+      tasks: {
+        ...s.tasks,
+        [selectedTaskId]: {
+          ...s.tasks[selectedTaskId],
+          relatedDocs: docs,
+          updatedAt: new Date().toISOString(),
+        }
+      }
+    };
+  });
+  renderDrawer();
+  showToast('已移除文件');
+}
+
+function confirmAddDoc() {
+  const input = document.getElementById('drDocInputField');
+  const name = input.value.trim();
+  if (!name) return;
+  const { selectedTaskId } = store.getState();
+  store.setState(s => ({
+    tasks: {
+      ...s.tasks,
+      [selectedTaskId]: {
+        ...s.tasks[selectedTaskId],
+        relatedDocs: [...(s.tasks[selectedTaskId].relatedDocs || []), name],
+        updatedAt: new Date().toISOString(),
+      }
+    }
+  }));
+  input.value = '';
+  renderDrawer();
+  showToast('已新增文件');
+}
+
+// Priority from dropdown
+let prioTarget = null;
+function togglePrioDropdown(e) {
+  const dd = document.getElementById('prioDropdown');
+  const rect = e.target.getBoundingClientRect();
+  dd.style.top = (rect.bottom + 4) + 'px';
+  dd.style.left = rect.left + 'px';
+  dd.classList.toggle('open');
+  prioTarget = e.target;
+  e.stopPropagation();
+}
+
+function setPriority(priority) {
+  document.getElementById('prioDropdown').classList.remove('open');
+  autoSave('priority', priority);
+  // update tag appearance immediately
+  const tag = document.getElementById('drPriorityTag');
+  if (tag) {
+    const pm = PRIORITY_META[priority];
+    tag.className = `priority-tag ${pm.cls}`;
+    tag.textContent = pm.label;
+  }
+  renderKanban();
+  renderTable();
+}
+
+// Inline add in kanban
+function showInlineAdd(status) {
+  document.querySelectorAll('.kb-inline-add').forEach(el => {
+    el.classList.remove('show');
+  });
+  const wrap = document.getElementById(`inlineAdd-${status}`);
+  if (wrap) {
+    wrap.classList.add('show');
+    document.getElementById(`inlineInput-${status}`)?.focus();
+  }
+}
+
+function hideInlineAdd(status) {
+  const wrap = document.getElementById(`inlineAdd-${status}`);
+  if (wrap) wrap.classList.remove('show');
+}
+
+function handleInlineKey(e, status) {
+  if (e.key === 'Enter') { e.preventDefault(); confirmInlineAdd(status); }
+  if (e.key === 'Escape') hideInlineAdd(status);
+}
+
+function confirmInlineAdd(status) {
+  const input = document.getElementById(`inlineInput-${status}`);
+  const title = input?.value.trim();
+  if (!title) return hideInlineAdd(status);
+
+  const newTask = {
+    id: uuidv4(), title, projectId: 'p1', status, priority: 'medium',
+    assigneeId: 'u1', startDate: '', dueDate: '',
+    description: '', todoItems: [], relatedDocs: [],
+    testUrl: '', prodUrl: '',
+    updatedAt: new Date().toISOString(),
+  };
+
+  store.setState(s => ({ tasks: { ...s.tasks, [newTask.id]: newTask } }));
+  input.value = '';
+  hideInlineAdd(status);
+  renderAll();
+  showToast('已新增任務');
+}
+
+function openNewTaskModal() {
+  const status = store.getState().viewMode === 'kanban' ? 'todo' : 'todo';
+  showInlineAdd(status);
+}
+
+function startPomodoro() {
+  const { selectedTaskId } = store.getState();
+  const task = store.getState().tasks[selectedTaskId];
+  if (task) {
+    sessionStorage.setItem('pomo-task', JSON.stringify({ id: task.id, title: task.title }));
+  }
+  window.open('pomodoro-timer.html', '_blank');
+}
+
+// ═══════════════════════════════════════════════════
+//  DRAWER OPEN/CLOSE
+// ═══════════════════════════════════════════════════
+function openDrawer(taskId) {
+  store.setState({ selectedTaskId: taskId });
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  renderDrawer();
+  renderKanban();
+  renderTable();
+}
+
+function closeDrawer() {
+  store.setState({ selectedTaskId: null });
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  renderKanban();
+  renderTable();
+}
+
+// ═══════════════════════════════════════════════════
+//  VIEW TOGGLE & FILTERS
+// ═══════════════════════════════════════════════════
+function setView(mode) {
+  store.setState({ viewMode: mode });
+  const kanban = document.getElementById('viewKanban');
+  const table  = document.getElementById('viewTable');
+  document.getElementById('btnKanban').classList.toggle('active', mode === 'kanban');
+  document.getElementById('btnTable').classList.toggle('active', mode === 'table');
+  kanban.style.display = mode === 'kanban' ? 'flex' : 'none';
+  table.style.display  = mode === 'table'  ? 'block' : 'none';
+  renderAll();
+}
+
+function applyFilters() {
+  const cur = store.getState().filters;
+  store.setState({
+    filters: {
+      projectId:    document.getElementById('filterProject')?.value  ?? cur.projectId,
+      priority:     document.getElementById('filterPriority')?.value ?? cur.priority,
+      assigneeId:   document.getElementById('filterAssignee')?.value ?? cur.assigneeId,
+      search:       document.getElementById('filterSearch')?.value   ?? cur.search,
+      quickFilters: cur.quickFilters,
+    }
+  });
+  updateFilterBadge();
+  renderKanban();
+  renderTable();
+}
+
+function updateFilterBadge() {
+  const filtered   = getFilteredTasks();
+  const totalTasks = Object.keys(store.getState().tasks).length;
+  const countEl    = document.getElementById('filterCount');
+  const advBadge   = document.getElementById('advBadge');
+  const { filters } = store.getState();
+
+  // Header count
+  document.getElementById('hdrCount').textContent = `${filtered.length} 個任務`;
+
+  // Filter count pill
+  if (filtered.length < totalTasks) {
+    countEl.textContent  = `${filtered.length} / ${totalTasks}`;
+    countEl.style.display = 'inline';
+  } else {
+    countEl.style.display = 'none';
+  }
+
+  // Adv filter badge dot — show if any dropdown has a value
+  const hasAdv = filters.projectId || filters.priority || filters.assigneeId;
+  advBadge?.classList.toggle('show', !!hasAdv);
+}
+
+function clearFilters() {
+  const el = id => document.getElementById(id);
+  if (el('filterProject'))  el('filterProject').value  = '';
+  if (el('filterPriority')) el('filterPriority').value = '';
+  if (el('filterAssignee')) el('filterAssignee').value = '';
+  if (el('filterSearch'))   el('filterSearch').value   = '';
+
+  // Deactivate all quick filter buttons
+  ['mine','today','high'].forEach(key => {
+    const btn = document.getElementById(`qf-${key}`);
+    if (btn) { btn.classList.remove('active','active-today','active-high'); }
+  });
+
+  store.setState({
+    filters: { projectId:'', priority:'', assigneeId:'', search:'', quickFilters: new Set() }
+  });
+  updateFilterBadge();
+  renderKanban();
+  renderTable();
+}
+
+function toggleQuickFilter(type) {
+  const { filters } = store.getState();
+  const qf  = new Set(filters.quickFilters);
+  const btn = document.getElementById(`qf-${type}`);
+  const activeClass = type === 'today' ? 'active-today' : type === 'high' ? 'active-high' : 'active';
+
+  if (qf.has(type)) {
+    qf.delete(type);
+    btn?.classList.remove('active', 'active-today', 'active-high');
+  } else {
+    qf.add(type);
+    btn?.classList.add(activeClass);
+  }
+
+  store.setState({ filters: { ...filters, quickFilters: qf } });
+  updateFilterBadge();
+  renderKanban();
+  renderTable();
+}
+
+function toggleAdvFilter() {
+  const panel = document.getElementById('advPanel');
+  const btn   = document.getElementById('advFilterBtn');
+  const open  = panel?.classList.toggle('show');
+  btn?.classList.toggle('open', open);
+}
+
+// ═══════════════════════════════════════════════════
+//  DOC/SUBTASK INPUT SHOW/HIDE
+// ═══════════════════════════════════════════════════
+function showAddDocInput() {
+  document.getElementById('drDocInput').style.display = 'flex';
+  document.getElementById('drDocInput').style.flexDirection = 'column';
+  document.getElementById('drDocInputField')?.focus();
+}
+function hideAddDocInput() {
+  document.getElementById('drDocInput').style.display = 'none';
+}
+function showAddSubtask() {
+  document.getElementById('drAddSubtaskInput').style.display = 'block';
+  document.getElementById('drSubtaskField')?.focus();
+}
+function hideAddSubtask() {
+  document.getElementById('drAddSubtaskInput').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════
+//  GAMIFICATION ENGINE
+// ═══════════════════════════════════════════════════
+
+const EXP_TABLE = { urgent:150, high:100, medium:50, low:20, none:10 };
+
+const LEVEL_XP = [0,200,500,1000,1800,3000,4500,6500,9000,12500,17000];
+
+const LEVEL_TITLES = [
+  '','見習 PM','任務新手','專注修煉者','番茄鐘達人',
+  '敏捷精英','衝刺大師','MVP 工程師','傳奇 PM','神話締造者','最強傳說',
+];
+
+function getLevelFromExp(exp) {
+  for (let i = LEVEL_XP.length - 1; i >= 0; i--) {
+    if (exp >= LEVEL_XP[i]) return i + 1;
+  }
+  return 1;
+}
+
+function getLevelProgress(exp) {
+  const level   = getLevelFromExp(exp);
+  const curBase = LEVEL_XP[level - 1] ?? 0;
+  const nextBase= LEVEL_XP[level]     ?? LEVEL_XP[LEVEL_XP.length - 1];
+  const pct     = Math.min(1, (exp - curBase) / (nextBase - curBase));
+  return { level, curBase, nextBase, pct };
+}
+
+function updateXPBar() {
+  const { experience, level } = store.getState().gamification;
+  const { pct, nextBase, curBase } = getLevelProgress(experience);
+
+  const numEl   = document.getElementById('sidebarLevel');
+  const titleEl = document.getElementById('sidebarTitle');
+  const subEl   = document.getElementById('sidebarSub');
+  const fillEl  = document.getElementById('sidebarXpFill');
+  const numEl2  = document.getElementById('sidebarXpNum');
+
+  if (numEl)   numEl.textContent   = level;
+  if (titleEl) titleEl.textContent = LEVEL_TITLES[Math.min(level, LEVEL_TITLES.length-1)] || `Lv.${level}`;
+  if (subEl)   subEl.textContent   = `${experience - curBase} / ${nextBase - curBase} EXP`;
+  if (fillEl)  fillEl.style.width  = `${Math.round(pct * 100)}%`;
+  if (numEl2)  numEl2.textContent  = `${experience} / ${nextBase}`;
+}
+
+function showExpBadge(x, y, amount) {
+  const el = document.createElement('div');
+  el.className = 'exp-badge';
+  el.textContent = `+${amount} EXP`;
+  el.style.left = `${x}px`;
+  el.style.top  = `${y}px`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1800);
+}
+
+function onTaskDone(taskId, priority) {
+  const cardEl = document.querySelector(`.task-card[data-id="${taskId}"]`);
+  const rect   = cardEl?.getBoundingClientRect();
+
+  // — Confetti burst from card —
+  if (rect && typeof confetti !== 'undefined') {
+    confetti({
+      particleCount: 70,
+      spread: 60,
+      origin: {
+        x: (rect.left + rect.width  / 2) / window.innerWidth,
+        y: (rect.top  + rect.height / 2) / window.innerHeight,
+      },
+      colors: ['#c084fc','#fbbf24','#f472b6','#38bdf8','#4ade80','#fb923c'],
+      gravity: 1.15,
+      scalar: 0.82,
+      ticks: 200,
+    });
+  }
+
+  // — Card exit animation, then re-render —
+  if (cardEl) {
+    cardEl.classList.add('completing');
+    setTimeout(() => {
+      renderKanban();
+      renderTable();
+    }, 480);
+  } else {
+    renderKanban();
+    renderTable();
+  }
+
+  // — EXP award —
+  const gain = EXP_TABLE[priority] || 10;
+  if (rect) showExpBadge(rect.left + rect.width / 2, rect.top + 12, gain);
+
+  const { gamification } = store.getState();
+  const oldLevel = gamification.level;
+  const newExp   = gamification.experience + gain;
+  const newLevel = getLevelFromExp(newExp);
+
+  store.setState({
+    gamification: {
+      ...gamification,
+      experience:     newExp,
+      level:          newLevel,
+      totalCompleted: gamification.totalCompleted + 1,
+    }
+  });
+
+  // Small delay so XP bar animates smoothly after DOM update
+  setTimeout(updateXPBar, 100);
+
+  // — Level up? —
+  if (newLevel > oldLevel) {
+    setTimeout(() => showLevelUpModal(newLevel, gain), 900);
+  }
+}
+
+function showLevelUpModal(level, expGain) {
+  const overlay = document.getElementById('levelupOverlay');
+  const card    = document.getElementById('levelupCard');
+  if (!overlay || !card) return;
+
+  document.getElementById('luNum').textContent   = level;
+  document.getElementById('luTitle').textContent = LEVEL_TITLES[Math.min(level, LEVEL_TITLES.length-1)] || `Lv.${level}`;
+  document.getElementById('luSub').textContent   = '解鎖了新的成就稱號！';
+  document.getElementById('luXpNote').textContent = `+${expGain} EXP 本次獲得`;
+
+  overlay.classList.add('show');
+  card.classList.remove('appear');
+  void card.offsetWidth; // force reflow
+  card.classList.add('appear');
+
+  // Spawn star particles
+  for (let i = 0; i < 12; i++) {
+    const star = document.createElement('div');
+    star.className = 'lu-star';
+    const angle = (Math.PI * 2 / 12) * i;
+    const dist  = 120 + Math.random() * 60;
+    star.style.setProperty('--sx', `${Math.cos(angle) * dist}px`);
+    star.style.setProperty('--sy', `${Math.sin(angle) * dist}px`);
+    star.style.left = '50%'; star.style.top = '50%';
+    star.style.animationDelay = `${0.3 + i * 0.04}s`;
+    star.textContent = ['✦','✧','⋆','★'][i % 4];
+    star.style.color = i % 2 ? '#fbbf24' : '#c084fc';
+    card.appendChild(star);
+  }
+}
+
+function closeLevelup() {
+  const overlay = document.getElementById('levelupOverlay');
+  const card    = document.getElementById('levelupCard');
+  overlay?.classList.remove('show');
+  // Clean up stars
+  card?.querySelectorAll('.lu-star').forEach(s => s.remove());
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════════════
+function renderAll() {
+  const { viewMode } = store.getState();
+  renderKanban();
+  renderTable();
+  updateNavChip();
+}
+
+function updateNavChip() {
+  const total = Object.keys(store.getState().tasks).length;
+  document.getElementById('navChip').textContent = total;
+}
+
+// ═══════════════════════════════════════════════════
+//  THEME
+// ═══════════════════════════════════════════════════
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+  localStorage.setItem('theme', html.getAttribute('data-theme'));
+}
+
+// ═══════════════════════════════════════════════════
+//  XSS PROTECTION
+// ═══════════════════════════════════════════════════
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+(function init() {
+  // Theme
+  const saved = localStorage.getItem('theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+
+  // Populate advanced filter selects (inside adv panel)
+  const projSel = document.getElementById('filterProject');
+  Object.values(PROJECTS_META).forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.id; o.textContent = p.name;
+    projSel.appendChild(o);
+  });
+  const assigneeSel = document.getElementById('filterAssignee');
+  Object.values(MEMBERS).forEach(m => {
+    const o = document.createElement('option');
+    o.value = m.id; o.textContent = m.name;
+    assigneeSel.appendChild(o);
+  });
+
+  // Close priority dropdown on outside click
+  document.addEventListener('click', e => {
+    const dd = document.getElementById('prioDropdown');
+    if (!dd.contains(e.target)) dd.classList.remove('open');
+  });
+
+  // Initial badge state
+  updateFilterBadge();
+
+  // Gamification XP bar
+  updateXPBar();
+
+  // Initial render
+  renderAll();
+})();
+</script>
+</body>
+</html>

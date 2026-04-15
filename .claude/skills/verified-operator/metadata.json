@@ -1,0 +1,15 @@
+{
+  "name": "verified-operator",
+  "version": "0.1.0",
+  "description": "Operate live systems with verification, evidence, recovery, and state tracking",
+  "updated_at": "2026-04-10",
+  "tags": [
+    "operations",
+    "verification",
+    "orchestration",
+    "automation",
+    "shared"
+  ],
+  "source_package_sha256": "d041caea19ed9d6520cc503d2217b17495e832acf456b506ae3e469db4080a96",
+  "rendered_from": "canonical-skills/regular-skills/verified-operator"
+}

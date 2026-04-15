@@ -1,0 +1,15 @@
+{
+  "name": "create-pr",
+  "version": "1.2.1",
+  "description": "Summarize branch changes, draft reviewer-friendly PR text, and optionally create a PR with gh",
+  "updated_at": "2026-04-09",
+  "tags": [
+    "git",
+    "pull-request",
+    "review",
+    "workflow",
+    "shared"
+  ],
+  "source_package_sha256": "92913fd9ef561ee7cd7688f26e03a85f9289e416466176701c50c52314f603ce",
+  "rendered_from": "canonical-skills/regular-skills/create-pr"
+}

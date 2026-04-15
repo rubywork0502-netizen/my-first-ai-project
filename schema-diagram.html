@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Schema — ProjectOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0a0f;
+    --surface:   #111118;
+    --border:    #1e1e2e;
+    --text:      #e2e2f0;
+    --muted:     #5a5a7a;
+    --dim:       #2a2a3e;
+
+    --workspace: #f0c040;
+    --project:   #6ee7b7;
+    --sprint:    #7dd3fc;
+    --task:      #c084fc;
+    --todo:      #fca5a5;
+    --doc:       #fbbf24;
+    --pomodoro:  #f97316;
+    --timelog:   #e879f9;
+    --user:      #34d399;
+    --label:     #60a5fa;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* Ambient gradient */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 600px;
+    background: radial-gradient(ellipse, rgba(108,99,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 32px 100px;
+  }
+
+  /* ── Header ── */
+  header {
+    margin-bottom: 64px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 40px;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--dim);
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  h1 span {
+    background: linear-gradient(135deg, #c084fc 0%, #7dd3fc 50%, #6ee7b7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 520px;
+  }
+
+  /* ── Hierarchy visual ── */
+  .hierarchy {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 64px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .hier-node {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .hier-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .hier-arrow {
+    color: var(--dim);
+    margin: 0 8px;
+    font-size: 16px;
+  }
+
+  /* ── Grid layout ── */
+  .schema-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .schema-grid { grid-template-columns: 1fr; }
+  }
+
+  .schema-grid .full { grid-column: 1 / -1; }
+  .schema-grid .wide { grid-column: span 2; }
+
+  /* ── Schema Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .card:hover { border-color: var(--dim); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.10s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.20s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+  .card:nth-child(6) { animation-delay: 0.30s; }
+  .card:nth-child(7) { animation-delay: 0.35s; }
+  .card:nth-child(8) { animation-delay: 0.40s; }
+  .card:nth-child(9) { animation-delay: 0.45s; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+  }
+
+  .card-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .card-tag {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--dim);
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  .card-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* ── Field row ── */
+  .field {
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    gap: 8px;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(30,30,46,0.5);
+    font-size: 12px;
+  }
+
+  .field:last-child { border-bottom: none; }
+
+  .field-name {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .field-required::after {
+    content: '*';
+    color: var(--pomodoro);
+    margin-left: 2px;
+    font-size: 10px;
+  }
+
+  .field-type {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 11px;
+  }
+
+  .field-note {
+    color: #3a3a5e;
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    text-align: right;
+  }
+
+  /* Type color hints */
+  .t-id      { color: #60a5fa; }
+  .t-string  { color: #6ee7b7; }
+  .t-number  { color: #f0c040; }
+  .t-bool    { color: #f97316; }
+  .t-enum    { color: #c084fc; }
+  .t-ref     { color: #fca5a5; }
+  .t-obj     { color: #fbbf24; }
+  .t-arr     { color: #7dd3fc; }
+
+  /* ── Enum block ── */
+  .enum-block {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .enum-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .enum-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .enum-val {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    background: var(--dim);
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Relations section ── */
+  .relations {
+    margin-top: 48px;
+    border-top: 1px solid var(--border);
+    padding-top: 40px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .relation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    padding: 10px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .rel-from {
+    font-weight: 500;
+    min-width: 120px;
+  }
+
+  .rel-type {
+    color: var(--muted);
+    font-size: 10px;
+    min-width: 90px;
+    letter-spacing: 0.05em;
+  }
+
+  .rel-arrow {
+    color: var(--dim);
+    font-size: 18px;
+  }
+
+  .rel-to {
+    color: var(--muted);
+  }
+
+  .rel-note {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    margin-top: 48px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .legend-title {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-name { color: var(--text); }
+  .legend-type { color: var(--muted); font-size: 10px; margin-left: auto; }
+
+  /* ── Type legend ── */
+  .type-legend {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .type-item {
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .type-swatch {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <header>
+    <div class="badge">Data Schema v1.0 · TypeScript</div>
+    <h1>Project<span>OS</span></h1>
+    <p class="subtitle">整合式專案管理系統資料模型 — 涵蓋 Workspace、Sprint、文件與番茄鐘工時追蹤</p>
+  </header>
+
+  <!-- Hierarchy -->
+  <div class="hierarchy">
+    <div class="hier-node"><div class="hier-dot" style="background:var(--workspace)"></div><span style="color:var(--workspace)">Workspace</span></div>
+    <span class="hier-arrow">›</span>
+    <div class="hier-node"><div class="hier-dot" style="background:var(--project)"></div><span style="color:var(--project)">Project</span></div>
+    <span class="hier-arrow">›</span>
+    <div class="hier-node"><div class="hier-dot" style="background:var(--sprint)"></div><span style="color:var(--sprint)">Sprint</span></div>
+    <span class="hier-arrow">›</span>
+    <div class="hier-node"><div class="hier-dot" style="background:var(--task)"></div><span style="color:var(--task)">Task</span></div>
+    <span class="hier-arrow">›</span>
+    <div class="hier-node"><div class="hier-dot" style="background:var(--task)" style="opacity:.6"></div><span style="color:var(--task);opacity:.7">Sub-task</span></div>
+    <span style="color:var(--dim);margin:0 4px">+</span>
+    <div class="hier-node"><div class="hier-dot" style="background:var(--todo)"></div><span style="color:var(--todo)">Todo</span></div>
+  </div>
+
+  <!-- Schema Cards -->
+  <div class="schema-grid">
+
+    <!-- Workspace -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-dot" style="background:var(--workspace)"></div>Workspace</div>
+        <span class="card-tag">Root</span>
+      </div>
+      <div class="card-body">
+        <div class="field"><span class="field-name field-required">id</span><span class="field-type t-id">ID (UUID)</span><span class="field-note">primary key</span></div>
+        <div class="field"><span class="field-name field-required">name</span><span class="field-type t-string">string</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">slug</span><span class="field-type t-string">string</span><span class="field-note">URL identifier</span></div>
+        <div class="field"><span class="field-name">iconEmoji</span><span class="field-type t-string">string?</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">color</span><span class="field-type t-enum">Color</span><span class="field-note">enum</span></div>
+        <div class="field"><span class="field-name field-required">ownerId</span><span class="field-type t-ref">→ User.id</span><span class="field-note">FK</span></div>
+        <div class="field"><span class="field-name field-required">memberIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">→ User[]</span></div>
+        <div class="field"><span class="field-name field-required">settings</span><span class="field-type t-obj">WorkspaceSettings</span><span class="field-note">embedded</span></div>
+        <div class="enum-block">
+          <div class="enum-label">WorkspaceSettings 關鍵欄位</div>
+          <div class="enum-values">
+            <span class="enum-val">pomodoroWorkMinutes</span>
+            <span class="enum-val">pomodoroBreakMinutes</span>
+            <span class="enum-val">sprintDuration</span>
+            <span class="enum-val">workingHoursPerDay</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-dot" style="background:var(--project)"></div>Project</div>
+        <span class="card-tag">Level 2</span>
+      </div>
+      <div class="card-body">
+        <div class="field"><span class="field-name field-required">id</span><span class="field-type t-id">ID</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">workspaceId</span><span class="field-type t-ref">→ Workspace.id</span><span class="field-note">FK</span></div>
+        <div class="field"><span class="field-name field-required">name</span><span class="field-type t-string">string</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name">description</span><span class="field-type t-string">Markdown?</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">status</span><span class="field-type t-enum">ProjectStatus</span><span class="field-note">enum</span></div>
+        <div class="field"><span class="field-name field-required">sprintIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">→ Sprint[]</span></div>
+        <div class="field"><span class="field-name field-required">documentIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">→ Document[]</span></div>
+        <div class="enum-block">
+          <div class="enum-label">ProjectStatus</div>
+          <div class="enum-values">
+            <span class="enum-val">planning</span>
+            <span class="enum-val">active</span>
+            <span class="enum-val">on_hold</span>
+            <span class="enum-val">completed</span>
+            <span class="enum-val">archived</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sprint (full width) -->
+    <div class="card full">
+      <div class="card-header">
+        <div class="card-title"><div class="card-dot" style="background:var(--sprint)"></div>Sprint</div>
+        <span class="card-tag">Scrum Module</span>
+      </div>
+      <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div class="field"><span class="field-name field-required">id</span><span class="field-type t-id">ID</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name field-required">projectId</span><span class="field-type t-ref">→ Project.id</span><span class="field-note">FK</span></div>
+          <div class="field"><span class="field-name field-required">name</span><span class="field-type t-string">string</span><span class="field-note">e.g. "Sprint 12"</span></div>
+          <div class="field"><span class="field-name">goal</span><span class="field-type t-string">string?</span><span class="field-note">sprint goal</span></div>
+          <div class="field"><span class="field-name field-required">status</span><span class="field-type t-enum">SprintStatus</span><span class="field-note">enum</span></div>
+          <div class="field"><span class="field-name field-required">startDate</span><span class="field-type t-string">ISO Date</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name field-required">endDate</span><span class="field-type t-string">ISO Date</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name field-required">taskIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">→ Task[]</span></div>
+          <div class="field"><span class="field-name">velocity</span><span class="field-type t-number">number?</span><span class="field-note">story pts done</span></div>
+          <div class="field"><span class="field-name">plannedVelocity</span><span class="field-type t-number">number?</span><span class="field-note">story pts planned</span></div>
+          <div class="enum-block">
+            <div class="enum-label">SprintStatus</div>
+            <div class="enum-values">
+              <span class="enum-val">draft</span>
+              <span class="enum-val">active</span>
+              <span class="enum-val">completed</span>
+              <span class="enum-val">cancelled</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">SprintReview (embedded)</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div class="field"><span class="field-name">conductedAt</span><span class="field-type t-string">ISO Date?</span><span class="field-note"></span></div>
+            <div class="field"><span class="field-name">conductedBy</span><span class="field-type t-ref">→ User.id?</span><span class="field-note">facilitator</span></div>
+            <div class="field"><span class="field-name">attendeeIds</span><span class="field-type t-arr">ID[]</span><span class="field-note"></span></div>
+            <div class="field"><span class="field-name">demoNotes</span><span class="field-type t-string">Markdown?</span><span class="field-note">demo recap</span></div>
+            <div class="field"><span class="field-name">stakeholderFeedback</span><span class="field-type t-string">Markdown?</span><span class="field-note"></span></div>
+            <div class="field"><span class="field-name">completedTaskIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">done tasks</span></div>
+            <div class="field"><span class="field-name">incompleteTaskIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">carry-over</span></div>
+            <div class="field"><span class="field-name">completedPoints</span><span class="field-type t-number">number</span><span class="field-note"></span></div>
+            <div class="field"><span class="field-name">rating</span><span class="field-type t-number">1–5?</span><span class="field-note">satisfaction</span></div>
+          </div>
+          <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin:16px 0 12px">SprintRetrospective (embedded)</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div class="field"><span class="field-name">wentWell</span><span class="field-type t-arr">string[]</span><span class="field-note">bullet list</span></div>
+            <div class="field"><span class="field-name">toImprove</span><span class="field-type t-arr">string[]</span><span class="field-note">bullet list</span></div>
+            <div class="field"><span class="field-name">actionItems</span><span class="field-type t-arr">RetroActionItem[]</span><span class="field-note"></span></div>
+            <div class="field"><span class="field-name">mood</span><span class="field-type t-enum">MoodEnum</span><span class="field-note">great…terrible</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task -->
+    <div class="card" style="grid-column: 1 / -1">
+      <div class="card-header">
+        <div class="card-title"><div class="card-dot" style="background:var(--task)"></div>Task</div>
+        <span class="card-tag">Core Unit · Level 3 + 4</span>
+      </div>
+      <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div class="enum-label" style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">識別 & 歸屬</div>
+          <div class="field"><span class="field-name field-required">id</span><span class="field-type t-id">ID</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name field-required">projectId</span><span class="field-type t-ref">→ Project.id</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name">sprintId</span><span class="field-type t-ref">→ Sprint.id?</span><span class="field-note">null=backlog</span></div>
+          <div class="field"><span class="field-name">parentTaskId</span><span class="field-type t-ref">→ Task.id?</span><span class="field-note">sub-task</span></div>
+          <div class="field"><span class="field-name field-required">title</span><span class="field-type t-string">string</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name">description</span><span class="field-type t-string">Markdown?</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name field-required">type</span><span class="field-type t-enum">TaskType</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name field-required">status</span><span class="field-type t-enum">TaskStatus</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name field-required">priority</span><span class="field-type t-enum">Priority</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name">storyPoints</span><span class="field-type t-number">number?</span><span class="field-note">sprint planning</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div class="enum-label" style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">關聯 & 子項</div>
+          <div class="field"><span class="field-name field-required">reporterId</span><span class="field-type t-ref">→ User.id</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name">assigneeId</span><span class="field-type t-ref">→ User.id?</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name field-required">labelIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">→ Label[]</span></div>
+          <div class="field"><span class="field-name field-required">subTaskIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">→ Task[]</span></div>
+          <div class="field"><span class="field-name field-required">todoItems</span><span class="field-type t-arr">TodoItem[]</span><span class="field-note">checklist</span></div>
+          <div class="field"><span class="field-name field-required">documentIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">linked docs</span></div>
+          <div class="field"><span class="field-name field-required">pomodoroSessionIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">→ Pomodoro[]</span></div>
+          <div class="field"><span class="field-name">dueDate</span><span class="field-type t-string">ISO Date?</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name">completedAt</span><span class="field-type t-string">ISO Date?</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name field-required">position</span><span class="field-type t-number">number</span><span class="field-note">sort order</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div class="enum-label" style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">工時</div>
+          <div class="field"><span class="field-name">estimatedMinutes</span><span class="field-type t-number">number?</span><span class="field-note"></span></div>
+          <div class="field"><span class="field-name field-required">loggedMinutes</span><span class="field-type t-number">number</span><span class="field-note">aggregated</span></div>
+          <div class="enum-block" style="margin-top:8px">
+            <div class="enum-label">TaskType</div>
+            <div class="enum-values">
+              <span class="enum-val">story</span><span class="enum-val">bug</span><span class="enum-val">task</span><span class="enum-val">epic</span><span class="enum-val">chore</span>
+            </div>
+          </div>
+          <div class="enum-block">
+            <div class="enum-label">TaskStatus</div>
+            <div class="enum-values">
+              <span class="enum-val">backlog</span><span class="enum-val">todo</span><span class="enum-val">in_progress</span><span class="enum-val">in_review</span><span class="enum-val">blocked</span><span class="enum-val">done</span><span class="enum-val">cancelled</span>
+            </div>
+          </div>
+          <div class="enum-block">
+            <div class="enum-label">Priority</div>
+            <div class="enum-values">
+              <span class="enum-val">urgent</span><span class="enum-val">high</span><span class="enum-val">medium</span><span class="enum-val">low</span><span class="enum-val">none</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pomodoro -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-dot" style="background:var(--pomodoro)"></div>PomodoroSession</div>
+        <span class="card-tag">Timer Module</span>
+      </div>
+      <div class="card-body">
+        <div class="field"><span class="field-name field-required">id</span><span class="field-type t-id">ID</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">taskId</span><span class="field-type t-ref">→ Task.id</span><span class="field-note">FK</span></div>
+        <div class="field"><span class="field-name field-required">userId</span><span class="field-type t-ref">→ User.id</span><span class="field-note">FK</span></div>
+        <div class="field"><span class="field-name field-required">type</span><span class="field-type t-enum">PomodoroType</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">status</span><span class="field-type t-enum">PomodoroStatus</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">plannedDurationMinutes</span><span class="field-type t-number">number</span><span class="field-note">from settings</span></div>
+        <div class="field"><span class="field-name">actualDurationMinutes</span><span class="field-type t-number">number?</span><span class="field-note">on complete</span></div>
+        <div class="field"><span class="field-name field-required">startedAt</span><span class="field-type t-string">ISO Date</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name">completedAt</span><span class="field-type t-string">ISO Date?</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name">interruptedAt</span><span class="field-type t-string">ISO Date?</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name">interruptionNote</span><span class="field-type t-string">string?</span><span class="field-note">why stopped</span></div>
+        <div class="field"><span class="field-name">note</span><span class="field-type t-string">string?</span><span class="field-note">session summary</span></div>
+        <div class="field"><span class="field-name field-required">sessionNumber</span><span class="field-type t-number">number</span><span class="field-note">daily count</span></div>
+        <div class="enum-block">
+          <div class="enum-label">PomodoroType / Status</div>
+          <div class="enum-values">
+            <span class="enum-val">work</span><span class="enum-val">short_break</span><span class="enum-val">long_break</span>
+          </div>
+          <div class="enum-values" style="margin-top:6px">
+            <span class="enum-val">running</span><span class="enum-val">paused</span><span class="enum-val">completed</span><span class="enum-val">interrupted</span><span class="enum-val">skipped</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Document -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-dot" style="background:var(--doc)"></div>Document</div>
+        <span class="card-tag">Markdown Module</span>
+      </div>
+      <div class="card-body">
+        <div class="field"><span class="field-name field-required">id</span><span class="field-type t-id">ID</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">workspaceId</span><span class="field-type t-ref">→ Workspace.id</span><span class="field-note">FK</span></div>
+        <div class="field"><span class="field-name">projectId</span><span class="field-type t-ref">→ Project.id?</span><span class="field-note">null=global</span></div>
+        <div class="field"><span class="field-name">parentDocumentId</span><span class="field-type t-ref">→ Document.id?</span><span class="field-note">nesting</span></div>
+        <div class="field"><span class="field-name field-required">title</span><span class="field-type t-string">string</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">content</span><span class="field-type t-string">Markdown</span><span class="field-note">full MD body</span></div>
+        <div class="field"><span class="field-name field-required">authorId</span><span class="field-type t-ref">→ User.id</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">collaboratorIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">→ User[]</span></div>
+        <div class="field"><span class="field-name field-required">linkedTaskIds</span><span class="field-type t-arr">ID[]</span><span class="field-note">bi-directional</span></div>
+        <div class="field"><span class="field-name field-required">tags</span><span class="field-type t-arr">string[]</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">isPublished</span><span class="field-type t-bool">boolean</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">version</span><span class="field-type t-number">number</span><span class="field-note">auto-increment</span></div>
+        <div class="field"><span class="field-name field-required">history</span><span class="field-type t-arr">DocumentVersion[]</span><span class="field-note">version log</span></div>
+      </div>
+    </div>
+
+    <!-- TodoItem + TimeLog -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-dot" style="background:var(--todo)"></div>TodoItem</div>
+        <span class="card-tag">Checklist</span>
+      </div>
+      <div class="card-body">
+        <div class="field"><span class="field-name field-required">id</span><span class="field-type t-id">ID</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">taskId</span><span class="field-type t-ref">→ Task.id</span><span class="field-note">parent FK</span></div>
+        <div class="field"><span class="field-name field-required">text</span><span class="field-type t-string">string</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">completed</span><span class="field-type t-bool">boolean</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name">assigneeId</span><span class="field-type t-ref">→ User.id?</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name">dueDate</span><span class="field-type t-string">ISO Date?</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">position</span><span class="field-type t-number">number</span><span class="field-note">sort</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><div class="card-dot" style="background:var(--timelog)"></div>TimeLog</div>
+        <span class="card-tag">Manual Work Log</span>
+      </div>
+      <div class="card-body">
+        <div class="field"><span class="field-name field-required">id</span><span class="field-type t-id">ID</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">taskId</span><span class="field-type t-ref">→ Task.id</span><span class="field-note">FK</span></div>
+        <div class="field"><span class="field-name field-required">userId</span><span class="field-type t-ref">→ User.id</span><span class="field-note">FK</span></div>
+        <div class="field"><span class="field-name field-required">minutes</span><span class="field-type t-number">number</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name">description</span><span class="field-type t-string">string?</span><span class="field-note"></span></div>
+        <div class="field"><span class="field-name field-required">loggedAt</span><span class="field-type t-string">ISO Date</span><span class="field-note">when worked</span></div>
+        <div style="padding: 12px 0 4px">
+          <div style="font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Computed: TaskWorkSummary</div>
+          <div class="enum-values">
+            <span class="enum-val">pomodoroMinutes</span>
+            <span class="enum-val">manualLogMinutes</span>
+            <span class="enum-val">totalLoggedMinutes</span>
+            <span class="enum-val">completedPomodoros</span>
+            <span class="enum-val">remainingMinutes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /schema-grid -->
+
+  <!-- Relations -->
+  <div class="relations">
+    <div class="section-title">Module Relationships</div>
+    <div class="relation-list">
+      <div class="rel" style="animation-delay:.05s"><span class="rel-from" style="color:var(--workspace)">Workspace</span><span class="rel-type">1 ──▶ N</span><span class="rel-arrow">→</span><span class="rel-to" style="color:var(--project)">Project</span><span class="rel-note">via Project.workspaceId</span></div>
+      <div class="rel" style="animation-delay:.08s"><span class="rel-from" style="color:var(--workspace)">Workspace</span><span class="rel-type">1 ──▶ N</span><span class="rel-arrow">→</span><span class="rel-to" style="color:var(--doc)">Document</span><span class="rel-note">workspace-level docs (projectId=null)</span></div>
+      <div class="rel" style="animation-delay:.11s"><span class="rel-from" style="color:var(--project)">Project</span><span class="rel-type">1 ──▶ N</span><span class="rel-arrow">→</span><span class="rel-to" style="color:var(--sprint)">Sprint</span><span class="rel-note">via Sprint.projectId</span></div>
+      <div class="rel" style="animation-delay:.14s"><span class="rel-from" style="color:var(--project)">Project</span><span class="rel-type">1 ──▶ N</span><span class="rel-arrow">→</span><span class="rel-to" style="color:var(--task)">Task</span><span class="rel-note">via Task.projectId</span></div>
+      <div class="rel" style="animation-delay:.17s"><span class="rel-from" style="color:var(--sprint)">Sprint</span><span class="rel-type">1 ──▶ N</span><span class="rel-arrow">→</span><span class="rel-to" style="color:var(--task)">Task</span><span class="rel-note">via Sprint.taskIds (null sprintId = backlog)</span></div>
+      <div class="rel" style="animation-delay:.20s"><span class="rel-from" style="color:var(--task)">Task</span><span class="rel-type">self-ref</span><span class="rel-arrow">→</span><span class="rel-to" style="color:var(--task)">Sub-Task</span><span class="rel-note">via Task.parentTaskId / Task.subTaskIds</span></div>
+      <div class="rel" style="animation-delay:.23s"><span class="rel-from" style="color:var(--task)">Task</span><span class="rel-type">1 ──▶ N</span><span class="rel-arrow">→</span><span class="rel-to" style="color:var(--todo)">TodoItem</span><span class="rel-note">embedded via Task.todoItems</span></div>
+      <div class="rel" style="animation-delay:.26s"><span class="rel-from" style="color:var(--task)">Task</span><span class="rel-type">1 ──▶ N</span><span class="rel-arrow">→</span><span class="rel-to" style="color:var(--pomodoro)">PomodoroSession</span><span class="rel-note">via Task.pomodoroSessionIds</span></div>
+      <div class="rel" style="animation-delay:.29s"><span class="rel-from" style="color:var(--task)">Task</span><span class="rel-type">M ──▶ N</span><span class="rel-arrow">↔</span><span class="rel-to" style="color:var(--doc)">Document</span><span class="rel-note">bi-directional: Task.documentIds ↔ Document.linkedTaskIds</span></div>
+      <div class="rel" style="animation-delay:.32s"><span class="rel-from" style="color:var(--pomodoro)">PomodoroSession</span><span class="rel-type">1 ──▶ 1</span><span class="rel-arrow">→</span><span class="rel-to" style="color:var(--user)">User</span><span class="rel-note">via PomodoroSession.userId</span></div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-title">Module Color Index</div>
+    <div class="legend-grid">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--workspace)"></div><span class="legend-name">Workspace</span><span class="legend-type">root</span></div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--project)"></div><span class="legend-name">Project</span><span class="legend-type">level 2</span></div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--sprint)"></div><span class="legend-name">Sprint</span><span class="legend-type">scrum</span></div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--task)"></div><span class="legend-name">Task / Sub-task</span><span class="legend-type">core</span></div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--todo)"></div><span class="legend-name">TodoItem</span><span class="legend-type">checklist</span></div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--doc)"></div><span class="legend-name">Document</span><span class="legend-type">markdown</span></div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--pomodoro)"></div><span class="legend-name">PomodoroSession</span><span class="legend-type">timer</span></div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--timelog)"></div><span class="legend-name">TimeLog</span><span class="legend-type">manual log</span></div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--user)"></div><span class="legend-name">User</span><span class="legend-type">identity</span></div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--label)"></div><span class="legend-name">Label</span><span class="legend-type">taxonomy</span></div>
+    </div>
+    <div class="type-legend">
+      <div class="type-item"><span class="type-swatch" style="background:var(--label)"></span><span style="color:var(--label)">ID</span></div>
+      <div class="type-item"><span class="type-swatch" style="background:var(--project)"></span><span style="color:var(--project)">string</span></div>
+      <div class="type-item"><span class="type-swatch" style="background:var(--workspace)"></span><span style="color:var(--workspace)">number</span></div>
+      <div class="type-item"><span class="type-swatch" style="background:var(--pomodoro)"></span><span style="color:var(--pomodoro)">boolean</span></div>
+      <div class="type-item"><span class="type-swatch" style="background:var(--task)"></span><span style="color:var(--task)">enum</span></div>
+      <div class="type-item"><span class="type-swatch" style="background:var(--todo)"></span><span style="color:var(--todo)">FK reference</span></div>
+      <div class="type-item"><span class="type-swatch" style="background:var(--doc)"></span><span style="color:var(--doc)">object</span></div>
+      <div class="type-item"><span class="type-swatch" style="background:var(--sprint)"></span><span style="color:var(--sprint)">array</span></div>
+      <div class="type-item"><span style="color:var(--muted);font-size:11px">* = required field</span></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<script src="auth.js"></script>
+<script src="profile.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMSuite — 電商平台重構</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ━━━ RESET ━━━ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+button{cursor:pointer;border:none;background:none;font:inherit}
+input,select,textarea{font:inherit;border:none;outline:none;background:none;width:100%}
+a{text-decoration:none;color:inherit}
+svg{display:block;flex-shrink:0}
+[contenteditable]{outline:none}
+
+/* ━━━ TOKENS ━━━ */
+:root {
+  --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
+  --b1:#1e1c2e; --b2:#2a2840; --b3:#3a3852;
+  --t1:#f0edfb; --t2:#9490b0; --t3:#58547a; --t4:#35324a;
+  --purple:#c084fc; --purple-d:rgba(192,132,252,.13); --purple-g:rgba(192,132,252,.06);
+  --cyan:#38bdf8;   --cyan-d:rgba(56,189,248,.13);
+  --teal:#2dd4bf;   --teal-d:rgba(45,212,191,.13);
+  --green:#4ade80;  --green-d:rgba(74,222,128,.13);
+  --amber:#fbbf24;  --amber-d:rgba(251,191,36,.13);
+  --orange:#fb923c; --orange-d:rgba(251,146,60,.13);
+  --pink:#f472b6;   --pink-d:rgba(244,114,182,.13);
+  --red:#f87171;    --red-d:rgba(248,113,113,.13);
+  --grad-main:linear-gradient(135deg,#c084fc 0%,#38bdf8 100%);
+  --grad-fire:linear-gradient(135deg,#f472b6 0%,#fb923c 100%);
+  --grad-life:linear-gradient(135deg,#4ade80 0%,#2dd4bf 100%);
+  --sb-w:228px; --hdr-h:58px; --r:10px; --r-sm:6px;
+  --hdr-bg:rgba(8,8,15,.9); --ghost-op:.05;
+}
+[data-theme="light"] {
+  --bg:#f4f2fb; --s1:#fff; --s2:#edeaf7; --s3:#e2dff2; --s4:#d5d0ea;
+  --b1:#dbd6f0; --b2:#ccc6e4; --b3:#b8b2d8;
+  --t1:#18142a; --t2:#5a5475; --t3:#9088aa; --t4:#b8b0cc;
+  --purple-d:rgba(192,132,252,.14); --cyan-d:rgba(56,189,248,.14);
+  --teal-d:rgba(45,212,191,.14); --green-d:rgba(74,222,128,.14);
+  --amber-d:rgba(251,191,36,.14); --orange-d:rgba(251,146,60,.14);
+  --pink-d:rgba(244,114,182,.14); --red-d:rgba(248,113,113,.14);
+  --hdr-bg:rgba(244,242,251,.92); --ghost-op:.07;
+}
+
+body,.sidebar,.hdr,.prop-row,.task-card,.icon-btn {
+  transition:background-color .28s ease,border-color .28s ease,color .2s ease;
+}
+
+body::after{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E")}
+
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
+  min-height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5}
+
+/* ━━━ SIDEBAR ━━━ */
+.sidebar{width:var(--sb-w);min-height:100vh;background:var(--s1);
+  border-right:1px solid var(--b1);display:flex;flex-direction:column;
+  flex-shrink:0;position:relative;z-index:20}
+.logo{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
+  padding:0 20px;border-bottom:1px solid var(--b1)}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;
+  flex-shrink:0;box-shadow:0 0 18px rgba(192,132,252,.35)}
+.logo-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--t1)}
+.logo-label em{font-style:normal;background:var(--grad-main);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:1px}
+.nav-section{font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--t4);padding:12px 10px 5px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;
+  border-radius:var(--r-sm);color:var(--t3);font-size:13.5px;font-weight:500;
+  cursor:pointer;transition:all .15s;text-decoration:none}
+.nav-item:hover{color:var(--t1);background:var(--s2)}
+.nav-item.active{color:var(--t1);background:var(--purple-g);
+  border-left:2px solid var(--purple);padding-left:10px}
+.ni{color:var(--t4);transition:color .15s;flex-shrink:0}
+.nav-item.active .ni{color:var(--purple)}
+.nav-item:hover .ni{color:var(--t2)}
+.nav-chip{margin-left:auto;font-family:'Fira Code',monospace;font-size:10px;font-weight:500;
+  padding:1px 7px;border-radius:10px;background:var(--s3);color:var(--t2);border:1px solid var(--b2)}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--b1)}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:var(--r-sm);cursor:pointer;transition:background .15s}
+.user-row:hover{background:var(--s2)}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:14px;color:#fff;flex-shrink:0;background:var(--grad-main)}
+.user-name{font-size:13px;font-weight:600;color:var(--t1)}
+.user-role{font-size:11px;color:var(--t3)}
+
+/* ━━━ MAIN ━━━ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ━━━ HEADER ━━━ */
+.hdr{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
+  padding:0 28px;border-bottom:1px solid var(--b1);background:var(--hdr-bg);
+  backdrop-filter:blur(16px);position:sticky;top:0;z-index:10;flex-shrink:0}
+.back-btn{display:flex;align-items:center;gap:7px;color:var(--t3);font-size:13px;
+  font-weight:500;padding:7px 12px;border-radius:var(--r-sm);transition:all .15s;
+  flex-shrink:0;text-decoration:none}
+.back-btn:hover{color:var(--t1);background:var(--s2)}
+.hdr-divider{width:1px;height:20px;background:var(--b2);flex-shrink:0}
+.hdr-proj-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;
+  letter-spacing:.02em;color:var(--t1);flex:1;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.icon-btn{width:36px;height:36px;border-radius:var(--r-sm);background:var(--s2);
+  border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;
+  color:var(--t3);transition:all .15s}
+.icon-btn:hover{color:var(--t1);border-color:var(--b2);background:var(--s3)}
+.btn-save{display:flex;align-items:center;gap:7px;background:var(--grad-main);color:#fff;
+  padding:8px 18px;border-radius:var(--r-sm);font-size:13px;font-weight:700;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;
+  box-shadow:0 0 20px rgba(192,132,252,.3);transition:all .2s;white-space:nowrap}
+.btn-save:hover{box-shadow:0 0 32px rgba(192,132,252,.5);transform:translateY(-1px)}
+
+/* ━━━ CONTENT ━━━ */
+.content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+/* ━━━ PAGE HERO (title + sprint band) ━━━ */
+.page-hero{padding:28px 36px 0;flex-shrink:0}
+.page-title-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;
+  letter-spacing:.02em;color:var(--t1);line-height:1.15;flex:1}
+.page-title:focus{border-bottom:1.5px dashed var(--b3)}
+.page-title:empty::before{content:attr(data-placeholder);color:var(--t4)}
+
+/* Sprint Band */
+.sprint-band{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  border-left:3px solid var(--purple);padding:16px 22px;margin-bottom:24px;
+  display:flex;align-items:center;gap:28px}
+.sprint-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;
+  letter-spacing:.05em;color:var(--t1);white-space:nowrap}
+.sprint-sub{font-size:11px;color:var(--t3);white-space:nowrap}
+.sprint-progress-wrap{flex:1;display:flex;align-items:center;gap:14px}
+.sprint-bar{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.sprint-fill{height:100%;border-radius:3px;background:var(--grad-main);
+  transition:width .8s cubic-bezier(.16,1,.3,1)}
+.sprint-pct{font-family:'Fira Code',monospace;font-size:12px;color:var(--purple);
+  font-weight:500;white-space:nowrap}
+
+/* ━━━ TWO-COLUMN LAYOUT ━━━ */
+.two-col{display:grid;grid-template-columns:65% 35%;flex:1;min-height:0;
+  border-top:1px solid var(--b1)}
+
+/* ━━━ LEFT: PROPERTIES ━━━ */
+.left-col{padding:24px 32px 36px;overflow-y:auto;border-right:1px solid var(--b1)}
+.left-col::-webkit-scrollbar{width:4px}
+.left-col::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+
+.section-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--t4);font-weight:700;margin-bottom:4px;margin-top:20px}
+.section-label:first-child{margin-top:0}
+
+/* Notion-style property row */
+.prop-row{display:grid;grid-template-columns:180px 1fr;align-items:start;gap:12px;
+  padding:8px 10px;border-radius:var(--r-sm);margin:0 -10px;transition:background .12s;
+  min-height:38px}
+.prop-row:hover{background:var(--s2)}
+.prop-key{display:flex;align-items:center;gap:9px;color:var(--t3);font-size:12.5px;
+  font-weight:500;padding-top:2px;white-space:nowrap;flex-shrink:0}
+.prop-key svg{color:var(--t4);flex-shrink:0}
+.prop-val{display:flex;align-items:flex-start;flex-wrap:wrap;gap:6px;padding-top:2px;
+  color:var(--t1);font-size:13px}
+.prop-val a{color:var(--cyan);display:flex;align-items:center;gap:5px;
+  transition:color .15s}
+.prop-val a:hover{color:var(--purple)}
+
+/* Phase badge (clickable, cycles) */
+.phase-sel{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;
+  padding:4px 12px;border-radius:20px;cursor:pointer;user-select:none;
+  transition:all .2s}
+.phase-sel:hover{filter:brightness(1.15)}
+.ps-delivering{background:var(--purple-d);color:var(--purple)}
+.ps-planning{background:var(--amber-d);color:var(--amber)}
+.ps-done{background:var(--teal-d);color:var(--teal)}
+.ps-paused{background:var(--orange-d);color:var(--orange)}
+
+/* Generic badges */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;
+  padding:3px 10px;border-radius:20px}
+.badge-cyan{background:var(--cyan-d);color:var(--cyan)}
+.badge-orange{background:var(--orange-d);color:var(--orange)}
+.badge-teal{background:var(--teal-d);color:var(--teal)}
+.badge-amber{background:var(--amber-d);color:var(--amber)}
+.badge-purple{background:var(--purple-d);color:var(--purple)}
+.badge-green{background:var(--green-d);color:var(--green)}
+.badge-gray{background:var(--s3);color:var(--t3)}
+.badge-red{background:var(--red-d);color:var(--red)}
+
+/* Description contenteditable */
+.desc-edit{color:var(--t1);font-size:13px;line-height:1.65;min-height:60px;
+  border-radius:var(--r-sm);padding:4px 8px;margin:-4px -8px;
+  transition:background .15s;cursor:text}
+.desc-edit:hover{background:var(--s3)}
+.desc-edit:focus{background:var(--s3)}
+.desc-edit:empty::before{content:attr(data-placeholder);color:var(--t4)}
+
+/* File tags */
+.file-tags{display:flex;flex-wrap:wrap;gap:6px;padding-top:2px}
+.file-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;
+  padding:4px 10px;border-radius:6px;background:var(--s3);color:var(--t2);
+  border:1px solid var(--b2);cursor:pointer;transition:all .15s}
+.file-tag:hover{border-color:var(--b3);color:var(--t1)}
+.file-tag svg{color:var(--t4)}
+.file-tag-add{border-style:dashed;background:transparent;color:var(--t3)}
+.file-tag-add:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-d)}
+
+/* Person row */
+.person-row{display:flex;align-items:center;gap:8px}
+.mini-av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:11px;color:#fff;flex-shrink:0}
+.person-name{font-size:13px;color:var(--t1);font-weight:500}
+.person-time{font-size:11px;color:var(--t3);margin-left:6px}
+
+/* Date value */
+.date-val{font-family:'Fira Code',monospace;font-size:13px;color:var(--t1);letter-spacing:.02em}
+.date-empty{font-family:'Fira Code',monospace;font-size:12px;color:var(--t4);
+  border:1px dashed var(--b2);border-radius:var(--r-sm);padding:4px 12px;cursor:pointer;
+  transition:border-color .15s,color .15s}
+.date-empty:hover{border-color:var(--purple);color:var(--purple)}
+
+/* Divider */
+.prop-divider{height:1px;background:var(--b1);margin:12px -10px}
+
+/* ━━━ RIGHT: TASK PANEL ━━━ */
+.right-col{padding:24px 24px 36px;overflow-y:auto;background:var(--s1)}
+.right-col::-webkit-scrollbar{width:4px}
+.right-col::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+
+.panel-header{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px}
+.panel-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;
+  letter-spacing:.05em;color:var(--t1)}
+.count-badge{font-family:'Fira Code',monospace;font-size:10px;padding:2px 8px;
+  border-radius:10px;background:var(--purple-d);color:var(--purple);border:1px solid transparent}
+
+/* Task cards */
+.task-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r-sm);
+  padding:14px 15px 12px;cursor:pointer;transition:all .18s;position:relative;
+  overflow:hidden;margin-bottom:10px}
+.task-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.28);
+  border-color:var(--b3)}
+.task-card[data-pri="high"]  {border-left:3px solid var(--orange)}
+.task-card[data-pri="medium"]{border-left:3px solid var(--cyan)}
+.task-card[data-pri="low"]   {border-left:3px solid var(--green)}
+
+.task-card-top{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:7px}
+.task-card-name{font-size:13px;font-weight:700;color:var(--t1);
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:.02em;font-size:15px}
+.task-open-link{font-size:11px;color:var(--t4);display:flex;align-items:center;gap:3px;
+  opacity:0;transition:opacity .15s;white-space:nowrap;padding:3px 8px;
+  border-radius:var(--r-sm);background:var(--s3)}
+.task-card:hover .task-open-link{opacity:1}
+.task-desc{font-size:12px;color:var(--t3);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;margin-bottom:9px}
+.task-badges{display:flex;align-items:center;gap:6px}
+
+/* Add task button */
+.add-task-btn{display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:10px;border-radius:var(--r-sm);border:1.5px dashed var(--b2);
+  color:var(--t3);font-size:13px;font-weight:500;cursor:pointer;
+  transition:all .18s;margin-top:4px}
+.add-task-btn:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-d)}
+
+/* ━━━ TOAST ━━━ */
+.toast{position:fixed;bottom:28px;right:28px;z-index:1000;
+  background:var(--s3);border:1px solid var(--b3);border-radius:10px;
+  padding:12px 20px;font-size:13px;font-weight:600;color:var(--t1);
+  display:flex;align-items:center;gap:10px;
+  transform:translateY(20px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 8px 32px rgba(0,0,0,.4);pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:8px;height:8px;border-radius:50%;background:var(--purple);flex-shrink:0}
+
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.page-hero{animation:up .4s cubic-bezier(.16,1,.3,1) both}
+.two-col{animation:up .4s .1s cubic-bezier(.16,1,.3,1) both}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">PM</div>
+    <div class="logo-label">PM<em>Suite</em></div>
+  </div>
+  <nav class="nav">
+    <a class="nav-item" href="index.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      控制台
+    </a>
+    <a class="nav-item active" href="projects.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M16 3v4M8 3v4"/></svg>
+      專案
+    </a>
+    <a class="nav-item" href="tasks.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      任務
+      <span class="nav-chip">9</span>
+    </a>
+    <a class="nav-item" href="sprint-review.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Sprint Review
+    </a>
+    <div class="nav-section">工具</div>
+    <a class="nav-item" href="pomodoro-timer.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
+      番茄鐘
+    </a>
+    <a class="nav-item" href="#">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      文件
+    </a>
+    <a class="nav-item" href="profile.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      設定
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="user-row">
+      <div class="av">PM</div>
+      <div>
+        <div class="user-name">王小明</div>
+        <div class="user-role">Project Manager</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- HEADER -->
+  <header class="hdr">
+    <a class="back-btn" href="projects.html">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      所有專案
+    </a>
+    <div class="hdr-divider"></div>
+    <div class="hdr-proj-title">電商平台重構</div>
+    <div class="hdr-last-edit" id="hdrLastEdit" style="display:none;align-items:center;gap:6px;font-size:11px;color:var(--t3)"></div>
+    <button class="btn-save" onclick="handleSave()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      儲存
+    </button>
+    <button class="icon-btn" onclick="toggleTheme()" title="切換主題">
+      <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- PAGE HERO: editable title + sprint band -->
+    <div class="page-hero">
+      <div class="page-title-row">
+        <h1 class="page-title" contenteditable="true" data-placeholder="專案名稱…" spellcheck="false">電商平台重構</h1>
+      </div>
+
+      <!-- Sprint Band -->
+      <div class="sprint-band">
+        <div>
+          <div class="sprint-label">Sprint #12</div>
+          <div class="sprint-sub">2026/04/01 — 2026/04/14</div>
+        </div>
+        <div class="sprint-progress-wrap">
+          <div class="sprint-bar"><div class="sprint-fill" style="width:62%"></div></div>
+          <span class="sprint-pct">62%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge badge-purple">進行中</span>
+          <span style="font-size:11px;color:var(--t3)">6 天剩餘</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TWO COLUMN -->
+    <div class="two-col">
+
+      <!-- ━━━ LEFT COL: PROPERTIES ━━━ -->
+      <div class="left-col">
+
+        <!-- 1. 專案階段 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            專案階段
+          </div>
+          <div class="prop-val">
+            <div class="phase-sel ps-delivering" id="phaseSel" onclick="cyclePhase()" title="點擊切換階段">
+              <span id="phaseIcon">🚀</span>
+              <span id="phaseText">交付中</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 專案類型 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            專案類型
+          </div>
+          <div class="prop-val">
+            <span class="badge badge-cyan">功能開發</span>
+          </div>
+        </div>
+
+        <!-- 3. 優先順序 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+            優先順序
+          </div>
+          <div class="prop-val">
+            <span class="badge badge-orange">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 11 12 6 7 11"/></svg>
+              高
+            </span>
+          </div>
+        </div>
+
+        <!-- 4. 描述 -->
+        <div class="prop-row" style="align-items:flex-start">
+          <div class="prop-key" style="padding-top:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+            描述
+          </div>
+          <div class="prop-val" style="flex:1">
+            <div class="desc-edit" contenteditable="true" data-placeholder="新增描述…" spellcheck="false">全面重構電商前後端架構，採用微服務設計模式提升系統可擴展性與維護性。整合 CI/CD 流程，建立自動化測試覆蓋率達 85% 以上。目標於 2026 Q2 完成核心功能上線，並逐步遷移既有資料。</div>
+          </div>
+        </div>
+
+        <!-- 5. 資料蒐集連結 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            資料蒐集連結
+          </div>
+          <div class="prop-val">
+            <a href="https://forms.example.com/project-survey" target="_blank">
+              https://forms.example.com/project-survey
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 6. 正式後台網址 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            正式後台網址
+          </div>
+          <div class="prop-val">
+            <a href="https://admin.example.com" target="_blank">
+              https://admin.example.com
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- 7. 測試後台網址 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            測試後台網址
+          </div>
+          <div class="prop-val">
+            <a href="https://staging-admin.example.com" target="_blank">
+              https://staging-admin.example.com
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="prop-divider"></div>
+
+        <!-- 8. 相關文件 -->
+        <div class="prop-row" style="align-items:flex-start">
+          <div class="prop-key" style="padding-top:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            相關文件
+          </div>
+          <div class="prop-val">
+            <div class="file-tags" id="files-spec">
+              <div class="file-tag">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                需求規格書 v2.pdf
+              </div>
+              <div class="file-tag file-tag-add" onclick="addFileTag('files-spec')">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                新增
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 9. 設計同意書 -->
+        <div class="prop-row" style="align-items:flex-start">
+          <div class="prop-key" style="padding-top:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            設計同意書
+          </div>
+          <div class="prop-val">
+            <div class="file-tags" id="files-design">
+              <div class="file-tag">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                設計同意書_簽署.pdf
+              </div>
+              <div class="file-tag file-tag-add" onclick="addFileTag('files-design')">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                新增
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10. 教育訓練手冊 -->
+        <div class="prop-row" style="align-items:flex-start">
+          <div class="prop-key" style="padding-top:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            教育訓練手冊
+          </div>
+          <div class="prop-val">
+            <div class="file-tags" id="files-manual">
+              <div class="file-tag">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                使用者手冊_v1.docx
+              </div>
+              <div class="file-tag">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                管理員手冊.docx
+              </div>
+              <div class="file-tag file-tag-add" onclick="addFileTag('files-manual')">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                新增
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-divider"></div>
+
+        <!-- 11. 前端負責人 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            前端負責人
+          </div>
+          <div class="prop-val">
+            <div class="person-row">
+              <div class="mini-av" style="background:linear-gradient(135deg,#c084fc,#38bdf8)">王</div>
+              <span class="person-name">王小明</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 12. 後端負責人 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            後端負責人
+          </div>
+          <div class="prop-val">
+            <div class="person-row">
+              <div class="mini-av" style="background:linear-gradient(135deg,#38bdf8,#2dd4bf)">李</div>
+              <span class="person-name">李大華</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 13. 最後編輯者 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            最後編輯者
+          </div>
+          <div class="prop-val">
+            <div class="person-row">
+              <div class="mini-av" style="background:linear-gradient(135deg,#fb923c,#fbbf24)">陳</div>
+              <span class="person-name">陳美玲</span>
+              <span class="person-time">2 小時前</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="prop-divider"></div>
+
+        <!-- 14. 開始日期 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            開始日期
+          </div>
+          <div class="prop-val">
+            <span class="date-val">2026·03·01</span>
+          </div>
+        </div>
+
+        <!-- 15. 預計完成日期 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            預計完成日期
+          </div>
+          <div class="prop-val">
+            <span class="date-val" style="color:var(--amber)" title="即將到期">2026·05·01</span>
+            <span class="badge badge-amber" style="font-size:10px;padding:2px 7px">即將到期</span>
+          </div>
+        </div>
+
+        <!-- 16. 實際結案日期 -->
+        <div class="prop-row">
+          <div class="prop-key">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="15" x2="16" y2="15"/></svg>
+            實際結案日期
+          </div>
+          <div class="prop-val">
+            <span class="date-empty" onclick="promptCloseDate()" title="點擊設定">點擊設定日期</span>
+          </div>
+        </div>
+
+      </div><!-- /left-col -->
+
+      <!-- ━━━ RIGHT COL: TASKS ━━━ -->
+      <div class="right-col">
+        <div class="panel-header">
+          <div class="panel-title">所屬任務</div>
+          <span class="count-badge">3</span>
+        </div>
+
+        <!-- Task 1 -->
+        <div class="task-card" data-pri="high" onclick="taskClick('PM 工作卡 #001')">
+          <div class="task-card-top">
+            <div class="task-card-name">PM 工作卡 #001</div>
+            <div class="task-open-link">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              開啟任務
+            </div>
+          </div>
+          <div class="task-desc">管理與追蹤專案進度、里程碑確認</div>
+          <div class="task-badges">
+            <span class="badge badge-purple" style="font-size:10.5px;padding:2px 9px">進行中</span>
+            <span class="badge badge-orange" style="font-size:10.5px;padding:2px 9px">
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="17 11 12 6 7 11"/></svg>
+              高
+            </span>
+          </div>
+        </div>
+
+        <!-- Task 2 -->
+        <div class="task-card" data-pri="medium" onclick="taskClick('維運工作 #008')">
+          <div class="task-card-top">
+            <div class="task-card-name">維運工作 #008</div>
+            <div class="task-open-link">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              開啟任務
+            </div>
+          </div>
+          <div class="task-desc">系統部署、環境配置、監控設定</div>
+          <div class="task-badges">
+            <span class="badge badge-gray" style="font-size:10.5px;padding:2px 9px">待辦</span>
+            <span class="badge badge-cyan" style="font-size:10.5px;padding:2px 9px">中</span>
+          </div>
+        </div>
+
+        <!-- Task 3 -->
+        <div class="task-card" data-pri="low" onclick="taskClick('月工作報告 #012')">
+          <div class="task-card-top">
+            <div class="task-card-name">月工作報告 #012</div>
+            <div class="task-open-link">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              開啟任務
+            </div>
+          </div>
+          <div class="task-desc">每月產出工作量統計報告</div>
+          <div class="task-badges">
+            <span class="badge badge-teal" style="font-size:10.5px;padding:2px 9px">已完成</span>
+            <span class="badge badge-green" style="font-size:10.5px;padding:2px 9px">低</span>
+          </div>
+        </div>
+
+        <!-- Add task -->
+        <button class="add-task-btn" onclick="showToast('關聯任務功能開發中')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          關聯任務
+        </button>
+
+        <!-- Info blurb -->
+        <div style="margin-top:20px;padding:14px;background:var(--s2);border-radius:var(--r-sm);
+          border:1px solid var(--b1)">
+          <div style="font-size:11px;color:var(--t3);line-height:1.6">
+            <div style="font-weight:600;color:var(--t2);margin-bottom:5px;font-size:12px">專案概況</div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span>完成任務</span>
+              <span style="color:var(--teal);font-family:'Fira Code',monospace">1 / 3</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span>整體進度</span>
+              <span style="color:var(--purple);font-family:'Fira Code',monospace">68%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span>剩餘天數</span>
+              <span style="color:var(--amber);font-family:'Fira Code',monospace">23 天</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /right-col -->
+    </div><!-- /two-col -->
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg">已儲存</span>
+</div>
+
+<script>
+/* ── THEME ── */
+const savedTheme = localStorage.getItem('pmsuite-theme');
+if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('pmsuite-theme', next);
+}
+
+/* ── PHASE CYCLE ── */
+const phases = [
+  { key: 'delivering', cls: 'ps-delivering', icon: '🚀', text: '交付中' },
+  { key: 'planning',   cls: 'ps-planning',   icon: '📋', text: '規劃中' },
+  { key: 'done',       cls: 'ps-done',       icon: '✅', text: '已完成' },
+  { key: 'paused',     cls: 'ps-paused',     icon: '⏸', text: '暫停'   },
+];
+let currentPhaseIdx = 0; // starts at 'delivering'
+
+function cyclePhase() {
+  currentPhaseIdx = (currentPhaseIdx + 1) % phases.length;
+  const p = phases[currentPhaseIdx];
+  const el = document.getElementById('phaseSel');
+  el.className = 'phase-sel ' + p.cls;
+  document.getElementById('phaseIcon').textContent = p.icon;
+  document.getElementById('phaseText').textContent = p.text;
+  showToast(`階段已切換為「${p.text}」`);
+}
+
+/* ── FILE TAG ADD ── */
+function addFileTag(containerId) {
+  const name = prompt('請輸入檔案名稱：');
+  if (!name || !name.trim()) return;
+  const container = document.getElementById(containerId);
+  const addBtn = container.querySelector('.file-tag-add');
+  const tag = document.createElement('div');
+  tag.className = 'file-tag';
+  tag.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>${name.trim()}`;
+  container.insertBefore(tag, addBtn);
+  showToast(`「${name.trim()}」已新增`);
+}
+
+/* ── CLOSE DATE ── */
+function promptCloseDate() {
+  const val = prompt('請輸入實際結案日期（格式：YYYY-MM-DD）：');
+  if (!val || !val.trim()) return;
+  const el = document.querySelector('.date-empty');
+  el.className = 'date-val';
+  el.textContent = val.trim().replace(/-/g, '·');
+  el.onclick = null;
+  showToast('結案日期已設定');
+}
+
+/* ── TASK CLICK ── */
+function taskClick(name) {
+  showToast(`任務詳情功能開發中`);
+}
+
+/* ── SAVE ── */
+function handleSave() {
+  const stamp = window.PMProfile?.getEditorStamp();
+  if (stamp) {
+    const el = document.getElementById('hdrLastEdit');
+    if (el) {
+      const avStyle = stamp.photoURL
+        ? `style="width:18px;height:18px;border-radius:50%;object-fit:cover;flex-shrink:0"`
+        : `style="width:18px;height:18px;border-radius:50%;background:${stamp.grad};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0"`;
+      const avContent = stamp.photoURL
+        ? `<img src="${stamp.photoURL}" ${avStyle}>`
+        : `<div ${avStyle}>${stamp.initial}</div>`;
+      el.innerHTML = `${avContent}<span>${stamp.name}</span><span style="color:var(--t4)">剛剛儲存</span>`;
+      el.style.display = 'flex';
+    }
+  }
+  showToast('變更已儲存');
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(powershell:*)",
+      "Bash(start:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./config/credentials.json)",
+      "Read(~/.aws/credentials)",
+      "Read(~/.ssh/id_*)",
+      "Read(~/.npmrc)"
+    ]
+  },
+  "allowManagedHooksOnly": true,
+  "allowedHttpHookUrls": [],
+  "httpHookAllowedEnvVars": [],
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "filesystem": {
+      "denyWrite": [
+        "/etc",
+        "/usr/local/bin",
+        "~/.ssh",
+        "~/.aws",
+        "~/.gnupg"
+      ],
+      "denyRead": [
+        "~/.aws/credentials",
+        "~/.ssh",
+        "~/.gnupg"
+      ]
+    },
+    "excludedCommands": [
+      "docker *"
+    ]
+  },
+  "disableBypassPermissionsMode": "disable"
+}

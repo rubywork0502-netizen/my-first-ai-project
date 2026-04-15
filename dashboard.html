@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMSuite — 控制台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+button{cursor:pointer;border:none;background:none;font:inherit}
+input{font:inherit;border:none;outline:none;background:none}
+ul,ol{list-style:none}
+
+/* ── Tokens ── */
+:root{
+  --bg:       #08080f;
+  --s1:       #0d0d17;
+  --s2:       #12121e;
+  --s3:       #1a1a2a;
+  --border:   #1e1e30;
+  --border2:  #252538;
+
+  --text:     #e8e8f5;
+  --text2:    #9090b0;
+  --text3:    #5050708;
+  --muted:    #404058;
+
+  --green:    #22c55e;
+  --green-d:  rgba(34,197,94,.12);
+  --amber:    #f59e0b;
+  --amber-d:  rgba(245,158,11,.12);
+  --red:      #ef4444;
+  --red-d:    rgba(239,68,68,.12);
+  --blue:     #3b82f6;
+  --blue-d:   rgba(59,130,246,.12);
+  --purple:   #a855f7;
+  --purple-d: rgba(168,85,247,.12);
+  --teal:     #14b8a6;
+  --teal-d:   rgba(20,184,166,.12);
+
+  --accent:   #7c6aff;
+  --accent2:  #22c55e;
+
+  --sidebar-w: 220px;
+  --header-h:  60px;
+  --radius:    10px;
+  --radius-sm: 6px;
+}
+
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  overflow:hidden;
+  font-size:14px;
+}
+
+/* ── Noise texture overlay ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;
+}
+
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+.sidebar{
+  width:var(--sidebar-w);
+  min-height:100vh;
+  background:var(--s1);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:relative;z-index:10;
+  flex-shrink:0;
+}
+
+.sidebar-logo{
+  height:var(--header-h);
+  display:flex;align-items:center;
+  padding:0 20px;
+  border-bottom:1px solid var(--border);
+  gap:10px;
+}
+.logo-mark{
+  width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),#22c55e);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#fff;
+  flex-shrink:0;
+}
+.logo-text{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:15px;
+  background:linear-gradient(135deg,#fff 0%,#9090b0 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+.nav{padding:12px 10px;display:flex;flex-direction:column;gap:2px;flex:1}
+
+.nav-section-label{
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);padding:12px 10px 6px;font-weight:600;
+}
+
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:var(--radius-sm);
+  color:var(--text2);font-size:13.5px;font-weight:500;
+  transition:all .15s;position:relative;
+  cursor:pointer;
+}
+.nav-item:hover{color:var(--text);background:var(--s3)}
+.nav-item.active{color:#fff;background:linear-gradient(135deg,rgba(124,106,255,.2),rgba(34,197,94,.1));
+  box-shadow:inset 1px 0 0 var(--accent);}
+.nav-item.active .nav-icon{color:var(--accent)}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active .nav-icon{opacity:1}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;}
+
+.sidebar-footer{
+  padding:14px 10px;border-top:1px solid var(--border);
+}
+.user-card{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:var(--radius-sm);cursor:pointer;
+  transition:background .15s;
+}
+.user-card:hover{background:var(--s3)}
+.avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#22c55e);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:13px;color:#fff;flex-shrink:0;
+}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-email{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ══════════════════════════════════════
+   MAIN
+══════════════════════════════════════ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── Header ── */
+.header{
+  height:var(--header-h);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;
+  padding:0 28px;flex-shrink:0;
+  background:rgba(8,8,15,.8);backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:9;
+}
+.header-title{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:18px;
+  color:var(--text);flex:1;
+}
+.search-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:7px 14px;
+  width:220px;transition:border-color .15s;
+}
+.search-box:focus-within{border-color:var(--accent)}
+.search-box svg{color:var(--muted);flex-shrink:0}
+.search-box input{color:var(--text);font-size:13px;flex:1}
+.search-box input::placeholder{color:var(--muted)}
+
+.header-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{
+  width:36px;height:36px;border-radius:var(--radius-sm);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text2);transition:all .15s;
+  background:var(--s2);border:1px solid var(--border);
+  position:relative;
+}
+.icon-btn:hover{color:var(--text);border-color:var(--border2)}
+.notif-dot{
+  position:absolute;top:7px;right:7px;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--red);border:1.5px solid var(--bg);
+}
+.btn-primary{
+  display:flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,var(--accent),#5b9ef7);
+  color:#fff;padding:8px 16px;border-radius:var(--radius-sm);
+  font-size:13px;font-weight:600;
+  box-shadow:0 0 20px rgba(124,106,255,.3);
+  transition:all .2s;
+}
+.btn-primary:hover{box-shadow:0 0 28px rgba(124,106,255,.5);transform:translateY(-1px)}
+
+/* ── Content ── */
+.content{flex:1;overflow-y:auto;padding:28px;display:flex;flex-direction:column;gap:24px;}
+
+/* scrollbar */
+.content::-webkit-scrollbar{width:6px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+/* ── Stat cards ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+
+.stat-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+  position:relative;overflow:hidden;
+  transition:border-color .2s,transform .2s;
+  animation:fadeUp .4s ease both;
+}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+
+/* glow top edge */
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  opacity:0;transition:opacity .2s;
+}
+.stat-card:hover::before{opacity:1}
+.stat-card.c-green::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.stat-card.c-amber::before{background:linear-gradient(90deg,transparent,var(--amber),transparent)}
+.stat-card.c-blue::before{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.stat-card.c-purple::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+
+.stat-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.stat-label{font-size:12px;color:var(--text2);font-weight:500;letter-spacing:.02em}
+.stat-icon{
+  width:34px;height:34px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+}
+.stat-icon.c-green{background:var(--green-d)}
+.stat-icon.c-amber{background:var(--amber-d)}
+.stat-icon.c-blue{background:var(--blue-d)}
+.stat-icon.c-purple{background:var(--purple-d)}
+
+.stat-value{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:30px;line-height:1;color:var(--text);margin-bottom:8px;
+}
+.stat-delta{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;
+}
+.stat-delta.up{background:var(--green-d);color:var(--green)}
+.stat-delta.down{background:var(--red-d);color:var(--red)}
+.stat-delta.neutral{background:var(--blue-d);color:var(--blue)}
+
+/* decorative bg circle */
+.stat-bg{
+  position:absolute;right:-20px;bottom:-20px;
+  width:80px;height:80px;border-radius:50%;opacity:.04;
+}
+.stat-card.c-green .stat-bg{background:var(--green)}
+.stat-card.c-amber .stat-bg{background:var(--amber)}
+.stat-card.c-blue  .stat-bg{background:var(--blue)}
+.stat-card.c-purple .stat-bg{background:var(--purple)}
+
+/* ── Two-col layout ── */
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:16px}
+
+/* ── Section card ── */
+.section-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  animation:fadeUp .5s ease both;
+}
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;border-bottom:1px solid var(--border);
+}
+.section-title{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text);
+  display:flex;align-items:center;gap:8px;
+}
+.section-title-dot{width:7px;height:7px;border-radius:50%}
+.section-link{font-size:12px;color:var(--text2);transition:color .15s}
+.section-link:hover{color:var(--accent)}
+
+/* ── Task rows ── */
+.task-row{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  transition:background .15s;cursor:pointer;
+}
+.task-row:last-child{border-bottom:none}
+.task-row:hover{background:var(--s2)}
+
+.task-check{
+  width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all .15s;
+}
+.task-check.done{background:var(--green);border-color:var(--green)}
+.task-row:hover .task-check:not(.done){border-color:var(--accent)}
+
+.task-info{flex:1;min-width:0}
+.task-name{font-size:13.5px;font-weight:500;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.task-row:hover .task-name{color:#fff}
+.task-sub{font-size:11.5px;color:var(--text2);margin-top:2px}
+
+.task-meta{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+.badge{
+  font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;
+  letter-spacing:.02em;
+}
+/* priority */
+.badge.urgent{background:var(--red-d);color:var(--red)}
+.badge.high  {background:var(--amber-d);color:var(--amber)}
+.badge.medium{background:var(--blue-d);color:var(--blue)}
+.badge.low   {background:var(--green-d);color:var(--green)}
+/* status */
+.badge.done    {background:var(--green-d);color:var(--green)}
+.badge.progress{background:var(--purple-d);color:var(--purple)}
+.badge.todo    {background:var(--s3);color:var(--text2)}
+.badge.blocked {background:var(--red-d);color:var(--red)}
+
+.task-due{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+
+/* ── Activity timeline ── */
+.activity-list{padding:4px 0}
+.activity-item{
+  display:flex;gap:14px;padding:12px 20px;
+  position:relative;
+}
+.activity-item::before{
+  content:'';position:absolute;left:30px;top:32px;bottom:-4px;
+  width:1px;background:var(--border);
+}
+.activity-item:last-child::before{display:none}
+
+.activity-dot{
+  width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:3px;
+  border:2px solid var(--bg);
+  position:relative;z-index:1;
+}
+.activity-dot.green{background:var(--green);box-shadow:0 0 8px rgba(34,197,94,.4)}
+.activity-dot.blue {background:var(--blue);box-shadow:0 0 8px rgba(59,130,246,.4)}
+.activity-dot.amber{background:var(--amber);box-shadow:0 0 8px rgba(245,158,11,.4)}
+.activity-dot.purple{background:var(--purple);box-shadow:0 0 8px rgba(168,85,247,.4)}
+
+.activity-content{flex:1}
+.activity-action{font-size:13px;font-weight:500;color:var(--text)}
+.activity-name{font-size:12.5px;color:var(--text2);margin-top:1px}
+.activity-time{font-size:11px;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace}
+
+/* ── Pomodoro chart ── */
+.pomodoro-body{padding:20px}
+.pomodoro-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.pomodoro-row:last-child{margin-bottom:0}
+.pomodoro-day{font-size:12px;color:var(--text2);width:28px;flex-shrink:0;font-weight:500}
+.pomodoro-bar-wrap{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.pomodoro-bar{height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--accent),var(--green));
+  transform-origin:left;animation:barIn .8s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes barIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.pomodoro-val{font-size:12px;color:var(--text2);width:28px;text-align:right;
+  font-family:'DM Mono',monospace;flex-shrink:0}
+
+.pomodoro-summary{
+  margin-top:20px;padding-top:16px;border-top:1px solid var(--border);
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.pomo-stat{
+  background:var(--s2);border-radius:var(--radius-sm);padding:12px;
+  border:1px solid var(--border);
+}
+.pomo-stat-val{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:var(--text);
+}
+.pomo-stat-label{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* ── Sprint progress ── */
+.sprint-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+  animation:fadeUp .6s ease both;
+}
+.sprint-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sprint-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px}
+.sprint-chip{
+  font-size:11px;padding:3px 10px;border-radius:20px;
+  background:var(--green-d);color:var(--green);font-weight:600;
+}
+.sprint-dates{font-size:11.5px;color:var(--text2);margin-bottom:16px;font-family:'DM Mono',monospace}
+.sprint-progress-wrap{margin-bottom:6px}
+.progress-top{display:flex;justify-content:space-between;margin-bottom:8px}
+.progress-label{font-size:12px;color:var(--text2)}
+.progress-pct{font-size:12px;color:var(--text);font-weight:600;font-family:'DM Mono',monospace}
+.progress-bar-wrap{height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.progress-bar{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--accent),var(--green));
+  animation:barIn .9s cubic-bezier(.16,1,.3,1) both;animation-delay:.2s;
+}
+.sprint-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.sprint-stat{text-align:center;background:var(--s2);border-radius:var(--radius-sm);padding:10px;border:1px solid var(--border)}
+.sprint-stat-val{font-family:'DM Mono',monospace;font-weight:500;font-size:16px;color:var(--text)}
+.sprint-stat-label{font-size:10px;color:var(--text2);margin-top:2px;letter-spacing:.04em}
+
+/* ── Animations ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(14px)}
+  to  {opacity:1;transform:translateY(0)}
+}
+.stat-card:nth-child(1){animation-delay:.05s}
+.stat-card:nth-child(2){animation-delay:.10s}
+.stat-card:nth-child(3){animation-delay:.15s}
+.stat-card:nth-child(4){animation-delay:.20s}
+.pomodoro-row:nth-child(1) .pomodoro-bar{animation-delay:.1s}
+.pomodoro-row:nth-child(2) .pomodoro-bar{animation-delay:.2s}
+.pomodoro-row:nth-child(3) .pomodoro-bar{animation-delay:.3s}
+.pomodoro-row:nth-child(4) .pomodoro-bar{animation-delay:.4s}
+.pomodoro-row:nth-child(5) .pomodoro-bar{animation-delay:.5s}
+
+/* ── SVG icons inline ── */
+svg{display:block}
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">P</div>
+    <span class="logo-text">PMSuite</span>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section-label">主選單</div>
+
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      控制台
+    </div>
+
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 7h18M3 12h18M3 17h12"/>
+      </svg>
+      專案
+    </div>
+
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+      </svg>
+      任務
+      <span class="nav-badge">24</span>
+    </div>
+
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      Sprint
+    </div>
+
+    <div class="nav-section-label">工具</div>
+
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+      文件
+    </div>
+
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.07 4.93A10 10 0 0 0 4.93 19.07M19.07 4.93A10 10 0 0 1 19.07 19.07"/>
+      </svg>
+      設定
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar">U</div>
+      <div class="user-info">
+        <div class="user-name">使用者</div>
+        <div class="user-email">user@example.com</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-title">控制台</div>
+
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" placeholder="搜尋任務、專案...">
+      <span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;background:var(--s3);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">⌘K</span>
+    </div>
+
+    <div class="header-actions">
+      <button class="icon-btn">
+        <div class="notif-dot"></div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+      <button class="icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/>
+        </svg>
+      </button>
+      <button class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        新增
+      </button>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Stat cards -->
+    <div class="stats-grid">
+
+      <div class="stat-card c-green">
+        <div class="stat-bg"></div>
+        <div class="stat-top">
+          <span class="stat-label">進行中專案</span>
+          <div class="stat-icon c-green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+              <polyline points="16 7 22 7 22 13"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-value">8</div>
+        <span class="stat-delta up">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+          +2 本週
+        </span>
+      </div>
+
+      <div class="stat-card c-amber">
+        <div class="stat-bg"></div>
+        <div class="stat-top">
+          <span class="stat-label">待辦任務</span>
+          <div class="stat-icon c-amber">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-value">24</div>
+        <span class="stat-delta down">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+          -5 較昨日
+        </span>
+      </div>
+
+      <div class="stat-card c-blue">
+        <div class="stat-bg"></div>
+        <div class="stat-top">
+          <span class="stat-label">已完成</span>
+          <div class="stat-icon c-blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-value">156</div>
+        <span class="stat-delta up">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+          +12 本月
+        </span>
+      </div>
+
+      <div class="stat-card c-purple">
+        <div class="stat-bg"></div>
+        <div class="stat-top">
+          <span class="stat-label">本週工時</span>
+          <div class="stat-icon c-purple">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stat-value">32h</div>
+        <span class="stat-delta up">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+          +8h 較上週
+        </span>
+      </div>
+    </div>
+
+    <!-- Sprint progress bar -->
+    <div class="sprint-card">
+      <div class="sprint-header">
+        <div>
+          <div class="sprint-name">Sprint #12 · 後端 API 整合</div>
+          <div class="sprint-dates" style="margin-top:4px">04/01 — 04/14 · 剩餘 6 天</div>
+        </div>
+        <span class="sprint-chip">進行中</span>
+      </div>
+      <div class="sprint-progress-wrap">
+        <div class="progress-top">
+          <span class="progress-label">完成進度</span>
+          <span class="progress-pct">62%</span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" style="width:62%"></div>
+        </div>
+      </div>
+      <div class="sprint-stats">
+        <div class="sprint-stat">
+          <div class="sprint-stat-val">18</div>
+          <div class="sprint-stat-label">已完成</div>
+        </div>
+        <div class="sprint-stat">
+          <div class="sprint-stat-val">11</div>
+          <div class="sprint-stat-label">進行中</div>
+        </div>
+        <div class="sprint-stat">
+          <div class="sprint-stat-val">42</div>
+          <div class="sprint-stat-label">Story pts</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks + Right column -->
+    <div class="two-col">
+
+      <!-- Tasks -->
+      <div class="section-card" style="animation-delay:.15s">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-title-dot" style="background:var(--accent)"></div>
+            最近任務
+          </div>
+          <a class="section-link">查看全部 →</a>
+        </div>
+
+        <div class="task-row">
+          <div class="task-check done">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="task-info">
+            <div class="task-name" style="text-decoration:line-through;opacity:.5">完成登入頁面設計</div>
+            <div class="task-sub">使用者系統 · Sprint #12</div>
+          </div>
+          <div class="task-meta">
+            <span class="badge high">高</span>
+            <span class="badge done">已完成</span>
+          </div>
+        </div>
+
+        <div class="task-row">
+          <div class="task-check"></div>
+          <div class="task-info">
+            <div class="task-name">實作 API 端點</div>
+            <div class="task-sub">後端開發 · Sprint #12</div>
+          </div>
+          <div class="task-meta">
+            <span class="task-due">04/10</span>
+            <span class="badge urgent">緊急</span>
+            <span class="badge progress">進行中</span>
+          </div>
+        </div>
+
+        <div class="task-row">
+          <div class="task-check"></div>
+          <div class="task-info">
+            <div class="task-name">撰寫測試案例</div>
+            <div class="task-sub">品質保證 · Sprint #12</div>
+          </div>
+          <div class="task-meta">
+            <span class="task-due">04/12</span>
+            <span class="badge medium">中</span>
+            <span class="badge progress">進行中</span>
+          </div>
+        </div>
+
+        <div class="task-row">
+          <div class="task-check"></div>
+          <div class="task-info">
+            <div class="task-name">優化資料庫查詢</div>
+            <div class="task-sub">效能優化 · Sprint #12</div>
+          </div>
+          <div class="task-meta">
+            <span class="task-due">04/14</span>
+            <span class="badge low">低</span>
+            <span class="badge todo">待辦</span>
+          </div>
+        </div>
+
+        <div class="task-row">
+          <div class="task-check"></div>
+          <div class="task-info">
+            <div class="task-name">設計通知系統架構</div>
+            <div class="task-sub">系統設計 · Backlog</div>
+          </div>
+          <div class="task-meta">
+            <span class="badge high">高</span>
+            <span class="badge todo">待辦</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- Pomodoro -->
+        <div class="section-card" style="animation-delay:.2s">
+          <div class="section-header">
+            <div class="section-title">
+              <div class="section-title-dot" style="background:var(--red)"></div>
+              本週番茄鐘
+            </div>
+            <span style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace">18h 總計</span>
+          </div>
+          <div class="pomodoro-body">
+            <div class="pomodoro-row">
+              <span class="pomodoro-day">一</span>
+              <div class="pomodoro-bar-wrap"><div class="pomodoro-bar" style="width:80%"></div></div>
+              <span class="pomodoro-val">4h</span>
+            </div>
+            <div class="pomodoro-row">
+              <span class="pomodoro-day">二</span>
+              <div class="pomodoro-bar-wrap"><div class="pomodoro-bar" style="width:60%"></div></div>
+              <span class="pomodoro-val">3h</span>
+            </div>
+            <div class="pomodoro-row">
+              <span class="pomodoro-day">三</span>
+              <div class="pomodoro-bar-wrap"><div class="pomodoro-bar" style="width:100%"></div></div>
+              <span class="pomodoro-val">5h</span>
+            </div>
+            <div class="pomodoro-row">
+              <span class="pomodoro-day">四</span>
+              <div class="pomodoro-bar-wrap"><div class="pomodoro-bar" style="width:70%"></div></div>
+              <span class="pomodoro-val">3.5h</span>
+            </div>
+            <div class="pomodoro-row">
+              <span class="pomodoro-day">五</span>
+              <div class="pomodoro-bar-wrap"><div class="pomodoro-bar" style="width:50%"></div></div>
+              <span class="pomodoro-val">2.5h</span>
+            </div>
+            <div class="pomodoro-summary">
+              <div class="pomo-stat">
+                <div class="pomo-stat-val">36</div>
+                <div class="pomo-stat-label">🍅 番茄數</div>
+              </div>
+              <div class="pomo-stat">
+                <div class="pomo-stat-val">92%</div>
+                <div class="pomo-stat-label">完成率</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="section-card" style="animation-delay:.25s">
+          <div class="section-header">
+            <div class="section-title">
+              <div class="section-title-dot" style="background:var(--teal)"></div>
+              活動時間軸
+            </div>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-dot green"></div>
+              <div class="activity-content">
+                <div class="activity-action">完成任務</div>
+                <div class="activity-name">登入頁面設計</div>
+                <div class="activity-time">2 分鐘前</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot blue"></div>
+              <div class="activity-content">
+                <div class="activity-action">開始 Sprint</div>
+                <div class="activity-name">Sprint #12</div>
+                <div class="activity-time">15 分鐘前</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot amber"></div>
+              <div class="activity-content">
+                <div class="activity-action">新增文件</div>
+                <div class="activity-name">API 設計規範</div>
+                <div class="activity-time">1 小時前</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot purple"></div>
+              <div class="activity-content">
+                <div class="activity-action">更新任務</div>
+                <div class="activity-name">後端開發進度</div>
+                <div class="activity-time">3 小時前</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

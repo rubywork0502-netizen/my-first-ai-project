@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<script src="auth.js"></script>
+<script src="profile.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMSuite — Sprint Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+button{cursor:pointer;border:none;background:none;font:inherit}
+input,select,textarea{font:inherit;border:none;outline:none;background:none}
+svg{display:block;flex-shrink:0}
+[contenteditable]{outline:none}
+
+:root {
+  --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
+  --b1:#1e1c2e; --b2:#2a2840; --b3:#3a3852;
+  --t1:#f0edfb; --t2:#9490b0; --t3:#58547a; --t4:#35324a;
+  --purple:#c084fc; --purple-d:rgba(192,132,252,.13); --purple-g:rgba(192,132,252,.06);
+  --cyan:#38bdf8;   --cyan-d:rgba(56,189,248,.13);
+  --teal:#2dd4bf;   --teal-d:rgba(45,212,191,.13);
+  --green:#4ade80;  --green-d:rgba(74,222,128,.13);
+  --amber:#fbbf24;  --amber-d:rgba(251,191,36,.13);
+  --orange:#fb923c; --orange-d:rgba(251,146,60,.13);
+  --pink:#f472b6;   --pink-d:rgba(244,114,182,.13);
+  --red:#f87171;    --red-d:rgba(248,113,113,.13);
+  --grad-main:linear-gradient(135deg,#c084fc 0%,#38bdf8 100%);
+  --grad-fire:linear-gradient(135deg,#f472b6 0%,#fb923c 100%);
+  --grad-cool:linear-gradient(135deg,#38bdf8 0%,#2dd4bf 100%);
+  --grad-life:linear-gradient(135deg,#4ade80 0%,#2dd4bf 100%);
+  --sb-w:228px; --hdr-h:58px; --r:10px; --r-sm:6px;
+  --hdr-bg:rgba(8,8,15,.9); --ghost-op:.05;
+}
+[data-theme="light"] {
+  --bg:#f4f2fb; --s1:#fff; --s2:#edeaf7; --s3:#e2dff2; --s4:#d5d0ea;
+  --b1:#dbd6f0; --b2:#ccc6e4; --b3:#b8b2d8;
+  --t1:#18142a; --t2:#5a5475; --t3:#9088aa; --t4:#b8b0cc;
+  --purple-d:rgba(192,132,252,.14); --purple-g:rgba(192,132,252,.08);
+  --cyan-d:rgba(56,189,248,.14); --teal-d:rgba(45,212,191,.14);
+  --green-d:rgba(74,222,128,.14); --orange-d:rgba(251,146,60,.14);
+  --hdr-bg:rgba(244,242,251,.92); --ghost-op:.07;
+}
+@media(prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#f4f2fb; --s1:#fff; --s2:#edeaf7; --s3:#e2dff2;
+    --b1:#dbd6f0; --b2:#ccc6e4; --b3:#b8b2d8;
+    --t1:#18142a; --t2:#5a5475; --t3:#9088aa; --t4:#b8b0cc;
+    --hdr-bg:rgba(244,242,251,.92);
+  }
+}
+body,aside,.hdr,.card,.panel,.stat-c{transition:background-color .28s,border-color .28s,color .2s}
+
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
+  min-height:100vh;display:flex;overflow:hidden;font-size:14px}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sb-w);min-height:100vh;background:var(--s1);border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;flex-shrink:0;z-index:20}
+.logo{height:var(--hdr-h);display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid var(--b1)}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;
+  box-shadow:0 0 18px rgba(192,132,252,.35)}
+.logo-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--t1)}
+.logo-label em{font-style:normal;background:var(--grad-main);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:1px}
+.nav-sec{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--t4);padding:12px 10px 5px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:var(--r-sm);
+  color:var(--t3);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s}
+.nav-item:hover{color:var(--t1);background:var(--s2)}
+.nav-item.active{color:var(--t1);background:var(--purple-g);border-left:2px solid var(--purple);padding-left:10px}
+.ni{color:var(--t4);flex-shrink:0;transition:color .15s}
+.nav-item.active .ni{color:var(--purple)}
+.nav-item:hover .ni{color:var(--t2)}
+.nav-chip{margin-left:auto;font-family:'Fira Code',monospace;font-size:10px;font-weight:500;
+  padding:1px 7px;border-radius:10px;background:var(--s3);color:var(--t2);border:1px solid var(--b2)}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--b1)}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-sm);cursor:pointer;transition:background .15s}
+.user-row:hover{background:var(--s2)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#fff}
+.user-name{font-size:13px;font-weight:600;color:var(--t1)}
+.user-role{font-size:11px;color:var(--t3)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.hdr{height:var(--hdr-h);display:flex;align-items:center;gap:14px;padding:0 28px;
+  border-bottom:1px solid var(--b1);background:var(--hdr-bg);backdrop-filter:blur(16px);
+  flex-shrink:0;position:sticky;top:0;z-index:10}
+.hdr-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;
+  letter-spacing:.03em;color:var(--t1);flex:1}
+.hdr-title span{color:var(--t3);font-weight:400;font-size:16px;margin-left:8px}
+.hdr-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{width:36px;height:36px;border-radius:var(--r-sm);background:var(--s2);
+  border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;
+  color:var(--t3);transition:all .15s}
+.icon-btn:hover{color:var(--t1);border-color:var(--b2)}
+.btn-save{display:flex;align-items:center;gap:7px;background:var(--grad-main);color:#fff;
+  padding:8px 18px;border-radius:var(--r-sm);font-size:13px;font-weight:700;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;
+  box-shadow:0 0 20px rgba(192,132,252,.3);transition:all .2s}
+.btn-save:hover{box-shadow:0 0 32px rgba(192,132,252,.5);transform:translateY(-1px)}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+/* ── SPRINT HERO BANNER ── */
+.sprint-hero{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  padding:24px 28px;position:relative;overflow:hidden;
+  animation:up .4s .05s cubic-bezier(.16,1,.3,1) both;
+}
+.sprint-hero::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:var(--grad-main);
+}
+.sh-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.sh-sprint{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;
+  letter-spacing:-.01em;color:var(--t1);display:flex;align-items:center;gap:12px}
+.sprint-status{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 12px;border-radius:20px;background:var(--teal-d);color:var(--teal)}
+.sh-dates{font-family:'Fira Code',monospace;font-size:12px;color:var(--t3);margin-top:4px}
+
+/* Stat cluster */
+.sh-stats{display:flex;gap:28px}
+.sh-stat{text-align:center}
+.sh-stat-n{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:36px;
+  line-height:1;letter-spacing:-.02em}
+.sh-stat-l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-top:4px}
+
+/* Progress bar */
+.sh-progress{margin-top:20px}
+.sh-prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:8px}
+.sh-prog-val{font-family:'Fira Code',monospace;
+  background:var(--grad-main);-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text;font-weight:500}
+.prog-wrap{height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--grad-main);border-radius:3px;
+  animation:barIn .9s .4s cubic-bezier(.16,1,.3,1) both}
+
+/* ── TWO COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+/* ── CARD ── */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;
+  animation:up .5s cubic-bezier(.16,1,.3,1) both}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:15px 20px;border-bottom:1px solid var(--b1)}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--t1);display:flex;align-items:center;gap:8px}
+.cdot{width:7px;height:7px;border-radius:50%;box-shadow:0 0 5px currentColor}
+.card-meta{font-size:11px;color:var(--t4);font-family:'Fira Code',monospace}
+
+/* Task completion table */
+.task-table{width:100%;border-collapse:collapse}
+.task-table th{font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--t4);padding:10px 20px;text-align:left;border-bottom:1px solid var(--b1)}
+.task-table td{padding:11px 20px;border-bottom:1px solid var(--b1);font-size:13px;vertical-align:middle}
+.task-table tr:last-child td{border-bottom:none}
+.task-table tr:hover td{background:var(--s2)}
+
+.t-name-cell{display:flex;align-items:center;gap:10px}
+.t-status-icon{width:16px;height:16px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center}
+.t-si-done{background:var(--teal)}
+.t-si-wip{background:var(--purple-d);border:1.5px solid var(--purple)}
+.t-si-todo{background:var(--s3);border:1.5px solid var(--b3)}
+.t-name{font-size:13px;font-weight:500;color:var(--t1)}
+.t-name.done{text-decoration:line-through;color:var(--t3)}
+.t-proj{font-size:11px;color:var(--t3);margin-top:1px}
+
+.badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em}
+.b-urgent{background:var(--red-d);color:var(--red)}
+.b-high{background:var(--orange-d);color:var(--orange)}
+.b-medium{background:var(--cyan-d);color:var(--cyan)}
+.b-low{background:var(--green-d);color:var(--green)}
+.b-done{background:var(--teal-d);color:var(--teal)}
+.b-wip{background:var(--purple-d);color:var(--purple)}
+.b-todo{background:var(--s3);color:var(--t3)}
+
+.pts-cell{font-family:'Fira Code',monospace;font-size:12px;color:var(--t2);text-align:center}
+.pts-cell.done{color:var(--teal)}
+
+/* Velocity chart */
+.vel-chart{padding:20px}
+.vel-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.vel-row:last-child{margin-bottom:0}
+.vel-label{font-size:11.5px;color:var(--t2);width:48px;flex-shrink:0}
+.vel-bar-wrap{flex:1;height:22px;background:var(--s2);border-radius:4px;overflow:hidden;border:1px solid var(--b1)}
+.vel-bar{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 10px;
+  font-family:'Fira Code',monospace;font-size:11px;font-weight:500;color:#fff;
+  animation:barIn .8s cubic-bezier(.16,1,.3,1) both}
+.vel-planned{background:var(--s3);height:100%;border-radius:4px;display:flex;align-items:center;
+  padding:0 10px;font-family:'Fira Code',monospace;font-size:11px;color:var(--t3)}
+.vel-pts{font-family:'Fira Code',monospace;font-size:11px;color:var(--t2);width:32px;text-align:right}
+
+/* ── RETROSPECTIVE EDITOR ── */
+.retro-col{display:flex;flex-direction:column;gap:16px}
+
+.retro-block{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;
+  animation:up .5s cubic-bezier(.16,1,.3,1) both}
+.retro-block:nth-child(1){animation-delay:.2s}
+.retro-block:nth-child(2){animation-delay:.28s}
+.retro-block:nth-child(3){animation-delay:.36s}
+.retro-block:nth-child(4){animation-delay:.44s}
+
+.retro-hdr{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--b1)}
+.retro-emoji{font-size:16px;line-height:1}
+.retro-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--t1)}
+.retro-hint{margin-left:auto;font-size:10px;color:var(--t4)}
+
+/* Rich text editor area */
+.editor{padding:16px 18px;min-height:100px;color:var(--t1);font-size:13px;line-height:1.7;
+  cursor:text;position:relative}
+.editor:empty::before{content:attr(data-placeholder);color:var(--t4);pointer-events:none}
+.editor:focus{border-color:var(--purple)}
+.retro-block:focus-within{border-color:var(--b3)}
+
+/* Editor toolbar */
+.editor-toolbar{padding:8px 14px;border-top:1px solid var(--b1);
+  display:flex;align-items:center;gap:6px;background:var(--s2)}
+.tb-btn{width:26px;height:26px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  color:var(--t3);font-size:11px;font-weight:700;transition:all .15s;cursor:pointer}
+.tb-btn:hover{background:var(--s3);color:var(--t1)}
+.tb-sep{width:1px;height:16px;background:var(--b2);margin:0 2px}
+.char-count{margin-left:auto;font-family:'Fira Code',monospace;font-size:9px;color:var(--t4)}
+
+/* Action items */
+.action-items{padding:0}
+.action-item{display:flex;align-items:center;gap:12px;padding:11px 18px;
+  border-bottom:1px solid var(--b1)}
+.action-item:last-child{border-bottom:none}
+.action-cb{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--b3);
+  flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s}
+.action-cb:hover{border-color:var(--purple)}
+.action-cb.checked{background:var(--purple);border-color:var(--purple)}
+.action-text{flex:1;font-size:13px;color:var(--t1)}
+.action-text.checked{text-decoration:line-through;color:var(--t3)}
+.action-assign{font-size:11px;color:var(--t3);flex-shrink:0}
+.add-action{display:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;
+  color:var(--t3);transition:color .15s}
+.add-action:hover{color:var(--purple)}
+.add-action span{font-size:12.5px}
+
+/* Rating row */
+.rating-row{padding:16px 18px;display:flex;align-items:center;justify-content:space-between}
+.rating-label{font-size:12px;color:var(--t2)}
+.rating-emojis{display:flex;gap:6px}
+.rating-opt{width:36px;height:36px;border-radius:8px;background:var(--s2);border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;
+  transition:all .2s}
+.rating-opt:hover{background:var(--s3);transform:scale(1.1)}
+.rating-opt.selected{background:var(--purple-g);border-color:var(--purple);transform:scale(1.15);
+  box-shadow:0 0 12px rgba(192,132,252,.35)}
+
+/* Full-width card variants */
+.full-width{grid-column:1/-1}
+
+/* Attendees */
+.attendees{display:flex;flex-wrap:wrap;gap:8px;padding:16px 20px}
+.attendee{display:flex;align-items:center;gap:8px;background:var(--s2);
+  border:1px solid var(--b1);border-radius:20px;padding:5px 12px 5px 6px;font-size:12.5px}
+.att-av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.att-name{color:var(--t1);font-weight:500}
+.add-att{border-style:dashed;cursor:pointer;color:var(--t3);transition:all .15s}
+.add-att:hover{border-color:var(--purple);color:var(--purple)}
+
+/* ── animations ── */
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes barIn{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">P</div>
+    <span class="logo-label">PM<em>Suite</em></span>
+  </div>
+  <nav class="nav">
+    <div class="nav-sec">主選單</div>
+    <a class="nav-item" href="index.html">
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+        <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+      </svg>控制台
+    </a>
+    <a class="nav-item" href="projects.html">
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>專案
+    </a>
+    <a class="nav-item" href="tasks.html">
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+      </svg>任務<span class="nav-chip">9</span>
+    </a>
+    <a class="nav-item active" href="sprint-review.html">
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>Sprint Review
+    </a>
+    <div class="nav-sec">工具</div>
+    <a class="nav-item" href="pomodoro-timer.html">
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/>
+      </svg>番茄鐘
+    </a>
+    <a class="nav-item" href="#">
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>文件
+    </a>
+    <a class="nav-item" href="profile.html">
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      設定
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="user-row">
+      <div class="avatar">U</div>
+      <div><div class="user-name">使用者</div><div class="user-role">管理員</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="hdr">
+    <div class="hdr-title">Sprint Review <span>Sprint #12</span></div>
+    <div class="hdr-actions">
+      <button class="icon-btn" id="theme-toggle" title="切換主題">
+        <svg id="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        </svg>
+        <svg id="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <button class="btn-save" id="btn-save">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        儲存 Review
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Sprint Hero -->
+    <div class="sprint-hero">
+      <div class="sh-top">
+        <div>
+          <div class="sh-sprint">
+            Sprint #12 — 後端 API 整合
+            <span class="sprint-status">已完成</span>
+          </div>
+          <div class="sh-dates">2026·04·01 → 2026·04·14 &nbsp;·&nbsp; 持續 14 天</div>
+        </div>
+        <div class="sh-stats">
+          <div class="sh-stat">
+            <div class="sh-stat-n" style="color:var(--teal)">18</div>
+            <div class="sh-stat-l">完成任務</div>
+          </div>
+          <div class="sh-stat">
+            <div class="sh-stat-n" style="color:var(--orange)">5</div>
+            <div class="sh-stat-l">未完成</div>
+          </div>
+          <div class="sh-stat">
+            <div class="sh-stat-n" style="color:var(--purple)">42</div>
+            <div class="sh-stat-l">Story pts</div>
+          </div>
+          <div class="sh-stat">
+            <div class="sh-stat-n" style="color:var(--amber)">76%</div>
+            <div class="sh-stat-l">完成率</div>
+          </div>
+        </div>
+      </div>
+      <div class="sh-progress">
+        <div class="sh-prog-labels">
+          <span>Sprint 完成進度</span>
+          <span class="sh-prog-val">76% (38 / 50 pts)</span>
+        </div>
+        <div class="prog-wrap"><div class="prog-fill" style="width:76%"></div></div>
+      </div>
+    </div>
+
+    <!-- Attendees -->
+    <div class="card full-width" style="animation-delay:.1s">
+      <div class="card-hdr">
+        <div class="card-title">
+          <div class="cdot" style="color:var(--cyan);background:var(--cyan)"></div>
+          Review 參與者
+        </div>
+        <span class="card-meta" id="review-date">Review 日期：2026·04·14</span>
+      </div>
+      <div class="attendees">
+        <div class="attendee"><div class="att-av" style="background:var(--purple)">U</div><span class="att-name">使用者（主持）</span></div>
+        <div class="attendee"><div class="att-av" style="background:var(--teal)">A</div><span class="att-name">Alex</span></div>
+        <div class="attendee"><div class="att-av" style="background:var(--orange)">S</div><span class="att-name">Sam</span></div>
+        <div class="attendee"><div class="att-av" style="background:var(--cyan)">M</div><span class="att-name">Morgan</span></div>
+        <div class="attendee add-att" id="add-attendee">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/>
+            <line x1="19" y1="5" x2="19" y2="11"/><line x1="16" y1="8" x2="22" y2="8"/>
+          </svg>
+          <span class="att-name" style="color:inherit">新增成員</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Table + Velocity -->
+    <div class="two-col">
+
+      <!-- Task completion -->
+      <div class="card" style="animation-delay:.15s">
+        <div class="card-hdr">
+          <div class="card-title">
+            <div class="cdot" style="color:var(--teal);background:var(--teal)"></div>
+            任務完成狀況
+          </div>
+          <span class="card-meta">18 / 23</span>
+        </div>
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th>任務名稱</th>
+              <th style="text-align:center">優先</th>
+              <th style="text-align:center">狀態</th>
+              <th style="text-align:center">pts</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="t-name-cell">
+                <div class="t-status-icon t-si-done"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#08080f" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div><div class="t-name done">完成登入頁面設計</div><div class="t-proj">使用者系統</div></div>
+              </div></td>
+              <td style="text-align:center"><span class="badge b-high">高</span></td>
+              <td style="text-align:center"><span class="badge b-done">完成</span></td>
+              <td class="pts-cell done">3</td>
+            </tr>
+            <tr>
+              <td><div class="t-name-cell">
+                <div class="t-status-icon t-si-done"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#08080f" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div><div class="t-name done">設計資料庫 schema</div><div class="t-proj">後端開發</div></div>
+              </div></td>
+              <td style="text-align:center"><span class="badge b-high">高</span></td>
+              <td style="text-align:center"><span class="badge b-done">完成</span></td>
+              <td class="pts-cell done">5</td>
+            </tr>
+            <tr>
+              <td><div class="t-name-cell">
+                <div class="t-status-icon t-si-done"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#08080f" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div><div class="t-name done">JWT 驗證實作</div><div class="t-proj">後端開發</div></div>
+              </div></td>
+              <td style="text-align:center"><span class="badge b-urgent">緊急</span></td>
+              <td style="text-align:center"><span class="badge b-done">完成</span></td>
+              <td class="pts-cell done">8</td>
+            </tr>
+            <tr>
+              <td><div class="t-name-cell">
+                <div class="t-status-icon t-si-wip"></div>
+                <div><div class="t-name">實作 API 端點</div><div class="t-proj">後端開發</div></div>
+              </div></td>
+              <td style="text-align:center"><span class="badge b-urgent">緊急</span></td>
+              <td style="text-align:center"><span class="badge b-wip">進行中</span></td>
+              <td class="pts-cell">8</td>
+            </tr>
+            <tr>
+              <td><div class="t-name-cell">
+                <div class="t-status-icon t-si-todo"></div>
+                <div><div class="t-name">撰寫測試案例</div><div class="t-proj">品質保證</div></div>
+              </div></td>
+              <td style="text-align:center"><span class="badge b-medium">中</span></td>
+              <td style="text-align:center"><span class="badge b-todo">待辦</span></td>
+              <td class="pts-cell">5</td>
+            </tr>
+            <tr>
+              <td><div class="t-name-cell">
+                <div class="t-status-icon t-si-todo"></div>
+                <div><div class="t-name">優化資料庫查詢</div><div class="t-proj">效能優化</div></div>
+              </div></td>
+              <td style="text-align:center"><span class="badge b-low">低</span></td>
+              <td style="text-align:center"><span class="badge b-todo">待辦</span></td>
+              <td class="pts-cell">3</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Velocity -->
+      <div class="card" style="animation-delay:.22s">
+        <div class="card-hdr">
+          <div class="card-title">
+            <div class="cdot" style="color:var(--purple);background:var(--purple)"></div>
+            Velocity 分析
+          </div>
+        </div>
+        <div class="vel-chart">
+          <div class="vel-row">
+            <div class="vel-label" style="color:var(--t1);font-weight:600">本次</div>
+            <div class="vel-bar-wrap">
+              <div class="vel-bar" style="width:76%;background:var(--grad-main);animation-delay:.3s">
+                38 pts
+              </div>
+            </div>
+            <div class="vel-pts">38</div>
+          </div>
+          <div class="vel-row">
+            <div class="vel-label">計劃</div>
+            <div class="vel-bar-wrap">
+              <div class="vel-planned" style="width:100%">50 pts</div>
+            </div>
+            <div class="vel-pts">50</div>
+          </div>
+          <div class="vel-row" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--b1)">
+            <div class="vel-label">Sprint 10</div>
+            <div class="vel-bar-wrap">
+              <div class="vel-bar" style="width:86%;background:linear-gradient(90deg,var(--teal),var(--green));animation-delay:.4s">34</div>
+            </div>
+            <div class="vel-pts">34</div>
+          </div>
+          <div class="vel-row">
+            <div class="vel-label">Sprint 11</div>
+            <div class="vel-bar-wrap">
+              <div class="vel-bar" style="width:80%;background:linear-gradient(90deg,var(--cyan),var(--teal));animation-delay:.5s">40</div>
+            </div>
+            <div class="vel-pts">40</div>
+          </div>
+          <div class="vel-row">
+            <div class="vel-label">Sprint 12</div>
+            <div class="vel-bar-wrap">
+              <div class="vel-bar" style="width:76%;background:var(--grad-main);animation-delay:.6s">38</div>
+            </div>
+            <div class="vel-pts">38</div>
+          </div>
+          <!-- Avg -->
+          <div style="margin-top:16px;padding:12px;background:var(--s2);border-radius:var(--r-sm);
+               border:1px solid var(--b1);display:flex;justify-content:space-between">
+            <span style="font-size:12px;color:var(--t2)">3 Sprint 平均 Velocity</span>
+            <span style="font-family:'Fira Code',monospace;font-size:13px;font-weight:500;
+              background:var(--grad-main);-webkit-background-clip:text;
+              -webkit-text-fill-color:transparent;background-clip:text">37.3 pts</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /two-col -->
+
+    <!-- Retrospective -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+      <!-- Went well -->
+      <div class="retro-block">
+        <div class="retro-hdr">
+          <span class="retro-emoji">🎉</span>
+          <span class="retro-title">哪些事情做得好</span>
+          <span class="retro-hint">按 Enter 換行</span>
+        </div>
+        <div class="editor" contenteditable="true" data-placeholder="記錄這次 Sprint 的亮點…"
+          id="editor-good">JWT 驗證提前完成，比預期快了 2 天。
+
+前後端溝通頻率提高，減少了介面誤解。
+
+Code review 品質明顯提升，幾乎沒有 merge 後 bug。</div>
+        <div class="editor-toolbar">
+          <button class="tb-btn" onclick="fmt('bold')" title="粗體"><b>B</b></button>
+          <button class="tb-btn" onclick="fmt('italic')" title="斜體"><i>I</i></button>
+          <div class="tb-sep"></div>
+          <button class="tb-btn" onclick="fmtList('good')" title="清單">≡</button>
+          <span class="char-count" id="cc-good">0 字</span>
+        </div>
+      </div>
+
+      <!-- To improve -->
+      <div class="retro-block">
+        <div class="retro-hdr">
+          <span class="retro-emoji">🔧</span>
+          <span class="retro-title">哪些事情需要改善</span>
+          <span class="retro-hint">按 Enter 換行</span>
+        </div>
+        <div class="editor" contenteditable="true" data-placeholder="記錄需要改善的地方…"
+          id="editor-bad">API 端點未如期完成，估點不夠準確。
+
+測試覆蓋率不足，下次 Sprint 需要提前寫測試。</div>
+        <div class="editor-toolbar">
+          <button class="tb-btn" onclick="fmt('bold')" title="粗體"><b>B</b></button>
+          <button class="tb-btn" onclick="fmt('italic')" title="斜體"><i>I</i></button>
+          <div class="tb-sep"></div>
+          <button class="tb-btn" onclick="fmtList('bad')" title="清單">≡</button>
+          <span class="char-count" id="cc-bad">0 字</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Action Items + Rating -->
+    <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start">
+
+      <!-- Action items -->
+      <div class="retro-block" style="animation-delay:.38s">
+        <div class="retro-hdr">
+          <span class="retro-emoji">⚡</span>
+          <span class="retro-title">改善行動項目</span>
+        </div>
+        <div class="action-items" id="action-list">
+          <div class="action-item">
+            <div class="action-cb" onclick="toggleAction(this)"></div>
+            <div class="action-text" contenteditable="true">下次 Sprint 加入估點 Buffer，每個任務預留 20%</div>
+            <span class="action-assign" style="color:var(--purple)">@使用者</span>
+          </div>
+          <div class="action-item">
+            <div class="action-cb" onclick="toggleAction(this)"></div>
+            <div class="action-text" contenteditable="true">測試案例與開發同步進行（TDD）</div>
+            <span class="action-assign" style="color:var(--teal)">@Alex</span>
+          </div>
+          <div class="action-item">
+            <div class="action-cb" onclick="toggleAction(this)"></div>
+            <div class="action-text" contenteditable="true">每日 standup 縮短至 10 分鐘，聚焦 blockers</div>
+            <span class="action-assign" style="color:var(--orange)">@Sam</span>
+          </div>
+        </div>
+        <div class="add-action" onclick="addAction()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>新增行動項目</span>
+        </div>
+      </div>
+
+      <!-- Rating + Mood -->
+      <div class="retro-block" style="min-width:220px;animation-delay:.46s">
+        <div class="retro-hdr">
+          <span class="retro-emoji">📊</span>
+          <span class="retro-title">團隊滿意度</span>
+        </div>
+        <div class="rating-row" style="flex-direction:column;align-items:flex-start;gap:12px">
+          <div class="rating-label">這個 Sprint 的整體感受？</div>
+          <div class="rating-emojis">
+            <div class="rating-opt" onclick="rate(this,'terrible')" title="很差">😰</div>
+            <div class="rating-opt" onclick="rate(this,'poor')"    title="不好">😕</div>
+            <div class="rating-opt" onclick="rate(this,'ok')"      title="還可以">😐</div>
+            <div class="rating-opt selected" onclick="rate(this,'good')" title="不錯">🙂</div>
+            <div class="rating-opt" onclick="rate(this,'great')"   title="很棒">🎉</div>
+          </div>
+          <div id="rating-text" style="font-size:12px;color:var(--t3)">當前評分：<strong style="color:var(--green)">不錯</strong></div>
+        </div>
+        <div style="padding:0 16px 16px">
+          <div style="height:1px;background:var(--b1);margin-bottom:14px"></div>
+          <div style="font-size:11px;color:var(--t3);margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase">Demo 備註</div>
+          <div class="editor" contenteditable="true"
+            style="min-height:60px;font-size:12.5px;padding:10px 12px;background:var(--s2);
+              border-radius:var(--r-sm);border:1px solid var(--b1)"
+            data-placeholder="記錄 Demo 給 Stakeholder 的摘要…">展示了登入流程與 JWT 驗證機制，Stakeholder 反應正面，要求加入 Google OAuth 支援。</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ─── Theme ───────────────────────────────────
+const root = document.documentElement;
+const LS = 'pms-theme';
+const sys = () => window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+function applyTheme(t) {
+  root.setAttribute('data-theme', t);
+  const sun = document.getElementById('icon-sun'), moon = document.getElementById('icon-moon');
+  if (sun && moon) { sun.style.display=t==='dark'?'block':'none'; moon.style.display=t==='light'?'block':'none'; }
+}
+applyTheme(localStorage.getItem(LS) || sys());
+document.getElementById('theme-toggle')?.addEventListener('click', () => {
+  const next = root.getAttribute('data-theme')==='dark'?'light':'dark';
+  localStorage.setItem(LS, next); applyTheme(next);
+});
+
+// ─── Rich text formatting ─────────────────────
+function fmt(cmd) { document.execCommand(cmd, false, null); }
+
+function fmtList(id) {
+  const el = document.getElementById('editor-'+id);
+  if (!el) return;
+  const lines = el.innerText.split('\n').filter(l => l.trim());
+  el.innerHTML = lines.map(l =>
+    l.startsWith('• ') ? `<p>${l}</p>` : `<p>• ${l}</p>`
+  ).join('');
+}
+
+// Char count
+function updateCharCount(editorId, ccId) {
+  const el = document.getElementById(editorId);
+  const cc = document.getElementById(ccId);
+  if (el && cc) {
+    el.addEventListener('input', () => {
+      cc.textContent = el.innerText.replace(/\s/g,'').length + ' 字';
+    });
+    // init
+    cc.textContent = el.innerText.replace(/\s/g,'').length + ' 字';
+  }
+}
+updateCharCount('editor-good', 'cc-good');
+updateCharCount('editor-bad',  'cc-bad');
+
+// ─── Action items ─────────────────────────────
+function toggleAction(cb) {
+  cb.classList.toggle('checked');
+  const textEl = cb.nextElementSibling;
+  if (textEl) textEl.classList.toggle('checked', cb.classList.contains('checked'));
+  if (cb.classList.contains('checked')) {
+    cb.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>';
+  } else {
+    cb.innerHTML = '';
+  }
+}
+
+function addAction() {
+  const list = document.getElementById('action-list');
+  const item = document.createElement('div');
+  item.className = 'action-item';
+  item.innerHTML = `
+    <div class="action-cb" onclick="toggleAction(this)"></div>
+    <div class="action-text" contenteditable="true" data-placeholder="輸入行動項目…" style="min-width:10px"></div>
+    <span class="action-assign" style="color:var(--t4)">@未指定</span>`;
+  list.appendChild(item);
+  item.querySelector('[contenteditable]').focus();
+}
+
+// ─── Rating ───────────────────────────────────
+const ratingLabels = {
+  terrible: { text: '很差', color: 'var(--red)' },
+  poor:     { text: '不好', color: 'var(--orange)' },
+  ok:       { text: '還可以', color: 'var(--amber)' },
+  good:     { text: '不錯', color: 'var(--green)' },
+  great:    { text: '非常棒！', color: 'var(--teal)' },
+};
+
+function rate(el, val) {
+  document.querySelectorAll('.rating-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  const cfg = ratingLabels[val];
+  document.getElementById('rating-text').innerHTML =
+    `當前評分：<strong style="color:${cfg.color}">${cfg.text}</strong>`;
+}
+
+// ─── Save ─────────────────────────────────────
+document.getElementById('btn-save')?.addEventListener('click', () => {
+  const btn = document.getElementById('btn-save');
+  btn.textContent = '✓ 已儲存';
+  btn.style.background = 'var(--grad-life)';
+  setTimeout(() => {
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+      <polyline points="17 21 17 13 7 13 7 21"/>
+      <polyline points="7 3 7 8 15 8"/>
+    </svg> 儲存 Review`;
+    btn.style.background = 'var(--grad-main)';
+  }, 2500);
+});
+
+// ─── Date display ─────────────────────────────
+const d = new Date();
+const pad = n => String(n).padStart(2,'0');
+document.getElementById('review-date').textContent =
+  `Review 日期：${d.getFullYear()}·${pad(d.getMonth()+1)}·${pad(d.getDate())}`;
+</script>
+</body>
+</html>

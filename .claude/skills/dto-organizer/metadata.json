@@ -1,0 +1,15 @@
+{
+  "name": "dto-organizer",
+  "version": "1.1.2",
+  "description": "Inventory API request and response shapes and generate structured DTO documentation",
+  "updated_at": "2026-04-09",
+  "tags": [
+    "documentation",
+    "api",
+    "dto",
+    "schema",
+    "inventory"
+  ],
+  "source_package_sha256": "9527dce730cc75d962fdfca070e00814b2debaa63f82fa172f4458d2be556d40",
+  "rendered_from": "canonical-skills/regular-skills/dto-organizer"
+}

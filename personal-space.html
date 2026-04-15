@@ -1,0 +1,2964 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMSuite — 個人中心</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&family=Playfair+Display:ital,wght@0,400;1,400;1,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>
+/* ━━━ RESET ━━━ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+button{cursor:pointer;border:none;background:none;font:inherit}
+input,select,textarea{font:inherit;border:none;outline:none;background:none;width:100%}
+a{text-decoration:none;color:inherit}
+svg{display:block;flex-shrink:0}
+
+/* ━━━ TOKENS ━━━ */
+:root {
+  --bg:#F5F0FF; --s1:#FFFFFF; --s2:#EDE7FC; --s3:#E3DAFC; --s4:#D5CBFB;
+  --b1:#E2DAF7; --b2:#CABEF2; --b3:#B0A2E8;
+  --t1:#1E1647; --t2:#524778; --t3:#8C7EB8; --t4:#C0B6E0;
+  --orange:#E47A3B; --orange-d:rgba(228,122,59,.12);
+  --gold:#F2C94C;   --gold-d:rgba(242,201,76,.12);
+  --violet:#7F56D9; --violet-d:rgba(127,86,217,.12);
+  --purple:#7F56D9; --purple-d:rgba(127,86,217,.14); --purple-g:rgba(127,86,217,.07);
+  --cyan:#38bdf8;   --cyan-d:rgba(56,189,248,.13);
+  --teal:#2dd4bf;   --teal-d:rgba(45,212,191,.13);
+  --green:#4ade80;  --green-d:rgba(74,222,128,.13);
+  --amber:#F2C94C;  --amber-d:rgba(242,201,76,.13);
+  --pink:#f472b6;   --pink-d:rgba(244,114,182,.13);
+  --red:#ef4444;    --red-d:rgba(239,68,68,.13);
+  --grad-main:linear-gradient(135deg,#7F56D9 0%,#E47A3B 100%);
+  --sb-w:228px; --hdr-h:58px; --r:12px; --r-sm:7px;
+  --hdr-bg:rgba(245,240,255,.88);
+}
+[data-theme="dark"] {
+  --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
+  --b1:#1e1c2e; --b2:#2a2840; --b3:#3a3852;
+  --t1:#f0edfb; --t2:#9490b0; --t3:#58547a; --t4:#35324a;
+  --purple:#c084fc; --purple-d:rgba(192,132,252,.13); --purple-g:rgba(192,132,252,.06);
+  --orange:#fb923c; --orange-d:rgba(251,146,60,.13);
+  --gold:#fbbf24; --gold-d:rgba(251,191,36,.13);
+  --violet:#a855f7; --violet-d:rgba(168,85,247,.13);
+  --amber:#fbbf24; --amber-d:rgba(251,191,36,.13);
+  --hdr-bg:rgba(8,8,15,.88);
+}
+
+/* ━━━ BODY & GRAIN ━━━ */
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
+  min-height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.035'/%3E%3C/svg%3E")}
+
+/* ━━━ BACKGROUND ORBS ━━━ */
+.ps-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px)}
+.orb-1{width:480px;height:480px;
+  background:radial-gradient(circle,rgba(127,86,217,.14) 0%,transparent 70%);
+  top:-80px;right:60px;animation:orbA 22s ease-in-out infinite alternate}
+.orb-2{width:320px;height:320px;
+  background:radial-gradient(circle,rgba(228,122,59,.1) 0%,transparent 70%);
+  bottom:60px;left:220px;animation:orbB 28s ease-in-out infinite alternate}
+.orb-3{width:200px;height:200px;
+  background:radial-gradient(circle,rgba(244,114,182,.1) 0%,transparent 70%);
+  top:50%;left:50%;animation:orbC 18s ease-in-out infinite alternate}
+@keyframes orbA{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-30px,40px) scale(1.08)}}
+@keyframes orbB{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,-28px) scale(0.92)}}
+@keyframes orbC{0%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-50%) scale(1.2) rotate(30deg)}}
+
+/* ━━━ SIDEBAR ━━━ */
+.sidebar{width:var(--sb-w);min-height:100vh;background:var(--s1);
+  border-right:1px solid var(--b1);display:flex;flex-direction:column;
+  flex-shrink:0;position:relative;z-index:20}
+.logo{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
+  padding:0 20px;border-bottom:1px solid var(--b1)}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;
+  flex-shrink:0;box-shadow:0 0 20px rgba(192,132,252,.35)}
+.logo-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--t1)}
+.logo-label em{font-style:normal;background:var(--grad-main);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:1px;overflow-y:auto}
+.nav-section{font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--t4);padding:12px 10px 5px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;
+  border-radius:var(--r-sm);color:var(--t3);font-size:13.5px;font-weight:500;
+  cursor:pointer;transition:all .15s;text-decoration:none}
+.nav-item:hover{color:var(--t1);background:var(--s2)}
+.nav-item.active{color:var(--t1);background:var(--purple-g);
+  border-left:2px solid var(--purple);padding-left:10px}
+.ni{color:var(--t4);transition:color .15s;flex-shrink:0}
+.nav-item.active .ni{color:var(--purple)}
+.nav-item:hover .ni{color:var(--t2)}
+.nav-chip{margin-left:auto;font-family:'Fira Code',monospace;font-size:10px;font-weight:500;
+  padding:1px 7px;border-radius:10px;background:var(--s3);color:var(--t2);border:1px solid var(--b2)}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--b1);display:flex;flex-direction:column;gap:5px}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:var(--r-sm);cursor:pointer;transition:background .15s}
+.user-row:hover{background:var(--s2)}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#fff;
+  flex-shrink:0;background:var(--grad-main)}
+.user-name{font-size:13px;font-weight:600;color:var(--t1)}
+.user-role{font-size:11px;color:var(--t3)}
+
+/* Sun reminder */
+.sun-reminder{display:none;align-items:center;gap:8px;padding:8px 10px;
+  border-radius:var(--r-sm);background:rgba(251,191,36,.07);
+  border:1px solid rgba(251,191,36,.2);cursor:pointer;transition:background .15s}
+.sun-reminder:hover{background:rgba(251,191,36,.12)}
+.sun-reminder.show{display:flex}
+.sun-icon{color:var(--amber);animation:sunSpin 3s linear infinite}
+@keyframes sunSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.sun-text{font-size:11px;color:var(--amber);font-weight:600;line-height:1.35}
+
+/* ━━━ MAIN ━━━ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;position:relative;z-index:1}
+.hdr{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
+  padding:0 24px;background:var(--hdr-bg);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.04);flex-shrink:0;z-index:10}
+.hdr-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;
+  letter-spacing:.02em;color:var(--t1);display:flex;align-items:baseline;gap:10px}
+.hdr-title span{font-size:12px;font-weight:500;color:var(--t3);
+  font-family:'Fira Code',monospace;letter-spacing:.04em}
+.hdr-space{flex:1}
+.icon-btn{width:34px;height:34px;border-radius:var(--r-sm);display:flex;align-items:center;
+  justify-content:center;color:var(--t3);transition:all .15s;border:1px solid transparent}
+.icon-btn:hover{background:var(--s3);color:var(--t1);border-color:var(--b2)}
+
+/* ━━━ SCROLL CONTAINER ━━━ */
+.ps-scroll{flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:16px}
+.ps-scroll::-webkit-scrollbar{width:4px}
+.ps-scroll::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* ━━━ GLASSMORPHISM MOTTO BOOST ZONE ━━━ */
+.motto-card{
+  border-radius:var(--r);overflow:hidden;position:relative;flex-shrink:0;
+  background:rgba(255,255,255,.65);
+  backdrop-filter:blur(40px) saturate(180%);
+  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  border:1px solid rgba(127,86,217,.22);
+  box-shadow:
+    0 0 0 1px rgba(127,86,217,.12),
+    0 24px 72px rgba(127,86,217,.22),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(127,86,217,.06);
+  animation:slideUp .6s cubic-bezier(.16,1,.3,1) both}
+/* Animated top-edge shimmer line */
+.motto-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;z-index:10;
+  background:linear-gradient(90deg,transparent 0%,rgba(228,122,59,.7) 20%,rgba(242,201,76,.9) 50%,rgba(127,86,217,.7) 80%,transparent 100%);
+  background-size:200% 100%;
+  animation:mottoShimmer 4s ease-in-out infinite;pointer-events:none}
+@keyframes mottoShimmer{
+  0%{background-position:200% 0;opacity:.5}
+  50%{background-position:-50% 0;opacity:1}
+  100%{background-position:200% 0;opacity:.5}}
+
+/* Purple-orange flowing halo orbs */
+.aurora-mesh{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.halo{position:absolute;border-radius:50%}
+.halo-1{
+  width:72%;height:220%;top:-60%;left:-12%;
+  background:radial-gradient(ellipse,rgba(127,86,217,.22) 0%,rgba(127,86,217,.06) 40%,transparent 68%);
+  filter:blur(52px);
+  animation:haloA 9s ease-in-out infinite alternate}
+.halo-2{
+  width:62%;height:200%;top:-50%;right:-8%;
+  background:radial-gradient(ellipse,rgba(228,122,59,.2) 0%,rgba(228,122,59,.05) 38%,transparent 65%);
+  filter:blur(56px);
+  animation:haloB 11.5s ease-in-out infinite alternate}
+.halo-3{
+  width:44%;height:140%;top:15%;left:30%;
+  background:radial-gradient(ellipse,rgba(244,114,182,.14) 0%,transparent 60%);
+  filter:blur(44px);
+  animation:haloC 14s ease-in-out infinite alternate}
+@keyframes haloA{0%{transform:translate(0,0) scale(1)}100%{transform:translate(5%,10%) scale(1.14)}}
+@keyframes haloB{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-10%,-6%) scale(1.1)}}
+@keyframes haloC{0%{transform:translate(0,0) scale(1);opacity:.75}100%{transform:translate(4%,9%) scale(1.22);opacity:1}}
+
+/* Floating deco chars */
+.motto-deco{position:absolute;pointer-events:none;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;
+  animation:decoFloat 6s ease-in-out infinite}
+.deco-1{top:16%;left:4%;font-size:14px;color:rgba(127,86,217,.5);animation-delay:0s}
+.deco-2{top:62%;right:5%;font-size:22px;color:rgba(228,122,59,.45);animation-delay:2.1s}
+.deco-3{bottom:20%;left:46%;font-size:11px;color:rgba(244,114,182,.45);animation-delay:3.8s}
+.deco-4{top:28%;right:18%;font-size:16px;color:rgba(242,201,76,.4);animation-delay:1.5s}
+@keyframes decoFloat{
+  0%,100%{transform:translateY(0) rotate(-5deg);opacity:.28}
+  50%{transform:translateY(-14px) rotate(9deg);opacity:.65}}
+
+/* Day chip */
+.motto-day-chip{
+  position:absolute;top:14px;right:16px;z-index:2;
+  font-size:9px;font-family:'Fira Code',monospace;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(242,201,76,.85);
+  background:rgba(242,201,76,.1);
+  border:1px solid rgba(242,201,76,.25);
+  border-radius:6px;padding:3px 10px;
+  backdrop-filter:blur(8px)}
+
+/* Inner layout — centred */
+.motto-inner{
+  position:relative;z-index:1;
+  padding:40px 64px 36px;
+  display:flex;flex-direction:column;
+  align-items:center;text-align:center;
+  min-height:180px;justify-content:center;gap:0}
+
+/* Decorative large quotation marks */
+.motto-qmark{
+  font-family:'Playfair Display',serif;font-style:italic;font-weight:600;
+  font-size:88px;line-height:1;color:rgba(127,86,217,.2);
+  position:absolute;pointer-events:none;user-select:none;
+  transition:color .4s}
+.motto-qmark.open{top:2px;left:22px}
+.motto-qmark.close{bottom:-12px;right:22px;transform:rotate(180deg)}
+.motto-card:hover .motto-qmark{color:rgba(127,86,217,.32)}
+
+/* Main quote text — large, italic, prominent */
+.motto-quote-text{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:30px;line-height:1.65;letter-spacing:.024em;
+  color:var(--t1);max-width:760px;position:relative;z-index:1;
+  animation:mottoEnter 2s cubic-bezier(.16,1,.3,1) both, quoteGoldPulse 5s 2s ease-in-out infinite}
+@keyframes mottoEnter{
+  0%{opacity:0;transform:translateY(28px) scale(.94);
+     filter:brightness(.3) blur(4px)}
+  40%{opacity:.7;transform:translateY(4px) scale(.99);
+      filter:brightness(1.15) drop-shadow(0 0 40px rgba(228,122,59,.7)) drop-shadow(0 0 80px rgba(228,122,59,.3)) blur(0px)}
+  65%{filter:brightness(1.08) drop-shadow(0 0 24px rgba(228,122,59,.5))}
+  100%{opacity:1;transform:none;
+       filter:drop-shadow(0 0 14px rgba(242,201,76,.28))}}
+@keyframes quoteGoldPulse{
+  0%,100%{filter:drop-shadow(0 0 12px rgba(242,201,76,.2))}
+  50%{filter:drop-shadow(0 0 32px rgba(242,201,76,.5)) drop-shadow(0 0 56px rgba(228,122,59,.18))}}
+
+/* Source attribution */
+.motto-source{
+  margin-top:16px;font-size:11px;font-family:'Fira Code',monospace;
+  letter-spacing:.09em;color:rgba(127,86,217,.65);
+  display:flex;align-items:center;gap:5px}
+.motto-source::before{content:'— '}
+
+/* ━━━ TWO-COLUMN GRID ━━━ */
+.ps-cols{display:grid;grid-template-columns:1fr 318px;gap:16px;flex:1;min-height:0}
+.ps-left{display:flex;flex-direction:column;gap:16px}
+.ps-right{display:flex;flex-direction:column}
+
+/* ━━━ MODULE CARDS — SHARED ━━━ */
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(18px) scale(.98)}
+  to{opacity:1;transform:none}}
+
+.ps-card{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  overflow:visible;position:relative;
+  transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s;
+  animation:slideUp .6s cubic-bezier(.16,1,.3,1) both}
+.ps-card:hover{transform:translateY(-2px);box-shadow:0 10px 36px rgba(127,86,217,.18)}
+
+/* Top edge accent glow per card */
+.ps-card::before{content:'';position:absolute;top:-1px;left:15%;right:15%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--card-glow,rgba(192,132,252,.5)),transparent);
+  z-index:2;pointer-events:none;border-radius:1px}
+
+.journal-card{--card-glow:rgba(251,191,36,.55);animation-delay:.08s}
+.todo-card   {--card-glow:rgba(56,189,248,.55);animation-delay:.18s}
+.cal-card    {--card-glow:rgba(192,132,252,.55);animation-delay:.28s}
+
+/* Card header */
+.ps-card-hdr{display:flex;align-items:center;gap:10px;padding:13px 16px 11px;
+  border-bottom:1px solid var(--b1);flex-shrink:0;position:relative;z-index:1}
+
+/* Section number badge */
+.card-num{font-family:'Barlow Condensed',sans-serif;font-weight:900;
+  font-size:26px;letter-spacing:-.03em;line-height:1;flex-shrink:0;
+  color:var(--card-num-color,rgba(192,132,252,.3))}
+.journal-card .card-num{--card-num-color:rgba(251,191,36,.35)}
+.todo-card    .card-num{--card-num-color:rgba(56,189,248,.35)}
+.cal-card     .card-num{--card-num-color:rgba(192,132,252,.35)}
+
+.ps-card-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0}
+.ps-card-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--t1);flex:1}
+.ps-card-sub{font-size:11px;color:var(--t3);font-family:'Fira Code',monospace}
+.ps-card-acts{display:flex;align-items:center;gap:4px;flex-shrink:0}
+
+.ps-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--r-sm);
+  font-size:11.5px;font-weight:600;color:var(--t3);border:1px solid var(--b2);
+  transition:all .15s;white-space:nowrap}
+.ps-btn:hover{color:var(--t1);border-color:var(--b3);background:var(--s2)}
+.ps-btn.active{color:var(--purple);border-color:rgba(192,132,252,.45);background:var(--purple-d)}
+
+/* ━━━ JOURNAL ━━━ */
+.journal-nav{display:flex;align-items:center;gap:5px}
+.jnav-btn{width:24px;height:24px;border-radius:var(--r-sm);display:flex;align-items:center;
+  justify-content:center;color:var(--t3);border:1px solid var(--b2);transition:all .15s}
+.jnav-btn:hover{color:var(--t1);background:var(--s2);border-color:var(--b3)}
+.jnav-btn:disabled{opacity:.28;cursor:not-allowed}
+.jnav-date{font-family:'Fira Code',monospace;font-size:11px;color:var(--t2);
+  padding:0 5px;min-width:50px;text-align:center}
+
+.journal-body{padding:14px 16px 16px}
+
+/* Ruled notebook textarea */
+.journal-ruled{position:relative}
+.journal-margin{position:absolute;left:32px;top:0;bottom:0;width:1px;
+  background:rgba(251,191,36,.18);pointer-events:none;z-index:1}
+.journal-textarea{
+  width:100%;min-height:148px;resize:vertical;
+  padding:10px 13px 10px 40px;
+  background:
+    var(--s2),
+    repeating-linear-gradient(
+      transparent 0px,transparent 27px,
+      rgba(192,132,252,.065) 27px,rgba(192,132,252,.065) 28px);
+  border:1px solid var(--b2);border-radius:var(--r-sm);
+  color:var(--t1);font-size:13px;line-height:28px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  transition:border-color .2s,box-shadow .2s}
+.journal-textarea:focus{border-color:rgba(251,191,36,.35);
+  box-shadow:0 0 0 3px rgba(251,191,36,.06)}
+.journal-textarea::placeholder{color:var(--t4);line-height:1.5}
+
+.journal-preview{padding:10px 13px 10px 40px;
+  background:var(--s2);border:1px solid var(--b2);
+  border-radius:var(--r-sm);min-height:148px;
+  font-size:13px;line-height:1.75;color:var(--t1);display:none}
+.journal-preview.show{display:block}
+.journal-preview h1{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;
+  color:var(--amber);margin:0 0 8px}
+.journal-preview h2{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;
+  color:var(--cyan);margin:9px 0 4px}
+.journal-preview h3{font-size:13.5px;font-weight:600;color:var(--t2);margin:7px 0 3px}
+.journal-preview strong{color:var(--t1);font-weight:700}
+.journal-preview em{color:rgba(251,191,36,.9);font-style:italic}
+.journal-preview del{color:var(--t4)}
+.journal-preview ul{padding-left:16px;margin:5px 0}
+.journal-preview li{margin:2px 0}
+.journal-preview p{margin:5px 0}
+.journal-preview hr{border:none;border-top:1px solid var(--b2);margin:10px 0}
+.journal-preview code{font-family:'Fira Code',monospace;font-size:11.5px;
+  background:var(--s3);padding:1px 6px;border-radius:4px;color:var(--amber)}
+
+.journal-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.journal-save-note{font-size:10px;color:var(--t4);font-family:'Fira Code',monospace;transition:color .3s}
+.journal-save-note.ok{color:rgba(74,222,128,.7)}
+
+/* Template dropdown */
+.tmpl-wrap{position:relative}
+.tmpl-menu{position:absolute;top:calc(100% + 5px);right:0;
+  background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
+  min-width:175px;z-index:30;display:none;
+  box-shadow:0 12px 40px rgba(30,22,71,.32),0 0 0 1px rgba(127,86,217,.1)}
+.tmpl-menu.open{display:block;animation:menuPop .14s cubic-bezier(.16,1,.3,1) both}
+@keyframes menuPop{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:none}}
+.tmpl-row{display:flex;align-items:flex-start;gap:9px;padding:9px 13px;
+  cursor:pointer;transition:background .1s}
+.tmpl-row:hover{background:var(--s3)}
+.tmpl-row:not(:last-child){border-bottom:1px solid var(--b1)}
+.tmpl-icon{font-size:13px;flex-shrink:0;margin-top:1px}
+.tmpl-title{font-size:12.5px;font-weight:600;color:var(--t1)}
+.tmpl-desc{font-size:10.5px;color:var(--t3);margin-top:1px}
+
+/* ━━━ TODO MODULE ━━━ */
+.todo-body{padding:14px 16px 16px}
+.todo-sec-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--t4);font-weight:700;margin-bottom:7px;padding:0 2px;
+  display:flex;align-items:center;gap:8px}
+.todo-sec-label::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+.todo-add-row{display:flex;align-items:center;gap:7px;margin-bottom:9px;
+  background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
+  padding:7px 12px;transition:border-color .15s,box-shadow .15s}
+.todo-add-row:focus-within{border-color:rgba(56,189,248,.35);
+  box-shadow:0 0 0 3px rgba(56,189,248,.07)}
+.todo-add-input{background:transparent;font-size:13px;color:var(--t1)}
+.todo-add-input::placeholder{color:var(--t4)}
+.todo-add-hint{font-size:10px;color:var(--t4);font-family:'Fira Code',monospace;flex-shrink:0}
+
+.todo-list{display:flex;flex-direction:column;gap:2px;margin-bottom:10px}
+
+/* Individual todo items */
+.todo-item{display:flex;align-items:center;gap:9px;padding:7px 8px;
+  border-radius:var(--r-sm);transition:background .12s;position:relative}
+.todo-item.personal{cursor:pointer}
+.todo-item:hover{background:var(--s2)}
+
+/* Animated checkbox */
+.todo-cb{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--b3);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .2s cubic-bezier(.16,1,.3,1);position:relative}
+.todo-item.done .todo-cb{
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  border-color:transparent;
+  box-shadow:0 0 8px rgba(56,189,248,.35)}
+.todo-item.done .todo-cb svg{display:block}
+.todo-cb svg{display:none;color:#fff}
+/* Bounce animation */
+@keyframes cbBounce{
+  0%{transform:scale(1)}
+  30%{transform:scale(1.5)}
+  55%{transform:scale(.82)}
+  75%{transform:scale(1.12)}
+  100%{transform:scale(1)}}
+.todo-cb.pop{animation:cbBounce .42s cubic-bezier(.22,1,.36,1)}
+/* Ring burst on pop */
+.todo-cb.pop::after{content:'';position:absolute;inset:-5px;border-radius:50%;
+  border:2px solid var(--cyan);animation:ringBurst .5s ease both;pointer-events:none}
+@keyframes ringBurst{0%{opacity:.7;transform:scale(.5)}100%{opacity:0;transform:scale(1.6)}}
+
+.todo-prio-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.todo-text{font-size:13px;color:var(--t1);flex:1;line-height:1.4;position:relative;transition:color .3s}
+.todo-item.done .todo-text{color:var(--t3)}
+.todo-item.done .todo-text::after{
+  content:'';position:absolute;left:0;right:0;top:50%;margin-top:-1.5px;
+  height:2px;border-radius:2px;
+  background:linear-gradient(90deg,var(--cyan) 0%,var(--purple) 100%);
+  animation:strikeWave .42s cubic-bezier(.22,1,.36,1) both;
+  transform-origin:left center}
+@keyframes strikeWave{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:.7}}
+
+.todo-meta{font-size:10px;color:var(--t4);font-family:'Fira Code',monospace;flex-shrink:0}
+.todo-del{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;
+  justify-content:center;color:var(--t4);opacity:0;transition:all .12s;flex-shrink:0}
+.todo-item:hover .todo-del{opacity:1}
+.todo-del:hover{color:var(--red);background:var(--red-d)}
+.todo-empty{font-size:12px;color:var(--t4);text-align:center;padding:12px 0;font-style:italic}
+
+/* ━━━ CALENDAR ━━━ */
+.cal-card{flex:1}
+.cal-body{padding:14px 16px 16px}
+.cal-nav{display:flex;align-items:center;gap:5px;margin-bottom:12px}
+.cal-nav-btn{width:24px;height:24px;border-radius:var(--r-sm);display:flex;align-items:center;
+  justify-content:center;color:var(--t3);border:1px solid var(--b2);transition:all .15s}
+.cal-nav-btn:hover{color:var(--t1);background:var(--s2);border-color:var(--b3)}
+.cal-month-lbl{flex:1;text-align:center;font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:14px;letter-spacing:.05em;color:var(--t1)}
+.cal-view-tabs{display:flex;background:var(--s3);border-radius:5px;padding:2px;gap:1px}
+.cal-vt{flex:1;text-align:center;font-size:10px;font-weight:700;padding:3px 8px;
+  border-radius:4px;color:var(--t3);cursor:pointer;transition:all .14s;letter-spacing:.04em}
+.cal-vt.active{background:var(--s4);color:var(--t1)}
+
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.cal-dow-cell{text-align:center;font-size:9px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--t4);padding:3px 0}
+.cal-cells{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+
+/* Day cells */
+.cal-cell{min-height:50px;border-radius:10px;padding:5px 6px;cursor:pointer;
+  transition:background .14s,transform .14s,box-shadow .14s;
+  position:relative;border:1px solid transparent}
+.cal-cell:hover{background:var(--s2);border-color:rgba(127,86,217,.2);transform:scale(1.04);
+  box-shadow:0 3px 12px rgba(127,86,217,.12)}
+.cal-cell.other-month{opacity:.22}
+.cal-cell.today{border-color:rgba(127,86,217,.5);background:rgba(127,86,217,.06)}
+.cal-cell.today .cal-day-num{
+  color:#fff;font-weight:700;
+  background:var(--violet);border-radius:50%;
+  width:18px;height:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;line-height:1}
+/* Today pulsing ring */
+@keyframes todayPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(127,86,217,.3),0 3px 12px rgba(127,86,217,.1)}
+  50%{box-shadow:0 0 0 5px rgba(127,86,217,.06),0 3px 12px rgba(127,86,217,.1)}}
+.cal-cell.today{animation:todayPulse 3s ease-in-out infinite}
+
+.cal-day-num{font-family:'Fira Code',monospace;font-size:10px;color:var(--t2);
+  display:flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:50%}
+.cal-dots{display:flex;flex-wrap:wrap;gap:2px;margin-top:3px}
+.cal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+/* Event type dots */
+.cal-dot.evt-leave{background:#E47A3B}
+.cal-dot.evt-meeting{background:#38bdf8}
+.cal-dot.evt-milestone{background:#7F56D9}
+.cal-note-snippet{font-size:8.5px;color:var(--cyan);line-height:1.2;margin-top:1px;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+/* Week view */
+.cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-wk-col{display:flex;flex-direction:column;gap:2px}
+.cal-wk-hdr{text-align:center;margin-bottom:4px}
+.cal-wk-dow{font-size:8.5px;color:var(--t4);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.cal-wk-date{font-family:'Fira Code',monospace;font-size:11px;color:var(--t2);
+  width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  margin:2px auto}
+.cal-wk-date.today{background:var(--purple);color:#fff;font-weight:700;
+  box-shadow:0 0 8px rgba(192,132,252,.4)}
+.cal-wk-task{font-size:9px;padding:2px 5px;border-radius:4px;
+  border-left:2px solid var(--purple);background:var(--purple-d);
+  color:var(--t2);margin-bottom:2px;line-height:1.3;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cal-wk-note{font-size:9px;padding:2px 5px;border-radius:4px;
+  border-left:2px solid var(--cyan);background:var(--cyan-d);
+  color:var(--cyan);margin-bottom:2px;line-height:1.3;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.cal-wk-add{height:20px;border-radius:4px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--t4);font-size:14px;font-weight:300;transition:background .1s}
+.cal-wk-add:hover{background:var(--s2);color:var(--t2)}
+
+.cal-legend{display:flex;gap:8px 12px;margin-top:11px;flex-wrap:wrap}
+.cal-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t4)}
+.cal-leg-dot{width:7px;height:7px;border-radius:50%}
+
+/* ━━━ MODALS ━━━ */
+.modal-wrap{position:fixed;inset:0;z-index:60;display:none;
+  align-items:center;justify-content:center}
+.modal-wrap.open{display:flex}
+.modal-overlay{position:absolute;inset:0;background:rgba(30,22,71,.48);backdrop-filter:blur(4px)}
+.modal-box{position:relative;z-index:1;background:var(--s2);border:1px solid var(--b2);
+  border-radius:var(--r);padding:22px;width:360px;
+  box-shadow:0 24px 64px rgba(30,22,71,.4),0 0 0 1px rgba(255,255,255,.06);
+  animation:menuPop .18s cubic-bezier(.16,1,.3,1) both}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;
+  color:var(--t1);margin-bottom:14px;letter-spacing:.03em}
+.modal-input{background:var(--s3);border:1px solid var(--b2);border-radius:var(--r-sm);
+  padding:10px 13px;color:var(--t1);font-size:13px;width:100%;transition:border-color .15s}
+.modal-input:focus{border-color:rgba(192,132,252,.45);outline:none}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.btn-ghost{padding:7px 14px;border-radius:var(--r-sm);font-size:13px;font-weight:600;
+  color:var(--t3);border:1px solid var(--b2);transition:all .15s}
+.btn-ghost:hover{color:var(--t1);border-color:var(--b3);background:var(--s3)}
+.btn-primary{padding:7px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;
+  background:var(--grad-main);color:#fff;transition:opacity .15s}
+.btn-primary:hover{opacity:.84}
+
+/* Import modal */
+.import-list{max-height:260px;overflow-y:auto;display:flex;flex-direction:column;
+  gap:4px;margin-top:4px}
+.import-list::-webkit-scrollbar{width:3px}
+.import-list::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
+.import-item{display:flex;align-items:center;gap:9px;padding:8px 11px;
+  border-radius:var(--r-sm);border:1px solid var(--b1);background:var(--s3);
+  cursor:pointer;transition:all .12s}
+.import-item:hover{border-color:var(--b2);background:var(--s4)}
+.import-item.selected{border-color:rgba(192,132,252,.4);background:var(--purple-d)}
+.import-item.selected .import-cb{background:linear-gradient(135deg,var(--cyan),var(--purple));border-color:transparent}
+.import-item.selected .import-cb svg{display:block}
+.import-cb{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--b3);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.import-cb svg{display:none;color:#fff}
+.import-task-title{font-size:12.5px;font-weight:500;color:var(--t1);flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.import-task-proj{font-size:10px;color:var(--t4);font-family:'Fira Code',monospace;flex-shrink:0}
+.import-empty{font-size:12px;color:var(--t4);text-align:center;padding:18px 0;font-style:italic}
+
+/* ━━━ TOAST ━━━ */
+.toast-wrap{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:100;
+  display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.toast{padding:9px 20px;border-radius:22px;font-size:13px;font-weight:500;
+  background:var(--s3);border:1px solid var(--b2);color:var(--t1);
+  animation:toastIn .28s cubic-bezier(.16,1,.3,1) both;
+  box-shadow:0 6px 24px rgba(30,22,71,.22)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(8px)}}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* ━━━ TODO DAY NAV & PROGRESS ━━━ */
+/* Todo day navigation in header */
+.todo-date-nav{display:flex;align-items:center;gap:4px;margin-right:6px}
+.todo-dnav-btn{width:24px;height:24px;border-radius:var(--r-sm);display:flex;align-items:center;
+  justify-content:center;color:var(--t3);border:1px solid var(--b2);transition:all .15s;flex-shrink:0}
+.todo-dnav-btn:hover{color:var(--orange);border-color:var(--orange);background:var(--orange-d)}
+.todo-dnav-btn:disabled{opacity:.3;cursor:not-allowed}
+.todo-ddate{font-family:'Fira Code',monospace;font-size:10px;color:var(--t2);
+  min-width:42px;text-align:center;white-space:nowrap}
+
+/* Mini progress bar */
+.todo-progress-wrap{
+  padding:0 16px 11px;border-bottom:1px solid var(--b1)}
+.todo-progress-bar{
+  height:5px;background:var(--b1);border-radius:3px;overflow:hidden;
+  position:relative}
+.todo-progress-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,#E47A3B,#F2C94C);
+  transition:width .55s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 0 8px rgba(228,122,59,.5)}
+.todo-progress-label{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:5px;font-size:9.5px;font-family:'Fira Code',monospace;
+  color:var(--t3)}
+.todo-progress-pct{color:var(--orange);font-weight:700}
+
+/* Todo card slide animation */
+@keyframes todoSlideOutLeft{
+  0%{transform:translateX(0);opacity:1}
+  100%{transform:translateX(-48px);opacity:0}}
+@keyframes todoSlideInRight{
+  0%{transform:translateX(48px);opacity:0}
+  100%{transform:translateX(0);opacity:1}}
+@keyframes todoSlideOutRight{
+  0%{transform:translateX(0);opacity:1}
+  100%{transform:translateX(48px);opacity:0}}
+@keyframes todoSlideInLeft{
+  0%{transform:translateX(-48px);opacity:0}
+  100%{transform:translateX(0);opacity:1}}
+.todo-body.slide-out-l{animation:todoSlideOutLeft .2s ease-in both}
+.todo-body.slide-in-r{animation:todoSlideInRight .2s ease-out both}
+.todo-body.slide-out-r{animation:todoSlideOutRight .2s ease-in both}
+.todo-body.slide-in-l{animation:todoSlideInLeft .2s ease-out both}
+
+/* Empty state */
+.todo-empty-state{
+  display:flex;flex-direction:column;align-items:center;
+  padding:24px 16px;gap:10px;text-align:center}
+.todo-empty-art{font-size:44px;line-height:1;filter:drop-shadow(0 4px 8px rgba(127,86,217,.2));
+  animation:emptyBounce 2.5s ease-in-out infinite}
+@keyframes emptyBounce{
+  0%,100%{transform:translateY(0) rotate(-2deg)}
+  50%{transform:translateY(-8px) rotate(3deg)}}
+.todo-empty-msg{font-size:13px;font-weight:600;color:var(--t2)}
+.todo-empty-sub{font-size:11.5px;color:var(--t3);margin-top:-4px}
+.todo-empty-cta{
+  margin-top:4px;display:flex;align-items:center;gap:6px;
+  padding:7px 16px;border-radius:20px;
+  background:linear-gradient(135deg,#E47A3B,#F2C94C);
+  color:#fff;font-size:12px;font-weight:700;
+  box-shadow:0 4px 16px rgba(228,122,59,.35);
+  transition:transform .15s,box-shadow .15s;cursor:pointer;border:none}
+.todo-empty-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(228,122,59,.45)}
+
+
+/* ━━━ ZOO PIXEL CLOUDS ━━━ */
+.zoo-cloud{
+  position:absolute;top:8%;pointer-events:none;z-index:1;
+  animation:cloudDrift linear infinite;will-change:transform}
+/* Pixel cloud using pure CSS box-shadow */
+.zoo-cloud-px{
+  width:8px;height:8px;background:rgba(255,255,255,.82);
+  position:relative;border-radius:1px;
+  box-shadow:
+    8px 0 0 rgba(255,255,255,.82),
+    16px 0 0 rgba(255,255,255,.82),
+    24px 0 0 rgba(255,255,255,.82),
+    4px -8px 0 rgba(255,255,255,.82),
+    12px -8px 0 rgba(255,255,255,.82),
+    20px -8px 0 rgba(255,255,255,.82),
+    8px -16px 0 rgba(255,255,255,.82),
+    16px -16px 0 rgba(255,255,255,.82)}
+@keyframes cloudDrift{
+  from{transform:translateX(-80px)}
+  to{transform:translateX(calc(100vw + 80px))}}
+
+/* ━━━ MINI ZOO DOCK ━━━ */
+.zoo-dock{
+  height:110px;flex-shrink:0;position:relative;overflow:hidden;
+  background:rgba(237,232,252,.72);
+  backdrop-filter:blur(24px) saturate(150%);
+  -webkit-backdrop-filter:blur(24px) saturate(150%);
+  border-top:1px solid rgba(127,86,217,.22);
+  box-shadow:inset 0 1px 0 rgba(127,86,217,.08),0 -8px 28px rgba(127,86,217,.1)}
+
+/* Ambient halos */
+.zoo-halo{position:absolute;border-radius:50%;pointer-events:none}
+.zoo-halo-1{
+  width:50%;height:300%;top:-100%;left:10%;
+  background:radial-gradient(ellipse,rgba(167,243,208,.08) 0%,transparent 65%);
+  filter:blur(48px);animation:zHalo1 14s ease-in-out infinite alternate}
+.zoo-halo-2{
+  width:40%;height:260%;top:-80%;right:8%;
+  background:radial-gradient(ellipse,rgba(251,146,60,.07) 0%,transparent 65%);
+  filter:blur(52px);animation:zHalo2 18s ease-in-out infinite alternate}
+.zoo-halo-3{
+  width:30%;height:200%;top:-50%;left:42%;
+  background:radial-gradient(ellipse,rgba(192,132,252,.06) 0%,transparent 60%);
+  filter:blur(44px);animation:zHalo3 11s ease-in-out infinite alternate}
+@keyframes zHalo1{0%{transform:translate(0,0)}100%{transform:translate(3%,5%)}}
+@keyframes zHalo2{0%{transform:translate(0,0)}100%{transform:translate(-4%,-3%)}}
+@keyframes zHalo3{0%{transform:translate(0,0)}100%{transform:translate(2%,4%)}}
+
+/* Ground strip */
+.zoo-ground{
+  position:absolute;bottom:0;left:0;right:0;height:34px;
+  background:linear-gradient(180deg,rgba(74,222,128,.14) 0%,rgba(74,222,128,.07) 100%);
+  border-top:1px solid rgba(74,222,128,.25)}
+/* Scalloped grass edge */
+.zoo-ground::before{
+  content:'';position:absolute;top:-10px;left:0;right:0;height:11px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 11'%3E%3Cpath d='M0 11 Q6 0 12 11 Q18 0 24 11 Z' fill='rgba(74%2C222%2C128%2C.15)'/%3E%3C/svg%3E")
+    repeat-x bottom;
+  background-size:24px 11px}
+
+/* Trees & flora */
+.zoo-tree{
+  position:absolute;bottom:32px;line-height:1;
+  animation:zTreeSway 5s ease-in-out infinite;transform-origin:bottom center;
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.3));pointer-events:none;user-select:none}
+@keyframes zTreeSway{0%,100%{transform:rotate(-.8deg)}50%{transform:rotate(1.3deg)}}
+
+/* Sparkle stars */
+.zoo-star{
+  position:absolute;font-size:9px;pointer-events:none;color:rgba(255,255,255,.3);
+  animation:zStarTwinkle 3s ease-in-out infinite}
+@keyframes zStarTwinkle{0%,100%{opacity:.12;transform:scale(1)}50%{opacity:.45;transform:scale(1.4)}}
+
+/* ── Animals Layer ── */
+.zoo-animals-layer{position:absolute;left:0;right:0;bottom:32px;height:62px}
+.zoo-animal{
+  position:absolute;bottom:0;cursor:pointer;text-align:center;z-index:3;
+  transition:left 2.8s cubic-bezier(.45,.05,.55,.95)}
+.zoo-flip{display:inline-block;transition:transform .35s ease}
+.zoo-emoji{
+  font-size:34px;display:block;line-height:1;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.4));
+  transform-origin:bottom center}
+
+/* Animation modes */
+@keyframes zIdle{
+  0%,100%{transform:translateY(0) scaleY(1)}
+  40%{transform:translateY(-10px) scaleY(.93)}
+  60%{transform:translateY(-1px) scaleY(1.05)}
+  70%{transform:translateY(0) scaleY(1)}}
+@keyframes zWork{
+  0%,100%{transform:rotate(-4deg) translateY(0)}
+  50%{transform:rotate(4deg) translateY(-2px)}}
+@keyframes zDance{
+  0%{transform:translateY(0) rotate(0) scale(1)}
+  15%{transform:translateY(-15px) rotate(-12deg) scale(1.14)}
+  30%{transform:translateY(0) rotate(0) scale(.9)}
+  50%{transform:translateY(-12px) rotate(12deg) scale(1.14)}
+  65%{transform:translateY(0) rotate(0) scale(.93)}
+  80%{transform:translateY(-7px) rotate(-5deg) scale(1.07)}
+  100%{transform:translateY(0) rotate(0) scale(1)}}
+@keyframes zEat{
+  0%,100%{transform:scale(1) translateY(0)}
+  30%{transform:scale(1.28) translateY(-7px)}
+  55%{transform:scale(.92) translateY(1px)}}
+
+.zoo-animal.m-idle .zoo-emoji{animation:zIdle 2s ease-in-out infinite}
+.zoo-animal.m-work .zoo-emoji{animation:zWork .7s ease-in-out infinite}
+.zoo-animal.m-dance .zoo-emoji{animation:zDance .62s ease-in-out infinite}
+.zoo-animal.m-eat .zoo-emoji{animation:zEat .55s ease-out 1}
+
+/* XP bar */
+.zoo-xpbar{
+  width:36px;height:3px;border-radius:2px;
+  background:rgba(255,255,255,.08);margin:3px auto 0;overflow:hidden}
+.zoo-xpfill{
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,#86efac,#4ade80);
+  transition:width .7s cubic-bezier(.16,1,.3,1)}
+
+/* Level badge */
+.zoo-lvl{
+  position:absolute;top:-8px;right:-6px;
+  width:15px;height:15px;border-radius:50%;
+  background:linear-gradient(135deg,#fbbf24,#fb923c);
+  font-size:7.5px;font-weight:800;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fira Code',monospace;
+  box-shadow:0 2px 7px rgba(251,146,60,.55)}
+
+/* Locked state */
+.zoo-animal.locked .zoo-emoji{
+  filter:grayscale(1) opacity(.2) drop-shadow(0 4px 12px rgba(0,0,0,.4));
+  animation:none!important}
+.zoo-lock-icon{
+  position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  font-size:12px;pointer-events:none}
+
+/* Speech bubble */
+.zoo-bubble{
+  position:absolute;bottom:calc(100% + 6px);left:50%;
+  transform:translateX(-50%);white-space:nowrap;
+  background:rgba(255,255,255,.94);
+  backdrop-filter:blur(12px);
+  color:#18142a;font-size:11.5px;font-weight:600;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  padding:6px 13px;border-radius:14px;
+  box-shadow:0 6px 22px rgba(0,0,0,.22),0 0 0 1px rgba(0,0,0,.05);
+  pointer-events:none;z-index:20;
+  animation:zBubble .26s cubic-bezier(.16,1,.3,1) both}
+.zoo-bubble::after{
+  content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;
+  border-top-color:rgba(255,255,255,.94);border-bottom:none}
+@keyframes zBubble{
+  from{opacity:0;transform:translateX(-50%) translateY(8px) scale(.8)}
+  to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+
+/* Feed button zone */
+.zoo-feed-zone{
+  position:absolute;right:16px;bottom:34px;z-index:5;
+  display:flex;flex-direction:column;align-items:center;gap:3px}
+.zoo-feed-btn{
+  width:44px;height:44px;border-radius:12px;
+  background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.22);
+  backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+  font-size:22px;cursor:pointer;position:relative;transition:all .15s}
+.zoo-feed-btn:hover{background:rgba(251,146,60,.2);transform:scale(1.08)}
+.zoo-feed-btn:active{transform:scale(.94)}
+.zoo-feed-badge{
+  position:absolute;top:-7px;right:-7px;
+  min-width:18px;height:18px;border-radius:9px;padding:0 4px;
+  background:#fb923c;color:#fff;font-size:9px;font-weight:700;
+  font-family:'Fira Code',monospace;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 6px rgba(251,146,60,.55);transition:transform .15s}
+.zoo-feed-badge.pop{animation:zFeedPop .38s cubic-bezier(.16,1,.3,1)}
+@keyframes zFeedPop{0%{transform:scale(1)}40%{transform:scale(1.75)}100%{transform:scale(1)}}
+.zoo-feed-label{
+  font-size:9px;font-family:'Fira Code',monospace;
+  color:rgba(251,146,60,.55);letter-spacing:.07em;text-transform:uppercase}
+
+/* Flying can */
+.zoo-can-fly{
+  position:fixed;font-size:20px;pointer-events:none;z-index:999;
+  animation:zCanFly .7s cubic-bezier(.25,.46,.45,.94) both}
+@keyframes zCanFly{
+  0%{opacity:1;transform:scale(1) rotate(0)}
+  100%{opacity:0;transform:scale(.25) rotate(210deg) translateY(-60px)}}
+
+/* Streak badge */
+.zoo-streak{
+  position:absolute;left:16px;bottom:40px;z-index:5;
+  display:flex;align-items:center;gap:5px;
+  font-size:9.5px;font-family:'Fira Code',monospace;
+  color:rgba(251,191,36,.85);
+  background:rgba(251,191,36,.06);
+  border:1px solid rgba(251,191,36,.16);
+  border-radius:7px;padding:4px 9px;
+  backdrop-filter:blur(8px)}
+
+/* Unlock burst overlay */
+.zoo-unlock-burst{
+  position:fixed;inset:0;pointer-events:none;z-index:150;
+  background:radial-gradient(ellipse 70% 35% at 50% 100%,rgba(251,146,60,.28) 0%,transparent 70%);
+  animation:zUnlockBurst 1s ease both}
+@keyframes zUnlockBurst{0%{opacity:0}35%{opacity:1}100%{opacity:0}}
+
+/* Unlock toast */
+.zoo-unlock-toast{
+  position:fixed;bottom:134px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,rgba(251,146,60,.14),rgba(192,132,252,.14));
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(251,146,60,.28);
+  border-radius:16px;padding:12px 24px;
+  color:var(--t1);font-size:13px;font-weight:600;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  box-shadow:0 12px 40px rgba(0,0,0,.38);
+  z-index:200;text-align:center;
+  animation:zUnlockToast .32s cubic-bezier(.16,1,.3,1) both}
+@keyframes zUnlockToast{
+  from{opacity:0;transform:translateX(-50%) translateY(14px) scale(.88)}
+  to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+
+/* ── Background Aurora Flow ── */
+.bg-aurora{
+  position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-aurora::before,.bg-aurora::after{
+  content:'';position:absolute;border-radius:50%;
+  filter:blur(90px);opacity:.38}
+.bg-aurora::before{
+  width:80vw;height:80vw;
+  background:radial-gradient(circle,rgba(127,86,217,.28) 0%,transparent 65%);
+  top:-20vw;left:-20vw;
+  animation:auroraA 22s ease-in-out infinite alternate}
+.bg-aurora::after{
+  width:70vw;height:70vw;
+  background:radial-gradient(circle,rgba(228,122,59,.18) 0%,transparent 65%);
+  bottom:-18vw;right:-10vw;
+  animation:auroraB 28s ease-in-out infinite alternate}
+@keyframes auroraA{
+  0%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(8vw,6vw) scale(1.12)}
+  100%{transform:translate(-4vw,12vw) scale(.95)}}
+@keyframes auroraB{
+  0%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(-10vw,-8vw) scale(1.15)}
+  100%{transform:translate(6vw,-4vw) scale(.92)}}
+
+/* ── Calendar selected cell ── */
+.cal-cell.selected{
+  background:rgba(127,86,217,.14)!important;
+  border-color:var(--violet)!important;
+  box-shadow:0 0 0 2px rgba(127,86,217,.3),0 3px 14px rgba(127,86,217,.18)!important;
+  animation:none!important}
+.cal-cell.selected .cal-day-num{
+  color:#fff!important;background:var(--violet)!important;
+  border-radius:50%;width:18px;height:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;line-height:1;font-weight:700}
+
+/* ── Today's Insights Panel ── */
+.cal-insights{
+  margin-top:14px;overflow:hidden;
+  transition:max-height .4s cubic-bezier(.16,1,.3,1),opacity .3s ease}
+.cal-insights.hidden{max-height:0;opacity:0;pointer-events:none}
+.cal-insights.visible{max-height:600px;opacity:1}
+.cal-insights-hdr{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:700;color:var(--t2);
+  text-transform:uppercase;letter-spacing:.08em;
+  padding-bottom:8px;border-bottom:1px solid var(--b1);margin-bottom:10px}
+.cal-insights-hdr .ci-date{
+  margin-left:auto;font-size:11px;font-weight:600;
+  color:var(--t3);font-variant-numeric:tabular-nums}
+.cal-events-list{display:flex;flex-direction:column;gap:7px;
+  max-height:200px;overflow-y:auto;padding-right:2px}
+.cal-events-list::-webkit-scrollbar{width:3px}
+.cal-events-list::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.ci-add-btn{
+  margin-left:auto;display:flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;
+  background:rgba(127,86,217,.1);color:var(--violet);
+  border:1px solid rgba(127,86,217,.22);cursor:pointer;
+  transition:all .15s;white-space:nowrap;flex-shrink:0}
+.ci-add-btn:hover{background:rgba(127,86,217,.2);border-color:var(--violet)}
+.cal-event{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:9px 12px;border-radius:10px;
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(127,86,217,.1);
+  backdrop-filter:blur(8px);
+  opacity:0;transform:translateY(10px);
+  animation:insightIn .32s cubic-bezier(.16,1,.3,1) both}
+@keyframes insightIn{
+  to{opacity:1;transform:translateY(0)}}
+.cal-event-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:700;letter-spacing:.05em;
+  padding:2px 8px;border-radius:20px;flex-shrink:0;margin-top:1px}
+.cal-event-leave{border-left:2px solid #E47A3B}
+.cal-event-meeting{border-left:2px solid #38bdf8}
+.cal-event-milestone{border-left:2px solid #7F56D9}
+.cal-event-leave .cal-event-tag{
+  background:rgba(228,122,59,.1);color:#B5551A;border:1px solid rgba(228,122,59,.25)}
+.cal-event-meeting .cal-event-tag{
+  background:rgba(56,189,248,.1);color:#1a6fa0;border:1px solid rgba(56,189,248,.28)}
+.cal-event-milestone .cal-event-tag{
+  background:rgba(127,86,217,.1);color:#5032a8;border:1px solid rgba(127,86,217,.24)}
+.cal-event-body{flex:1;min-width:0}
+.cal-event-title{font-size:12.5px;font-weight:600;color:var(--t1);line-height:1.4}
+.cal-event-meta{font-size:11px;color:var(--t3);margin-top:2px}
+.cal-insights-empty{
+  text-align:center;padding:20px 0;
+  font-size:13px;color:var(--t4);
+  opacity:0;animation:insightIn .32s ease both}
+.cal-insights-empty .ci-empty-art{font-size:28px;margin-bottom:6px}
+
+/* ━━━ TIME-AWARE GREETING ━━━ */
+.greeting-wrap{display:flex;flex-direction:column;gap:1px;justify-content:center}
+.greeting-main{
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;
+  font-size:22px;letter-spacing:.015em;color:var(--t1);
+  display:flex;align-items:center;gap:8px;line-height:1.1}
+.greeting-emoji{font-size:20px;line-height:1;
+  animation:greetBounce 2.4s ease-in-out infinite}
+@keyframes greetBounce{
+  0%,100%{transform:rotate(-5deg) scale(1)}
+  50%{transform:rotate(8deg) scale(1.15)}}
+.greeting-name{
+  background:var(--grad-main);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.greeting-sub{
+  font-size:10px;color:var(--t3);font-family:'Fira Code',monospace;
+  letter-spacing:.05em}
+
+/* ━━━ STATS STRIP ━━━ */
+.stats-strip{
+  display:flex;gap:8px;flex-wrap:wrap;
+  animation:slideUp .7s .07s cubic-bezier(.16,1,.3,1) both}
+.stat-pill{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 15px;border-radius:24px;
+  background:rgba(255,255,255,.82);
+  backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid rgba(127,86,217,.12);
+  box-shadow:0 2px 12px rgba(127,86,217,.07),inset 0 1px 0 rgba(255,255,255,.9);
+  transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s;
+  cursor:default;flex-shrink:0}
+.stat-pill:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(127,86,217,.16)}
+.stat-pill-icon{font-size:16px;line-height:1}
+.stat-pill-data{display:flex;flex-direction:column;gap:0}
+.stat-pill-value{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;
+  color:var(--t1);letter-spacing:-.02em;line-height:1.1}
+.stat-pill-label{font-size:9px;color:var(--t3);font-family:'Fira Code',monospace;
+  letter-spacing:.04em;text-transform:uppercase}
+.stat-pill.sp-todo  {border-color:rgba(56,189,248,.22);background:rgba(237,252,255,.88)}
+.stat-pill.sp-streak{border-color:rgba(242,201,76,.25);background:rgba(255,252,232,.88)}
+.stat-pill.sp-pomo  {border-color:rgba(228,122,59,.2);background:rgba(255,248,240,.88)}
+.stat-pill.sp-mood  {border-color:rgba(244,114,182,.22);background:rgba(255,240,250,.88)}
+[data-theme="dark"] .stat-pill.sp-todo  {background:rgba(56,189,248,.07)}
+[data-theme="dark"] .stat-pill.sp-streak{background:rgba(242,201,76,.07)}
+[data-theme="dark"] .stat-pill.sp-pomo  {background:rgba(228,122,59,.07)}
+[data-theme="dark"] .stat-pill.sp-mood  {background:rgba(244,114,182,.07)}
+[data-theme="dark"] .stat-pill{background:rgba(14,13,20,.75);border-color:rgba(255,255,255,.06)}
+[data-theme="dark"] .motto-card{background:rgba(14,13,20,.72);border-color:rgba(168,85,247,.18)}
+
+/* ━━━ TODO LEFT-ACCENT BAR ━━━ */
+.todo-item{
+  border-left:2px solid transparent;padding-left:6px;
+  transition:background .12s,border-color .18s}
+.todo-item:hover{background:var(--s2);border-left-color:rgba(127,86,217,.3)}
+.todo-item.done{border-left-color:rgba(56,189,248,.3)}
+/* Imported item accent colours match prio dot */
+.todo-item[data-prio="urgent"]:not(.done){border-left-color:rgba(248,113,113,.5)}
+.todo-item[data-prio="high"]:not(.done){border-left-color:rgba(251,146,60,.5)}
+.todo-item[data-prio="medium"]:not(.done){border-left-color:rgba(251,191,36,.5)}
+.todo-item[data-prio="low"]:not(.done){border-left-color:rgba(74,222,128,.5)}
+
+/* ━━━ PROGRESS MILESTONE TICKS ━━━ */
+.todo-progress-bar{position:relative;overflow:visible!important}
+.p-mile{
+  position:absolute;top:50%;transform:translate(-50%,-50%);
+  width:2px;height:9px;border-radius:1px;background:var(--b2);pointer-events:none}
+
+/* ━━━ JOURNAL WORD COUNT ━━━ */
+.journal-wc{font-size:10px;color:var(--t4);font-family:'Fira Code',monospace;
+  transition:color .3s}
+.journal-wc.active{color:var(--orange)}
+
+/* ━━━ CARD ENTRANCE STAGGER REFINEMENTS ━━━ */
+.motto-card  {animation-delay:.02s}
+.journal-card{animation-delay:.08s}
+.todo-card   {animation-delay:.16s}
+.cal-card    {animation-delay:.12s}
+.mood-card   {animation-delay:.22s}
+.orb-card    {animation-delay:.30s}
+
+/* ━━━ SIDEBAR ACTIVE GLOW ━━━ */
+.nav-item.active{
+  box-shadow:inset 2px 0 0 var(--violet),inset 0 0 12px rgba(127,86,217,.04)}
+
+/* ━━━ SCROLL AREA TOP FADE ━━━ */
+.ps-scroll{position:relative}
+
+/* ━━━ MOOD TRACKER ━━━ */
+.mood-card{--card-glow:rgba(244,114,182,.5);animation-delay:.44s}
+.mood-body{padding:12px 14px 14px}
+.mood-emojis{display:flex;gap:6px;margin-bottom:12px}
+.mood-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:9px 4px;border-radius:12px;cursor:pointer;
+  border:1.5px solid transparent;
+  background:var(--s2);transition:all .22s cubic-bezier(.16,1,.3,1)}
+.mood-btn:hover{background:var(--s3);transform:translateY(-3px);
+  box-shadow:0 6px 18px rgba(127,86,217,.14)}
+.mood-btn.selected.m-happy{
+  border-color:rgba(74,222,128,.6);background:rgba(74,222,128,.08);
+  transform:translateY(-5px) scale(1.06);
+  box-shadow:0 8px 24px rgba(74,222,128,.22)}
+.mood-btn.selected.m-neutral{
+  border-color:rgba(228,122,59,.55);background:var(--orange-d);
+  transform:translateY(-5px) scale(1.06);
+  box-shadow:0 8px 24px rgba(228,122,59,.2)}
+.mood-btn.selected.m-sad{
+  border-color:rgba(127,86,217,.5);background:var(--violet-d);
+  transform:translateY(-5px) scale(1.06);
+  box-shadow:0 8px 24px rgba(127,86,217,.18)}
+.mood-emoji{font-size:24px;line-height:1;transition:transform .2s}
+.mood-btn:hover .mood-emoji{transform:scale(1.18)}
+.mood-label{font-size:9.5px;font-weight:700;color:var(--t3);
+  font-family:'Fira Code',monospace;letter-spacing:.04em}
+.mood-footer{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.mood-hist-label{font-size:9px;color:var(--t4);font-family:'Fira Code',monospace;flex-shrink:0}
+.mood-hist-dots{display:flex;gap:3px}
+.mood-hist-dot{
+  width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;background:var(--s2);border:1px solid var(--b1);cursor:default;
+  transition:transform .15s}
+.mood-hist-dot:hover{transform:scale(1.25)}
+
+/* ━━━ FOCUS ORB ━━━ */
+.orb-card{--card-glow:rgba(56,189,248,.55);animation-delay:.52s}
+.orb-body{padding:12px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.focus-orb-wrap{position:relative;width:88px;height:88px}
+.orb-ring{
+  position:absolute;inset:-10px;border-radius:50%;
+  border:1.5px dashed rgba(127,86,217,.2);
+  animation:orbRingSpin 9s linear infinite}
+.orb-ring.r2{
+  inset:-18px;border:1.5px dashed rgba(228,122,59,.14);
+  animation-duration:14s;animation-direction:reverse}
+@keyframes orbRingSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.orb-ring::before{
+  content:'●';position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  font-size:5px;color:rgba(127,86,217,.45);line-height:1}
+.orb-ring.r2::before{color:rgba(228,122,59,.35)}
+.focus-orb{
+  width:100%;height:100%;border-radius:50%;
+  background:
+    radial-gradient(circle at 32% 30%,rgba(255,255,255,.55) 0%,transparent 50%),
+    radial-gradient(circle,rgba(127,86,217,.28) 0%,rgba(56,189,248,.18) 55%,rgba(127,86,217,.1) 100%);
+  border:2px solid rgba(127,86,217,.28);
+  box-shadow:
+    0 0 0 5px rgba(127,86,217,.06),
+    0 0 28px rgba(127,86,217,.28),
+    inset 0 0 16px rgba(56,189,248,.12);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  transition:box-shadow .6s,border-color .4s;position:relative;z-index:2}
+.focus-orb.charging{
+  animation:orbCharge 2.8s ease-in-out infinite;
+  border-color:rgba(228,122,59,.55);
+  box-shadow:
+    0 0 0 8px rgba(228,122,59,.07),
+    0 0 44px rgba(228,122,59,.42),
+    inset 0 0 22px rgba(228,122,59,.18)}
+@keyframes orbCharge{
+  0%,100%{transform:scale(1);filter:brightness(1)}
+  50%{transform:scale(1.08);filter:brightness(1.14) drop-shadow(0 0 18px rgba(228,122,59,.55))}}
+.orb-count{
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;
+  font-size:26px;letter-spacing:-.03em;color:var(--t1);line-height:1}
+.orb-unit{font-size:8.5px;font-family:'Fira Code',monospace;color:var(--t3);letter-spacing:.06em}
+.orb-status{
+  font-size:11px;font-weight:600;color:var(--t3);
+  font-family:'Fira Code',monospace;letter-spacing:.03em;text-align:center}
+.orb-status.active{color:var(--orange);animation:orbPulse 1.4s ease-in-out infinite}
+@keyframes orbPulse{0%,100%{opacity:.65}50%{opacity:1}}
+.orb-week-dots{display:flex;gap:5px;align-items:center}
+.orb-day-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--b2);
+  transition:all .35s cubic-bezier(.16,1,.3,1)}
+.orb-day-dot.has{background:linear-gradient(135deg,var(--violet),var(--cyan));
+  box-shadow:0 0 4px rgba(127,86,217,.35)}
+.orb-day-dot.today{background:linear-gradient(135deg,var(--orange),var(--gold));
+  box-shadow:0 0 7px rgba(228,122,59,.45);transform:scale(1.3)}
+
+</style>
+</head>
+<body>
+
+<!-- ━━━ BACKGROUND AURORA ━━━ -->
+<div class="bg-aurora" aria-hidden="true"></div>
+
+<!-- ━━━ BACKGROUND ORBS ━━━ -->
+<div class="ps-orbs" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- ━━━ SIDEBAR ━━━ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">PM</div>
+    <div class="logo-label">PM<em>Suite</em></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">工作區</div>
+    <a class="nav-item" href="index.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      總覽
+    </a>
+    <a class="nav-item" href="projects.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>
+      專案
+    </a>
+    <a class="nav-item" href="tasks.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      任務
+    </a>
+    <a class="nav-item" href="project-detail.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      看板
+    </a>
+    <a class="nav-item" href="sprint-review.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Sprint Review
+    </a>
+    <div class="nav-section">工具</div>
+    <a class="nav-item" href="pomodoro-timer.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
+      番茄鐘
+    </a>
+    <a class="nav-item active" href="personal-space.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M3 21c0-4.2 4-7 9-7s9 2.8 9 7"/><path d="M16.5 3.5c1-1 2.5-.5 3 1s-.5 2.5-1.5 2.5"/></svg>
+      個人中心
+    </a>
+    <a class="nav-item" href="#">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      文件
+    </a>
+    <a class="nav-item" href="profile.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      設定
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sun-reminder" id="sunReminder" onclick="document.getElementById('journalTextarea').focus()">
+      <svg class="sun-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <div class="sun-text">今天的晨報<br>還沒填寫喔</div>
+    </div>
+    <div class="user-row">
+      <div class="av">王</div>
+      <div>
+        <div class="user-name">王小明</div>
+        <div class="user-role">Project Manager</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ━━━ MAIN ━━━ -->
+<div class="main">
+  <header class="hdr">
+    <div class="greeting-wrap" id="greetingWrap">
+      <div class="greeting-main">
+        <span class="greeting-emoji" id="greetEmoji">🌅</span>
+        <span id="greetText">早安，</span><span class="greeting-name">王小明</span>
+      </div>
+      <div class="greeting-sub" id="greetSub"></div>
+    </div>
+    <div class="hdr-space"></div>
+    <button class="icon-btn" onclick="toggleTheme()" title="切換主題">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </header>
+
+  <div class="ps-scroll">
+
+    <!-- ▼ 01 — MOTTO BOOST ZONE (Glassmorphism) -->
+    <div class="motto-card">
+      <div class="aurora-mesh">
+        <div class="halo halo-1"></div>
+        <div class="halo halo-2"></div>
+        <div class="halo halo-3"></div>
+      </div>
+      <!-- Floating decorative glyphs -->
+      <span class="motto-deco deco-1">✦</span>
+      <span class="motto-deco deco-2">✦</span>
+      <span class="motto-deco deco-3">✧</span>
+      <span class="motto-deco deco-4">⟡</span>
+      <!-- Day chip -->
+      <div class="motto-day-chip" id="mottoDayChip">今日能量</div>
+      <div class="motto-inner">
+        <!-- Decorative big quotes -->
+        <div class="motto-qmark open">"</div>
+        <div class="motto-qmark close">"</div>
+        <!-- Auto-updated daily quote -->
+        <div class="motto-quote-text" id="mottoQuoteText">正在載入今日能量…</div>
+        <div class="motto-source" id="mottoSource"></div>
+      </div>
+    </div>
+
+    <!-- ▼ STATS STRIP -->
+    <div class="stats-strip" id="statsStrip">
+      <div class="stat-pill sp-todo">
+        <span class="stat-pill-icon">✅</span>
+        <div class="stat-pill-data">
+          <span class="stat-pill-value" id="spTodo">0/0</span>
+          <span class="stat-pill-label">今日任務</span>
+        </div>
+      </div>
+      <div class="stat-pill sp-streak">
+        <span class="stat-pill-icon">🔥</span>
+        <div class="stat-pill-data">
+          <span class="stat-pill-value" id="spStreak">0</span>
+          <span class="stat-pill-label">連續天數</span>
+        </div>
+      </div>
+      <div class="stat-pill sp-pomo">
+        <span class="stat-pill-icon">🍅</span>
+        <div class="stat-pill-data">
+          <span class="stat-pill-value" id="spPomo">0</span>
+          <span class="stat-pill-label">本週番茄</span>
+        </div>
+      </div>
+      <div class="stat-pill sp-mood">
+        <span class="stat-pill-icon" id="spMoodIcon">—</span>
+        <div class="stat-pill-data">
+          <span class="stat-pill-value" id="spMood">未記錄</span>
+          <span class="stat-pill-label">今日心情</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ▼ TWO-COLUMN GRID -->
+    <div class="ps-cols">
+
+      <!-- LEFT COLUMN -->
+      <div class="ps-left">
+
+        <!-- JOURNAL CARD -->
+        <div class="ps-card journal-card">
+          <div class="ps-card-hdr">
+            <div class="card-num">01</div>
+            <div class="ps-card-icon" style="background:rgba(251,191,36,.1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <div class="ps-card-title">晨報記事本</div>
+            <div class="journal-nav">
+              <button class="jnav-btn" id="jnavPrev" onclick="journalNav(-1)">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <div class="jnav-date" id="jnavDateLabel">今天</div>
+              <button class="jnav-btn" id="jnavNext" onclick="journalNav(1)">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <div class="ps-card-acts">
+              <div class="tmpl-wrap">
+                <button class="ps-btn" id="tmplBtn" onclick="toggleTmplMenu()">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                  模板
+                </button>
+                <div class="tmpl-menu" id="tmplMenu">
+                  <div class="tmpl-row" onclick="applyTemplate('morning')">
+                    <span class="tmpl-icon">🌅</span>
+                    <div><div class="tmpl-title">晨間反思</div><div class="tmpl-desc">感恩·目標·心情</div></div>
+                  </div>
+                  <div class="tmpl-row" onclick="applyTemplate('standup')">
+                    <span class="tmpl-icon">🚀</span>
+                    <div><div class="tmpl-title">站立會議</div><div class="tmpl-desc">昨天·今天·阻礙</div></div>
+                  </div>
+                  <div class="tmpl-row" onclick="applyTemplate('weekly')">
+                    <span class="tmpl-icon">📅</span>
+                    <div><div class="tmpl-title">週回顧</div><div class="tmpl-desc">成就·挑戰·計畫</div></div>
+                  </div>
+                  <div class="tmpl-row" onclick="applyTemplate('blank')">
+                    <span class="tmpl-icon">✏️</span>
+                    <div><div class="tmpl-title">自由書寫</div><div class="tmpl-desc">清空重新開始</div></div>
+                  </div>
+                </div>
+              </div>
+              <button class="ps-btn" id="previewBtn" onclick="togglePreview()">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                預覽
+              </button>
+            </div>
+          </div>
+          <div class="journal-body">
+            <div class="journal-ruled">
+              <div class="journal-margin"></div>
+              <textarea class="journal-textarea" id="journalTextarea"
+                placeholder="今天的晨報… 支援 Markdown&#10;# 標題  **粗體**  *斜體*  - 清單"
+                oninput="onJournalInput()"></textarea>
+              <div class="journal-preview" id="journalPreview"></div>
+            </div>
+            <div class="journal-footer">
+              <div class="journal-save-note" id="journalSaveNote">自動儲存</div>
+              <div style="font-size:10px;color:var(--t4)">Markdown 支援</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TODO CARD -->
+        <div class="ps-card todo-card">
+          <div class="ps-card-hdr">
+            <div class="card-num">02</div>
+            <div class="ps-card-icon" style="background:rgba(56,189,248,.1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div class="ps-card-title">每日 To-Do</div>
+            <div class="todo-date-nav">
+              <button class="todo-dnav-btn" id="tdnavPrev" onclick="todoNavDay(-1)" title="前一天">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <div class="todo-ddate" id="tdnavLabel">今天</div>
+              <button class="todo-dnav-btn" id="tdnavNext" onclick="todoNavDay(1)" title="後一天" disabled>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <div class="ps-card-sub" id="todoCountEl">0 / 0</div>
+            <div class="ps-card-acts">
+              <button class="ps-btn" onclick="openImportModal()">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
+                匯入
+              </button>
+              <button class="ps-btn" onclick="clearDoneTodos()">清除完成</button>
+            </div>
+          </div>
+          <div class="todo-progress-wrap">
+            <div class="todo-progress-label">
+              <span>完成進度</span>
+              <span class="todo-progress-pct" id="todoProgressPct">0%</span>
+            </div>
+            <div class="todo-progress-bar">
+              <div class="todo-progress-fill" id="todoProgressFill" style="width:0%"></div>
+              <div class="p-mile" style="left:25%"></div>
+              <div class="p-mile" style="left:50%"></div>
+              <div class="p-mile" style="left:75%"></div>
+            </div>
+          </div>
+          <div class="todo-body">
+            <div class="todo-sec-label">來自專案的任務</div>
+            <div id="projTodoList" class="todo-list"></div>
+            <div class="todo-sec-label">個人雜事</div>
+            <div class="todo-add-row">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <input class="todo-add-input" id="personalTodoInput" type="text"
+                placeholder="新增個人待辦… 按 Enter 新增"
+                onkeydown="onTodoKey(event)">
+              <span class="todo-add-hint">↵</span>
+            </div>
+            <div id="personalTodoList" class="todo-list"></div>
+          </div>
+        </div>
+
+      </div><!-- /ps-left -->
+
+      <!-- RIGHT COLUMN: CALENDAR -->
+      <div class="ps-right">
+        <div class="ps-card cal-card">
+          <div class="ps-card-hdr">
+            <div class="card-num">03</div>
+            <div class="ps-card-icon" style="background:rgba(192,132,252,.1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="ps-card-title">整合行事曆</div>
+            <div class="ps-card-acts">
+              <div class="cal-view-tabs">
+                <div class="cal-vt active" id="calTabMonth" onclick="setCalView('month')">月</div>
+                <div class="cal-vt" id="calTabWeek" onclick="setCalView('week')">週</div>
+              </div>
+            </div>
+          </div>
+          <div class="cal-body">
+            <div class="cal-nav">
+              <button class="cal-nav-btn" onclick="calNav(-1)">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <div class="cal-month-lbl" id="calMonthLabel"></div>
+              <button class="cal-nav-btn" onclick="calNav(1)">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <div id="calMonthView">
+              <div class="cal-dow">
+                <div class="cal-dow-cell">日</div><div class="cal-dow-cell">一</div>
+                <div class="cal-dow-cell">二</div><div class="cal-dow-cell">三</div>
+                <div class="cal-dow-cell">四</div><div class="cal-dow-cell">五</div>
+                <div class="cal-dow-cell">六</div>
+              </div>
+              <div class="cal-cells" id="calCells"></div>
+            </div>
+            <div id="calWeekView" style="display:none">
+              <div class="cal-week" id="calWeekCells"></div>
+            </div>
+            <div class="cal-legend">
+              <div class="cal-leg-item">
+                <div class="cal-leg-dot" style="background:var(--purple)"></div>截止任務
+              </div>
+              <div class="cal-leg-item">
+                <div class="cal-leg-dot" style="background:var(--cyan)"></div>個人記事
+              </div>
+              <div class="cal-leg-item">
+                <div class="cal-leg-dot" style="background:#E47A3B"></div>請假
+              </div>
+              <div class="cal-leg-item">
+                <div class="cal-leg-dot" style="background:#38bdf8"></div>會議
+              </div>
+              <div class="cal-leg-item">
+                <div class="cal-leg-dot" style="background:#7F56D9"></div>里程碑
+              </div>
+            </div>
+            <!-- Today's Insights -->
+            <div class="cal-insights hidden" id="calInsights">
+              <div class="cal-insights-hdr">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                今日洞察
+                <span class="ci-date" id="ciDateLabel"></span>
+                <button class="ci-add-btn" id="ciAddBtn" onclick="openInsightNoteModal(selectedCalDate)">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  新增記事
+                </button>
+              </div>
+              <div class="cal-events-list" id="calEventsList"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ▼ MOOD TRACKER -->
+        <div class="ps-card mood-card" style="margin-top:16px">
+          <div class="ps-card-hdr">
+            <div class="ps-card-icon" style="background:rgba(244,114,182,.1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <div class="ps-card-title">今日心情</div>
+            <div class="ps-card-sub" id="moodDateLabel"></div>
+          </div>
+          <div class="mood-body">
+            <div class="mood-emojis">
+              <button class="mood-btn m-happy" data-mood="happy" onclick="setMood('happy')">
+                <div class="mood-emoji">😊</div>
+                <div class="mood-label">開心</div>
+              </button>
+              <button class="mood-btn m-neutral" data-mood="neutral" onclick="setMood('neutral')">
+                <div class="mood-emoji">😐</div>
+                <div class="mood-label">普通</div>
+              </button>
+              <button class="mood-btn m-sad" data-mood="sad" onclick="setMood('sad')">
+                <div class="mood-emoji">😞</div>
+                <div class="mood-label">有點累</div>
+              </button>
+            </div>
+            <div class="mood-footer">
+              <span class="mood-hist-label">近7天</span>
+              <div class="mood-hist-dots" id="moodHistDots"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ▼ FOCUS ORB -->
+        <div class="ps-card orb-card" style="margin-top:16px">
+          <div class="ps-card-hdr">
+            <div class="ps-card-icon" style="background:rgba(56,189,248,.1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
+            </div>
+            <div class="ps-card-title">專注能量球</div>
+            <div class="ps-card-sub" id="orbWeekLabel">本週</div>
+          </div>
+          <div class="orb-body">
+            <div class="focus-orb-wrap">
+              <div class="orb-ring"></div>
+              <div class="orb-ring r2"></div>
+              <div class="focus-orb" id="focusOrb">
+                <div class="orb-count" id="orbCount">0</div>
+                <div class="orb-unit">🍅 番茄</div>
+              </div>
+            </div>
+            <div class="orb-status" id="orbStatus">本週尚無番茄鐘</div>
+            <div class="orb-week-dots" id="orbWeekDots"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /ps-cols -->
+  </div><!-- /ps-scroll -->
+
+  <!-- ━━━ MINI ZOO DOCK ━━━ -->
+  <div class="zoo-dock" id="zooDock">
+    <!-- Ambient halos -->
+    <div class="zoo-halo zoo-halo-1"></div>
+    <div class="zoo-halo zoo-halo-2"></div>
+    <div class="zoo-halo zoo-halo-3"></div>
+    <!-- Ground -->
+    <div class="zoo-ground"></div>
+    <!-- Flora -->
+    <div class="zoo-tree" style="left:6%;font-size:30px;animation-delay:.2s">🌲</div>
+    <div class="zoo-tree" style="left:18%;font-size:22px;animation-delay:1.1s">🌿</div>
+    <div class="zoo-tree" style="left:52%;font-size:28px;animation-delay:.7s">🌳</div>
+    <div class="zoo-tree" style="left:71%;font-size:20px;animation-delay:1.8s">🌱</div>
+    <!-- Sparkles -->
+    <div class="zoo-star" style="left:10%;top:15%;animation-delay:.3s">✦</div>
+    <div class="zoo-star" style="left:35%;top:12%;animation-delay:1.4s">✧</div>
+    <div class="zoo-star" style="left:62%;top:18%;animation-delay:2.1s">✦</div>
+
+    <!-- Pixel clouds -->
+    <div class="zoo-cloud" style="top:10%;animation-duration:22s;animation-delay:0s"><div class="zoo-cloud-px"></div></div>
+    <div class="zoo-cloud" style="top:16%;animation-duration:30s;animation-delay:-12s;transform:scale(.7)"><div class="zoo-cloud-px"></div></div>
+    <div class="zoo-cloud" style="top:8%;animation-duration:18s;animation-delay:-7s;transform:scale(1.2)"><div class="zoo-cloud-px"></div></div>
+
+    <!-- Animals layer -->
+    <div class="zoo-animals-layer" id="zooAnimalsLayer">
+      <!-- 🐰 Bunny (starts unlocked) -->
+      <div class="zoo-animal m-idle" id="zoo-a-bunny" style="left:200px" onclick="zooAnimalClick('bunny')">
+        <div class="zoo-animal-wrap" style="position:relative;display:inline-block">
+          <div class="zoo-flip" id="zoo-flip-bunny">
+            <span class="zoo-emoji">🐰</span>
+          </div>
+          <div class="zoo-lvl" id="zoo-lvl-bunny">1</div>
+        </div>
+        <div class="zoo-xpbar"><div class="zoo-xpfill" id="zoo-xp-bunny" style="width:0%"></div></div>
+      </div>
+      <!-- 🦊 Fox (unlocks at 3-day streak) -->
+      <div class="zoo-animal m-idle locked" id="zoo-a-fox" style="left:400px" onclick="zooAnimalClick('fox')">
+        <div class="zoo-animal-wrap" style="position:relative;display:inline-block">
+          <div class="zoo-flip" id="zoo-flip-fox">
+            <span class="zoo-emoji">🦊</span>
+          </div>
+          <div class="zoo-lock-icon">🔒</div>
+          <div class="zoo-lvl" id="zoo-lvl-fox">1</div>
+        </div>
+        <div class="zoo-xpbar"><div class="zoo-xpfill" id="zoo-xp-fox" style="width:0%"></div></div>
+      </div>
+      <!-- 🦁 Lion (unlocks at 7-day streak) -->
+      <div class="zoo-animal m-idle locked" id="zoo-a-lion" style="left:580px" onclick="zooAnimalClick('lion')">
+        <div class="zoo-animal-wrap" style="position:relative;display:inline-block">
+          <div class="zoo-flip" id="zoo-flip-lion">
+            <span class="zoo-emoji">🦁</span>
+          </div>
+          <div class="zoo-lock-icon">🔒</div>
+          <div class="zoo-lvl" id="zoo-lvl-lion">1</div>
+        </div>
+        <div class="zoo-xpbar"><div class="zoo-xpfill" id="zoo-xp-lion" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Streak badge -->
+    <div class="zoo-streak" id="zooStreak">
+      <span>🔥</span>
+      <span id="zooStreakNum">0 天連續</span>
+    </div>
+
+    <!-- Feed zone -->
+    <div class="zoo-feed-zone">
+      <button class="zoo-feed-btn" id="zooFeedBtn" onclick="zooFeed()" title="投餵動物">
+        🥫
+        <span class="zoo-feed-badge" id="zooFeedBadge">0</span>
+      </button>
+      <div class="zoo-feed-label">飼料罐</div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ━━━ NOTE MODAL ━━━ -->
+<div class="modal-wrap" id="noteModal">
+  <div class="modal-overlay" onclick="closeNoteModal()"></div>
+  <div class="modal-box">
+    <div class="modal-title" id="noteModalTitle">新增個人記事</div>
+    <input class="modal-input" id="noteModalInput" type="text"
+      placeholder="輸入記事內容…"
+      onkeydown="if(event.key==='Enter')confirmNote();if(event.key==='Escape')closeNoteModal()">
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeNoteModal()">取消</button>
+      <button class="btn-primary" onclick="confirmNote()">新增</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ IMPORT MODAL ━━━ -->
+<div class="modal-wrap" id="importModal">
+  <div class="modal-overlay" onclick="closeImportModal()"></div>
+  <div class="modal-box" style="width:420px">
+    <div class="modal-title">從專案匯入任務</div>
+    <div style="font-size:12px;color:var(--t3);margin-bottom:10px">選擇要加入今日清單的任務：</div>
+    <div class="import-list" id="importList"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeImportModal()">取消</button>
+      <button class="btn-primary" onclick="confirmImport()">加入清單</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ TOAST ━━━ -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════════════
+const STORAGE_KEY   = 'personal-space-v1';
+const TASKS_KEY     = 'projectos-tasks-v1';
+const PRIO_COLOR    = { urgent:'#f87171', high:'#fb923c', medium:'#fbbf24', low:'#4ade80', none:'#58547a' };
+
+const TEMPLATES = {
+  morning:`# 🌅 晨間反思 — {d}
+
+## 今天感恩的三件事
+1.
+2.
+3.
+
+## 今日最重要的目標
+-
+
+## 今天的心情
+⭐ ⭐ ⭐ ⭐ ⭐
+
+---
+**備注：**
+`,
+  standup:`# 🚀 站立會議 — {d}
+
+## 昨天完成了什麼？
+-
+
+## 今天打算做什麼？
+-
+
+## 有什麼阻礙？
+- 無
+`,
+  weekly:`# 📅 週回顧 — {d}
+
+## 本週成就
+-
+
+## 本週挑戰
+-
+
+## 下週計畫
+1.
+2.
+3.
+
+## 本週評分
+⭐ ⭐ ⭐ ⭐ ⭐
+`,
+  blank: '',
+};
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+let state = {
+  dailyData: {},
+  todos:     [],
+  calNotes:  {},
+  weekPomos: [],
+};
+
+let journalDate  = new Date();
+let calYear, calMonth;
+let calView      = 'month';
+let noteDate     = null;
+let selectedCalDate = null;
+let saveTimer    = null;
+let importSelected = new Set();
+
+// ═══════════════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════════════
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      state.dailyData = s.dailyData || {};
+      state.todos     = s.todos     || [];
+      state.calNotes  = s.calNotes  || {};
+      state.weekPomos = s.weekPomos || [];
+    }
+  } catch(e) {}
+}
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function getDay(k) {
+  if (!state.dailyData[k]) state.dailyData[k] = { journal:'', goal:'', motto:'' };
+  return state.dailyData[k];
+}
+
+function getProjectTasks() {
+  try {
+    const raw = localStorage.getItem(TASKS_KEY);
+    if (!raw) return [];
+    const s = JSON.parse(raw);
+    return Object.values(s.tasks || {});
+  } catch(e) { return []; }
+}
+
+// ═══════════════════════════════════════════════════
+//  DATE UTILS
+// ═══════════════════════════════════════════════════
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function todayKey() { return dateKey(new Date()); }
+function fmtShort(d) {
+  const t = todayKey(), k = dateKey(d);
+  if (k === t) return '今天';
+  if (k === dateKey(new Date(Date.now()-86400000))) return '昨天';
+  if (k === dateKey(new Date(Date.now()+86400000))) return '明天';
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+function fmtHeader(d) {
+  const wd = ['日','一','二','三','四','五','六'];
+  return `${d.getFullYear()} / ${d.getMonth()+1} / ${d.getDate()} 週${wd[d.getDay()]}`;
+}
+
+// ═══════════════════════════════════════════════════
+//  DAILY MOTTOS — store-backed, one random quote per day
+// ═══════════════════════════════════════════════════
+const DAILY_MOTTOS = [
+  { text: '不要等待機會，而要創造機會。', source: '林肯' },
+  { text: '成功不是終點，失敗也不是終結，勇氣才是永恆的力量。', source: '邱吉爾' },
+  { text: '每一個偉大的夢想，都始於一個敢於做夢的人。', source: '哈莉特・塔布曼' },
+  { text: '你所走的每一步，都是通往偉大的唯一路徑。', source: '愛默生' },
+  { text: '相信自己能做到，你就已經成功了一半。', source: '西奧多・羅斯福' },
+  { text: '最好的時刻，永遠是現在。', source: '老子' },
+  { text: '只要還有明天，今天永遠都是起跑線。', source: '無名' },
+  { text: '困難是強大的鑰匙，它只對努力的人開門。', source: '佚名' },
+  { text: '行動是治癒恐懼的良藥，猶豫卻只會滋養恐懼。', source: '威廉・詹姆斯' },
+  { text: '你的限制，只存在於你願意接受它的那一刻。', source: '無名' },
+  { text: '不在乎你跌倒幾次，重要的是每次你都站了起來。', source: '尼爾森・曼德拉' },
+  { text: '人生最重要的不是所站的位置，而是所朝的方向。', source: '奧利佛・霍姆斯' },
+  { text: '凡是值得做的事，就值得做好。', source: '切斯特菲爾德勛爵' },
+  { text: '激情是成功的燃料，堅持是抵達的路。', source: '佚名' },
+  { text: '昨天是歷史，明天是謎，今天是禮物。', source: '愛蓮娜・羅斯福' },
+  { text: '世界上沒有絕望的處境，只有對處境感到絕望的人。', source: '克萊爾・布思・魯斯' },
+  { text: '真正的勇敢，是感到害怕，卻依然前行。', source: '約翰・韋恩' },
+  { text: '把每個黎明當作新生命的開始。', source: '泰戈爾' },
+  { text: '播種行為，收穫習慣；播種習慣，收穫性格；播種性格，收穫命運。', source: '查爾斯・瑞德' },
+  { text: '生命中最美好的事物，往往需要你先邁出第一步。', source: '佚名' },
+  { text: '你的努力，終將成為閃閃發光的自己。', source: '無名' },
+  { text: '一念之轉，天地皆寬。', source: '佚名' },
+  { text: '今天的你，比昨天更接近夢想。', source: '無名' },
+  { text: '喜悅不是來自擁有，而是來自成為。', source: '佚名' },
+  { text: '每一次呼吸，都是宇宙給你的禮物。', source: '佚名' },
+];
+
+// Pick today's motto using a deterministic date-based seed.
+// Stored in state so it stays fixed all day even on reload.
+function getDailyMotto() {
+  const key = todayKey();
+  const day = getDay(key);
+  if (day.autoMotto) return day.autoMotto;
+
+  // Deterministic hash of the date string → stable index
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (Math.imul(hash, 31) + key.charCodeAt(i)) | 0;
+  }
+  const idx = Math.abs(hash) % DAILY_MOTTOS.length;
+  day.autoMotto = DAILY_MOTTOS[idx];
+  save();
+  return day.autoMotto;
+}
+
+function renderMotto() {
+  const motto = getDailyMotto();
+  const textEl  = document.getElementById('mottoQuoteText');
+  const srcEl   = document.getElementById('mottoSource');
+  const chipEl  = document.getElementById('mottoDayChip');
+  if (textEl) textEl.textContent = motto.text;
+  if (srcEl)  srcEl.textContent  = motto.source;
+  if (chipEl) {
+    const now = new Date();
+    chipEl.textContent = `${now.getMonth()+1}月${now.getDate()}日 · 今日能量`;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  JOURNAL
+// ═══════════════════════════════════════════════════
+let previewMode = false;
+
+function renderJournal() {
+  const key  = dateKey(journalDate), day = getDay(key);
+  const ta   = document.getElementById('journalTextarea');
+  const prev = document.getElementById('journalPreview');
+  const lbl  = document.getElementById('jnavDateLabel');
+  const next = document.getElementById('jnavNext');
+
+  ta.value = day.journal || '';
+  lbl.textContent = fmtShort(journalDate);
+
+  const isToday = key === todayKey();
+  next.disabled = isToday;
+  next.style.opacity = isToday ? '0.28' : '1';
+
+  if (previewMode) {
+    ta.style.display = 'none';
+    prev.classList.add('show');
+    prev.innerHTML = renderMd(day.journal || '');
+  } else {
+    ta.style.display = '';
+    prev.classList.remove('show');
+  }
+  updateSunReminder();
+}
+
+function onJournalInput() {
+  const key = dateKey(journalDate), day = getDay(key);
+  day.journal = document.getElementById('journalTextarea').value;
+
+  const note = document.getElementById('journalSaveNote');
+  note.textContent = '正在儲存…'; note.className = 'journal-save-note';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    save();
+    note.textContent = '已儲存 ✓'; note.className = 'journal-save-note ok';
+    updateSunReminder();
+    renderCal();
+  }, 700);
+}
+
+function journalNav(d) {
+  const next = new Date(journalDate);
+  next.setDate(next.getDate() + d);
+  if (dateKey(next) > todayKey()) return;
+  journalDate = next;
+  renderJournal();
+}
+
+function togglePreview() {
+  previewMode = !previewMode;
+  document.getElementById('previewBtn').classList.toggle('active', previewMode);
+  renderJournal();
+}
+
+function toggleTmplMenu() {
+  const m = document.getElementById('tmplMenu');
+  const b = document.getElementById('tmplBtn');
+  const o = m.classList.toggle('open');
+  b.classList.toggle('active', o);
+}
+
+function applyTemplate(type) {
+  const d = new Date();
+  const ds = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  const text = (TEMPLATES[type] || '').replace('{d}', ds);
+  const ta = document.getElementById('journalTextarea');
+  ta.value = text;
+  getDay(dateKey(journalDate)).journal = text;
+  save();
+  document.getElementById('tmplMenu').classList.remove('open');
+  document.getElementById('tmplBtn').classList.remove('active');
+  updateSunReminder();
+  showToast('模板已套用 ✨');
+}
+
+function updateSunReminder() {
+  const hasJ = !!(getDay(todayKey()).journal?.trim());
+  document.getElementById('sunReminder').classList.toggle('show', !hasJ);
+}
+
+// ═══════════════════════════════════════════════════
+//  MARKDOWN RENDERER
+// ═══════════════════════════════════════════════════
+function renderMd(text) {
+  if (!text.trim()) return '<p style="color:var(--t4);font-style:italic">（空白）</p>';
+  let h = escHtml(text);
+  h = h.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  h = h.replace(/^## (.+)$/gm,  '<h2>$1</h2>');
+  h = h.replace(/^# (.+)$/gm,   '<h1>$1</h1>');
+  h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/\*(.+?)\*/g,    '<em>$1</em>');
+  h = h.replace(/~~(.+?)~~/g,    '<del>$1</del>');
+  h = h.replace(/`(.+?)`/g,      '<code>$1</code>');
+  h = h.replace(/^---$/gm,       '<hr>');
+  h = h.replace(/^\[x\] (.+)$/gim, '<li style="list-style:none">✅ <del>$1</del></li>');
+  h = h.replace(/^\[ \] (.+)$/gm,  '<li style="list-style:none">⬜ $1</li>');
+  h = h.replace(/^[-*] (.+)$/gm,   '<li>$1</li>');
+  h = h.replace(/((?:<li[^>]*>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
+  h = h.replace(/\n\n+/g, '</p><p>');
+  h = h.replace(/\n/g, '<br>');
+  return `<p>${h}</p>`;
+}
+
+// ═══════════════════════════════════════════════════
+//  TODOS
+// ═══════════════════════════════════════════════════
+
+// ── Audio ding + confetti ──
+function playDing() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 1760;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(.55, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .32);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + .32);
+  } catch(e){}
+}
+
+function fireConfetti(el) {
+  if (!window.confetti || !el) return;
+  const rect = el.getBoundingClientRect();
+  confetti({
+    particleCount: 38,
+    spread: 55,
+    origin: { x: rect.left / window.innerWidth + rect.width / window.innerWidth / 2, y: rect.top / window.innerHeight },
+    colors: ['#F2C94C','#E47A3B','#7F56D9','#f472b6','#4ade80'],
+    scalar: .85,
+    gravity: 1.2,
+    drift: .1,
+  });
+}
+
+// ── Todo day view ──
+let todoViewDate = new Date();
+
+function todoNavDay(d) {
+  const next = new Date(todoViewDate);
+  next.setDate(next.getDate() + d);
+  if (dateKey(next) > todayKey()) return;
+
+  const body = document.querySelector('.todo-body');
+  if (body) {
+    // d > 0 means going forward in time → slide left out, new content slides in from right
+    // d < 0 means going back in time   → slide right out, new content slides in from left
+    const outCls = d > 0 ? 'slide-out-l' : 'slide-out-r';
+    const inCls  = d > 0 ? 'slide-in-r'  : 'slide-in-l';
+    body.classList.add(outCls);
+    setTimeout(() => {
+      todoViewDate = next;
+      renderTodos();
+      const newBody = document.querySelector('.todo-body');
+      if (newBody) {
+        newBody.classList.add(inCls);
+        newBody.addEventListener('animationend', () => newBody.classList.remove(inCls), { once: true });
+      }
+    }, 200);
+  } else {
+    todoViewDate = next;
+    renderTodos();
+  }
+}
+
+function updateTodoDateNav() {
+  const label = document.getElementById('tdnavLabel');
+  const nextBtn = document.getElementById('tdnavNext');
+  if (label) label.textContent = fmtShort(todoViewDate);
+  if (nextBtn) nextBtn.disabled = dateKey(todoViewDate) >= todayKey();
+}
+
+function updateTodoProgress() {
+  const viewKey = dateKey(todoViewDate);
+  const isToday = viewKey === todayKey();
+  const todos = isToday ? state.todos : state.todos.filter(t => t.createdAt && t.createdAt.startsWith(viewKey));
+  const total = todos.length;
+  const done  = todos.filter(t => t.done).length;
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  const fill  = document.getElementById('todoProgressFill');
+  const label = document.getElementById('todoProgressPct');
+  if (fill)  fill.style.width  = `${pct}%`;
+  if (label) label.textContent = `${pct}%`;
+}
+
+function renderTodos() {
+  const projEl  = document.getElementById('projTodoList');
+  const persEl  = document.getElementById('personalTodoList');
+  const countEl = document.getElementById('todoCountEl');
+  const addRow  = document.querySelector('.todo-add-row');
+
+  const viewKey = dateKey(todoViewDate);
+  const isToday = viewKey === todayKey();
+
+  if (!isToday) {
+    // Past day: show read-only todos whose createdAt starts with viewKey
+    const dayTodos = state.todos.filter(t => t.createdAt && t.createdAt.startsWith(viewKey));
+    const pastNotice = `<div style="text-align:center;padding:8px;font-size:11px;color:var(--t3);font-style:italic">
+      ${fmtShort(todoViewDate)} 的待辦紀錄 (只讀)
+    </div>`;
+    if (addRow) addRow.style.display = 'none';
+    if (dayTodos.length === 0) {
+      if (projEl) projEl.innerHTML = '';
+      if (persEl) persEl.innerHTML = `<div class="todo-empty-state">
+        <div class="todo-empty-art">📋</div>
+        <div class="todo-empty-msg">這天沒有待辦紀錄</div>
+        <div class="todo-empty-sub">選擇其他日期查看</div>
+      </div>`;
+    } else {
+      if (projEl) projEl.innerHTML = pastNotice;
+      if (persEl) persEl.innerHTML = dayTodos.map(t => `
+        <div class="todo-item${t.done?' done':''}">
+          <div class="todo-cb">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="todo-text">${escHtml(t.text)}</div>
+        </div>`).join('');
+    }
+    const total = dayTodos.length;
+    const done  = dayTodos.filter(t=>t.done).length;
+    if (countEl) countEl.textContent = `${done} / ${total}`;
+    updateTodoProgress();
+    updateTodoDateNav();
+    return;
+  }
+
+  // Today: restore add row
+  if (addRow) addRow.style.display = '';
+
+  const imported = state.todos.filter(t => t.imported);
+  const personal = state.todos.filter(t => !t.imported);
+
+  // Show empty state if both lists empty
+  if (imported.length === 0 && personal.length === 0) {
+    if (projEl) projEl.innerHTML = '';
+    if (persEl) persEl.innerHTML = `<div class="todo-empty-state">
+      <div class="todo-empty-art">📋</div>
+      <div class="todo-empty-msg">今天還沒有待辦事項</div>
+      <div class="todo-empty-sub">新增第一個任務，開始今天的旅程吧！</div>
+      <button class="todo-empty-cta" onclick="document.getElementById('personalTodoInput')?.focus()">
+        ＋ 新增第一個任務
+      </button>
+    </div>`;
+  } else {
+    if (projEl) {
+      if (imported.length === 0) {
+        projEl.innerHTML = `<div class="todo-empty">暫無任務 — 點擊「匯入」加入</div>`;
+      } else {
+        projEl.innerHTML = imported.map(t => `
+          <div class="todo-item${t.done?' done':''}" data-id="${escAttr(t.id)}" data-prio="${escAttr(t.prio||'none')}" onclick="toggleTodo('${escAttr(t.id)}')">
+            <div class="todo-prio-dot" style="background:${PRIO_COLOR[t.prio]||PRIO_COLOR.none}"></div>
+            <div class="todo-cb">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="todo-text">${escHtml(t.text)}</div>
+            <div class="todo-meta">${escHtml(t.projName||'')}</div>
+            <button class="todo-del" onclick="event.stopPropagation();deleteTodo('${escAttr(t.id)}')" title="移除">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>`).join('');
+      }
+    }
+    if (persEl) {
+      if (personal.length === 0) {
+        persEl.innerHTML = `<div class="todo-empty">還沒有個人待辦 ✨</div>`;
+      } else {
+        persEl.innerHTML = personal.map(t => `
+          <div class="todo-item personal${t.done?' done':''}" data-id="${escAttr(t.id)}" data-prio="${escAttr(t.prio||'none')}" onclick="toggleTodo('${escAttr(t.id)}')">
+            <div class="todo-cb">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="todo-text">${escHtml(t.text)}</div>
+            <button class="todo-del" onclick="event.stopPropagation();deleteTodo('${escAttr(t.id)}')" title="刪除">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>`).join('');
+      }
+    }
+  }
+
+  const total = state.todos.length;
+  const done  = state.todos.filter(t=>t.done).length;
+  if (countEl) countEl.textContent = `${done} / ${total}`;
+  updateTodoProgress();
+  updateTodoDateNav();
+  renderStatsStrip();
+}
+
+function onTodoKey(e) {
+  if (e.key !== 'Enter') return;
+  const inp = document.getElementById('personalTodoInput');
+  const text = inp.value.trim();
+  if (!text) return;
+  state.todos.push({ id: uuidv4(), text, done: false, imported: false, createdAt: new Date().toISOString() });
+  inp.value = '';
+  save();
+  renderTodos();
+}
+
+function toggleTodo(id) {
+  const item = state.todos.find(t=>t.id===id);
+  if (!item) return;
+  const justChecked = !item.done;
+  item.done = !item.done;
+  save();
+  renderTodos();
+  if (justChecked) {
+    playDing();
+    const itemEl = document.querySelector(`.todo-item[data-id="${id}"]`);
+    fireConfetti(itemEl);
+    // Checkbox bounce
+    const cb = document.querySelector(`.todo-item[data-id="${id}"] .todo-cb`);
+    if (cb) {
+      cb.classList.add('pop');
+      cb.addEventListener('animationend', () => cb.classList.remove('pop'), { once: true });
+    }
+    // Zoo reward: completed task → +1 feed can
+    zooOnTodoDone();
+  }
+}
+
+function deleteTodo(id) {
+  state.todos = state.todos.filter(t=>t.id!==id);
+  save(); renderTodos(); showToast('已移除');
+}
+
+function clearDoneTodos() {
+  state.todos = state.todos.filter(t=>!t.done);
+  save(); renderTodos(); showToast('已清除完成項目');
+}
+
+// Import modal
+const PROJ_META = {
+  p1:{name:'使用者系統',color:'#c084fc'},
+  p2:{name:'行銷活動', color:'#38bdf8'},
+  p3:{name:'平台升級', color:'#4ade80'},
+  p4:{name:'數據分析', color:'#fbbf24'},
+};
+
+function openImportModal() {
+  importSelected = new Set();
+  const tasks  = getProjectTasks().filter(t => t.status !== 'done');
+  const list   = document.getElementById('importList');
+  const already= new Set(state.todos.filter(t=>t.imported).map(t=>t.taskId));
+
+  if (tasks.length === 0) {
+    list.innerHTML = '<div class="import-empty">沒有可匯入的任務</div>';
+  } else {
+    list.innerHTML = tasks.map(t => {
+      const proj = PROJ_META[t.projectId] || { name: t.projectId, color:'#9490b0' };
+      const sel  = already.has(t.id);
+      if (sel) importSelected.add(t.id);
+      return `<div class="import-item${sel?' selected':''}" id="ii-${escAttr(t.id)}" onclick="toggleImportItem('${escAttr(t.id)}')">
+        <div class="import-cb">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="import-task-title">${escHtml(t.title)}</div>
+        <div class="import-task-proj" style="color:${proj.color}">${escHtml(proj.name)}</div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('importModal').classList.add('open');
+}
+
+function toggleImportItem(id) {
+  if (importSelected.has(id)) importSelected.delete(id);
+  else importSelected.add(id);
+  const el = document.getElementById(`ii-${id}`);
+  el?.classList.toggle('selected', importSelected.has(id));
+}
+
+function confirmImport() {
+  const tasks = getProjectTasks();
+  const taskMap = {};
+  tasks.forEach(t => { taskMap[t.id] = t; });
+  state.todos = state.todos.filter(t => !t.imported || importSelected.has(t.taskId));
+  const existing = new Set(state.todos.filter(t=>t.imported).map(t=>t.taskId));
+  importSelected.forEach(id => {
+    if (existing.has(id)) return;
+    const t = taskMap[id]; if (!t) return;
+    const proj = PROJ_META[t.projectId] || { name: t.projectId };
+    state.todos.unshift({
+      id: uuidv4(), text: t.title, done: false,
+      imported: true, taskId: t.id,
+      projName: proj.name, prio: t.priority,
+      createdAt: new Date().toISOString(),
+    });
+  });
+  save(); renderTodos(); closeImportModal();
+  showToast(`已匯入 ${importSelected.size} 個任務`);
+}
+
+function closeImportModal() {
+  document.getElementById('importModal').classList.remove('open');
+  importSelected = new Set();
+}
+
+// ═══════════════════════════════════════════════════
+//  CALENDAR
+// ═══════════════════════════════════════════════════
+function renderCal() {
+  if (calView === 'month') renderCalMonth();
+  else renderCalWeek();
+}
+
+function renderCalMonth() {
+  const lbl   = document.getElementById('calMonthLabel');
+  const cells = document.getElementById('calCells');
+  lbl.textContent = `${calYear}年 ${calMonth+1}月`;
+
+  const today   = todayKey();
+  const ptasks  = getProjectTasks();
+  const byDate  = {};
+  ptasks.forEach(t => {
+    if (!t.dueDate) return;
+    const k = t.dueDate.split('T')[0];
+    (byDate[k] = byDate[k]||[]).push(t);
+  });
+
+  const first = new Date(calYear, calMonth, 1);
+  const last  = new Date(calYear, calMonth+1, 0);
+  const dow   = first.getDay();
+  let html = '';
+
+  for (let i = 0; i < dow; i++) {
+    html += calCellHtml(new Date(calYear, calMonth, -(dow-i-1)), today, byDate, true);
+  }
+  for (let d = 1; d <= last.getDate(); d++) {
+    html += calCellHtml(new Date(calYear, calMonth, d), today, byDate, false);
+  }
+  const trail = (dow + last.getDate()) % 7;
+  for (let i = 1; i <= (trail ? 7-trail : 0); i++) {
+    html += calCellHtml(new Date(calYear, calMonth+1, i), today, byDate, true);
+  }
+  cells.innerHTML = html;
+}
+
+function calCellHtml(date, today, byDate, otherMonth) {
+  const key   = dateKey(date);
+  const tasks = byDate[key] || [];
+  const notes = state.calNotes[key] || [];
+  const evts  = CAL_EVENTS[key] || [];
+  let cls = 'cal-cell';
+  if (otherMonth) cls += ' other-month';
+  if (key === today) cls += ' today';
+  if (key === selectedCalDate) cls += ' selected';
+
+  // Task priority dots (up to 2)
+  const taskDots = tasks.slice(0,2).map(t =>
+    `<div class="cal-dot" style="background:${PRIO_COLOR[t.priority]||'#9490b0'}"></div>`
+  ).join('');
+  // Note dot
+  const noteDot = notes.length ? `<div class="cal-dot" style="background:var(--cyan)"></div>` : '';
+  // Event type dots (leave/meeting/milestone, deduplicated by type, up to 3)
+  const evtTypes = [...new Set(evts.map(e => e.type))].slice(0,3);
+  const evtDots = evtTypes.map(t => `<div class="cal-dot evt-${t}"></div>`).join('');
+
+  const snippet = notes[0]
+    ? `<div class="cal-note-snippet">${escHtml(notes[0].length>7?notes[0].slice(0,7)+'…':notes[0])}</div>` : '';
+  return `<div class="${cls}" onclick="onCellClick('${key}')">
+    <div class="cal-day-num">${date.getDate()}</div>
+    <div class="cal-dots">${taskDots}${noteDot}${evtDots}</div>
+    ${snippet}
+  </div>`;
+}
+
+function renderCalWeek() {
+  const lbl   = document.getElementById('calMonthLabel');
+  const wrap  = document.getElementById('calWeekCells');
+  const today = todayKey();
+  const ptasks = getProjectTasks();
+  const byDate = {};
+  ptasks.forEach(t => {
+    if (!t.dueDate) return;
+    const k = t.dueDate.split('T')[0];
+    (byDate[k] = byDate[k]||[]).push(t);
+  });
+  const base = new Date(calYear, calMonth, 1);
+  base.setDate(base.getDate() - base.getDay());
+  lbl.textContent = `${base.getMonth()+1}/${base.getDate()} 週`;
+  const days = ['日','一','二','三','四','五','六'];
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(base); d.setDate(base.getDate()+i);
+    const key = dateKey(d);
+    const ts  = byDate[key] || [];
+    const ns  = state.calNotes[key] || [];
+    const isTd = key === today;
+    html += `<div class="cal-wk-col">
+      <div class="cal-wk-hdr">
+        <div class="cal-wk-dow">${days[i]}</div>
+        <div class="cal-wk-date${isTd?' today':''}">${d.getDate()}</div>
+      </div>
+      ${ts.map(t=>`<div class="cal-wk-task" style="border-color:${PRIO_COLOR[t.priority]||'#9490b0'}" title="${escAttr(t.title)}">${escHtml(t.title)}</div>`).join('')}
+      ${ns.map(n=>`<div class="cal-wk-note">${escHtml(n)}</div>`).join('')}
+      <div class="cal-wk-add" onclick="openInsightNoteModal('${key}')" title="新增記事">+</div>
+    </div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+function setCalView(v) {
+  calView = v;
+  document.getElementById('calTabMonth').classList.toggle('active', v==='month');
+  document.getElementById('calTabWeek').classList.toggle('active', v==='week');
+  document.getElementById('calMonthView').style.display = v==='month' ? '' : 'none';
+  document.getElementById('calWeekView').style.display  = v==='week'  ? '' : 'none';
+  renderCal();
+}
+
+function calNav(delta) {
+  calMonth += delta;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCal();
+}
+
+// ─── Calendar events mock data (relative to today) ───────────────────
+const CAL_EVENTS = (() => {
+  const events = {};
+  const add = (offsetDays, type, title, meta) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    const k = dateKey(d);
+    (events[k] = events[k] || []).push({ type, title, meta });
+  };
+  // Leaves
+  add(0,  'leave',     '王小明 請假',          '全天假');
+  add(1,  'leave',     '林美華 請假',          '上午半天');
+  add(3,  'leave',     '陳大偉 請假',          '全天假');
+  add(7,  'leave',     '張雅婷 請假',          '下午半天');
+  add(-1, 'leave',     '李志遠 請假',          '全天假');
+  // Meetings
+  add(0,  'meeting',   '週一站立會議',         '09:00 · 15 分鐘');
+  add(0,  'meeting',   'Sprint 計畫會議',      '14:00 · 1 小時');
+  add(2,  'meeting',   '設計評審',             '10:30 · 45 分鐘');
+  add(4,  'meeting',   '客戶展示',             '15:00 · 1 小時');
+  add(7,  'meeting',   '回顧會議',             '16:00 · 1 小時');
+  add(-2, 'meeting',   '技術分享',             '11:00 · 30 分鐘');
+  // Milestones
+  add(0,  'milestone', 'v2.1 Beta 發布',       '里程碑 · 高優先');
+  add(5,  'milestone', 'API 整合完成',          '里程碑 · 中優先');
+  add(10, 'milestone', 'Q2 設計凍結',           '里程碑 · 高優先');
+  add(-3, 'milestone', 'v2.0 正式上線',         '里程碑 · 已完成');
+  return events;
+})();
+
+const CAL_EVENT_LABELS = {
+  leave:     { tag:'請假', icon:'🌴' },
+  meeting:   { tag:'會議', icon:'📋' },
+  milestone: { tag:'里程碑', icon:'🏁' },
+};
+
+function onCellClick(key) {
+  selectedCalDate = key;
+  renderCal();
+  renderDayInsights(key);
+}
+
+function renderDayInsights(key) {
+  const panel = document.getElementById('calInsights');
+  const list  = document.getElementById('calEventsList');
+  const lbl   = document.getElementById('ciDateLabel');
+  if (!panel || !list) return;
+
+  const [y, m, d] = key.split('-');
+  lbl.textContent = `${+m}月${+d}日`;
+
+  const evts = CAL_EVENTS[key] || [];
+  panel.classList.remove('hidden');
+  panel.classList.add('visible');
+
+  if (!evts.length) {
+    list.innerHTML = `<div class="cal-insights-empty">
+      <div class="ci-empty-art">🌤️</div>
+      <div>這天沒有安排的事項</div>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = evts.map((e, i) => {
+    const meta = CAL_EVENT_LABELS[e.type] || { tag: e.type, icon: '•' };
+    return `<div class="cal-event cal-event-${e.type}" style="animation-delay:${i * 60}ms">
+      <span class="cal-event-tag">${meta.icon} ${meta.tag}</span>
+      <div class="cal-event-body">
+        <div class="cal-event-title">${escHtml(e.title)}</div>
+        <div class="cal-event-meta">${escHtml(e.meta)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openInsightNoteModal(key) {
+  noteDate = key;
+  const [y,m,d] = key.split('-');
+  document.getElementById('noteModalTitle').textContent = `${+m}月${+d}日 — 新增個人記事`;
+  document.getElementById('noteModalInput').value = '';
+  document.getElementById('noteModal').classList.add('open');
+  setTimeout(() => document.getElementById('noteModalInput').focus(), 80);
+}
+
+function closeNoteModal() {
+  document.getElementById('noteModal').classList.remove('open');
+  noteDate = null;
+}
+
+function confirmNote() {
+  const text = document.getElementById('noteModalInput').value.trim();
+  if (!text || !noteDate) return closeNoteModal();
+  if (!state.calNotes[noteDate]) state.calNotes[noteDate] = [];
+  state.calNotes[noteDate].push(text);
+  save(); renderCal(); closeNoteModal();
+  showToast('記事已新增');
+}
+
+// ═══════════════════════════════════════════════════
+//  THEME & UTILS
+// ═══════════════════════════════════════════════════
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    html.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'light');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+  }
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function escAttr(s) {
+  if (!s) return '';
+  return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0;
+    return (c==='x'?r:(r&0x3|0x8)).toString(16);
+  });
+}
+function showToast(msg) {
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'toastOut .28s both';
+    setTimeout(() => el.remove(), 280);
+  }, 2200);
+}
+
+// Close dropdowns outside click
+document.addEventListener('click', e => {
+  const m = document.getElementById('tmplMenu');
+  const b = document.getElementById('tmplBtn');
+  if (!m.contains(e.target) && !b.contains(e.target)) {
+    m.classList.remove('open'); b.classList.remove('active');
+  }
+});
+
+// ═══════════════════════════════════════════════════
+//  MINI ZOO DOCK
+// ═══════════════════════════════════════════════════
+const ZOO_KEY = 'mini-zoo-v1';
+
+const ZOO_DEFS = [
+  { id:'bunny', emoji:'🐰', name:'小兔兔', streakNeeded:0  },
+  { id:'fox',   emoji:'🦊', name:'小狐狸', streakNeeded:3  },
+  { id:'lion',  emoji:'🦁', name:'小獅子', streakNeeded:7  },
+];
+
+const ZOO_CHEERS = [
+  '加油！快完成了！✨','你是最棒的！🌟','繼續努力！🎉',
+  '今天進度超棒！','休息一下也沒關係喔～','你做到了！💪',
+  '一步一步就能完成！','超級厲害！繼續！','我為你加油！🔥',
+  '今天的你閃閃發光！','相信自己！🦋','你是我的英雄！🌈',
+];
+
+let zooState = {
+  feedCans: 0, streak: 0, lastCompleteDate: null,
+  animals: {
+    bunny: { unlocked:true,  xp:0, level:1 },
+    fox:   { unlocked:false, xp:0, level:1 },
+    lion:  { unlocked:false, xp:0, level:1 },
+  },
+};
+
+// Runtime (not persisted)
+const ZRT = {
+  pomoPrev: false,
+  pos:  { bunny:200, fox:400, lion:580 },
+  dir:  { bunny:1,   fox:-1,  lion:1  },
+  mode: { bunny:'idle', fox:'idle', lion:'idle' },
+};
+
+function zooLoad() {
+  try {
+    const raw = localStorage.getItem(ZOO_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    zooState.feedCans = s.feedCans || 0;
+    zooState.streak   = s.streak   || 0;
+    zooState.lastCompleteDate = s.lastCompleteDate || null;
+    if (s.animals) Object.keys(s.animals).forEach(k => {
+      if (zooState.animals[k]) Object.assign(zooState.animals[k], s.animals[k]);
+    });
+  } catch(e){}
+}
+function zooSave() { localStorage.setItem(ZOO_KEY, JSON.stringify(zooState)); }
+
+function zooRender() {
+  ZOO_DEFS.forEach(def => {
+    const el  = document.getElementById(`zoo-a-${def.id}`);
+    const aS  = zooState.animals[def.id];
+    if (!el || !aS) return;
+
+    // Class: mode + locked
+    const locked = !aS.unlocked;
+    el.className = `zoo-animal m-${ZRT.mode[def.id]}${locked ? ' locked' : ''}`;
+
+    // Position
+    el.style.left = `${ZRT.pos[def.id]}px`;
+
+    // Flip
+    const flipEl = document.getElementById(`zoo-flip-${def.id}`);
+    if (flipEl) flipEl.style.transform = ZRT.dir[def.id] < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+
+    // Lock icon visibility
+    const lockEl = el.querySelector('.zoo-lock-icon');
+    if (lockEl) lockEl.style.display = locked ? '' : 'none';
+
+    // XP bar
+    const xpFill = document.getElementById(`zoo-xp-${def.id}`);
+    if (xpFill) {
+      const needed = aS.level * 5;
+      xpFill.style.width = `${Math.min(100, (aS.xp / needed) * 100)}%`;
+    }
+
+    // Level badge
+    const lvlEl = document.getElementById(`zoo-lvl-${def.id}`);
+    if (lvlEl) lvlEl.textContent = aS.level;
+  });
+
+  // Feed badge
+  const fb = document.getElementById('zooFeedBadge');
+  if (fb) fb.textContent = zooState.feedCans;
+
+  // Streak
+  const sn = document.getElementById('zooStreakNum');
+  if (sn) sn.textContent = `${zooState.streak} 天連續`;
+}
+
+function zooMoveAnimals() {
+  const dock = document.getElementById('zooDock');
+  if (!dock) return;
+  const W = dock.offsetWidth;
+  // Usable range: avoid streak badge (left ~130px) and feed button (right ~80px)
+  const minX = 130, maxX = W - 110;
+  ZOO_DEFS.forEach(def => {
+    if (!zooState.animals[def.id].unlocked) return;
+    const newX = minX + Math.random() * Math.max(0, maxX - minX);
+    ZRT.dir[def.id] = newX > ZRT.pos[def.id] ? 1 : -1;
+    ZRT.pos[def.id] = newX;
+    const el = document.getElementById(`zoo-a-${def.id}`);
+    if (el) el.style.left = `${newX}px`;
+    const flipEl = document.getElementById(`zoo-flip-${def.id}`);
+    if (flipEl) flipEl.style.transform = ZRT.dir[def.id] < 0 ? 'scaleX(-1)' : 'scaleX(1)';
+  });
+}
+
+function zooPollPomodoro() {
+  try {
+    const raw = localStorage.getItem('pomodoro-state');
+    const ps  = raw ? JSON.parse(raw) : null;
+    const isActive = ps && (ps.running || ps.isRunning || ps.active || ps.timerRunning);
+    const justFinished = ZRT.pomoPrev && !isActive;
+    ZOO_DEFS.forEach(def => {
+      if (!zooState.animals[def.id].unlocked) return;
+      if (isActive) {
+        ZRT.mode[def.id] = 'work';
+      } else if (justFinished) {
+        ZRT.mode[def.id] = 'dance';
+        setTimeout(() => { ZRT.mode[def.id] = 'idle'; zooRender(); }, 5000);
+        if (def.id === 'bunny') showToast('🎉 番茄鐘結束！小動物們在慶祝！');
+      } else if (ZRT.mode[def.id] !== 'eat') {
+        ZRT.mode[def.id] = 'idle';
+      }
+    });
+    if (justFinished) orbOnPomoComplete();
+    ZRT.pomoPrev = !!isActive;
+  } catch(e){}
+  zooRender();
+  renderFocusOrb();
+}
+
+function zooAnimalClick(id) {
+  const aS = zooState.animals[id];
+  if (!aS?.unlocked) { showToast('🔒 完成連續任務解鎖這隻動物！'); return; }
+  const el = document.getElementById(`zoo-a-${id}`);
+  if (!el) return;
+  // Remove old bubble
+  el.querySelectorAll('.zoo-bubble').forEach(b => b.remove());
+  const bubble = document.createElement('div');
+  bubble.className = 'zoo-bubble';
+  bubble.textContent = ZOO_CHEERS[Math.floor(Math.random() * ZOO_CHEERS.length)];
+  el.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 2800);
+}
+
+function zooFeed() {
+  if (zooState.feedCans <= 0) { showToast('沒有飼料罐了！完成待辦任務來獲得 🥫'); return; }
+  // Find most unlocked animals, feed the one with lowest xp%
+  const candidates = ZOO_DEFS.filter(d => zooState.animals[d.id].unlocked);
+  if (!candidates.length) return;
+  const def = candidates.reduce((best, d) => {
+    const aB = zooState.animals[best.id], aD = zooState.animals[d.id];
+    return (aD.xp / (aD.level * 5)) < (aB.xp / (aB.level * 5)) ? d : best;
+  });
+  const aS = zooState.animals[def.id];
+  zooState.feedCans--;
+  aS.xp++;
+  const needed = aS.level * 5;
+  if (aS.xp >= needed) {
+    aS.xp = 0; aS.level++;
+    showToast(`🌟 ${def.name} 升級了！Lv.${aS.level}`);
+  }
+  // Eat mode
+  ZRT.mode[def.id] = 'eat';
+  const el = document.getElementById(`zoo-a-${def.id}`);
+  if (el) {
+    el.className = `zoo-animal m-eat`;
+    setTimeout(() => { ZRT.mode[def.id] = 'idle'; zooRender(); }, 600);
+  }
+  // Flying can animation
+  const btn = document.getElementById('zooFeedBtn');
+  const target = document.getElementById(`zoo-a-${def.id}`);
+  if (btn && target) {
+    const bR = btn.getBoundingClientRect(), tR = target.getBoundingClientRect();
+    const fly = document.createElement('div');
+    fly.className = 'zoo-can-fly';
+    fly.textContent = '🥫';
+    fly.style.cssText = `left:${bR.left + bR.width/2 - 12}px;top:${bR.top}px`;
+    document.body.appendChild(fly);
+    fly.animate([
+      { left:`${bR.left + bR.width/2 - 12}px`, top:`${bR.top}px`, opacity:1 },
+      { left:`${tR.left + tR.width/2 - 12}px`, top:`${tR.top - 10}px`, opacity:0 },
+    ], { duration:650, easing:'cubic-bezier(.25,.46,.45,.94)', fill:'both' })
+      .onfinish = () => fly.remove();
+  }
+  // Badge pop
+  const badge = document.getElementById('zooFeedBadge');
+  if (badge) { badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop'); }
+  zooSave(); zooRender();
+}
+
+// Called by toggleTodo when a todo is newly completed
+function zooOnTodoDone() {
+  zooState.feedCans++;
+  // Check streak
+  const today = todayKey();
+  const doneTodos = state.todos.filter(t => t.done);
+  if (doneTodos.length > 0 && zooState.lastCompleteDate !== today) {
+    const yesterday = dateKey(new Date(Date.now() - 86400000));
+    zooState.streak = (zooState.lastCompleteDate === yesterday) ? zooState.streak + 1 : 1;
+    zooState.lastCompleteDate = today;
+    // Check unlocks
+    ZOO_DEFS.forEach(def => {
+      const aS = zooState.animals[def.id];
+      if (!aS.unlocked && def.streakNeeded > 0 && zooState.streak >= def.streakNeeded) {
+        aS.unlocked = true;
+        // Burst effect
+        const burst = document.createElement('div');
+        burst.className = 'zoo-unlock-burst';
+        document.body.appendChild(burst);
+        setTimeout(() => burst.remove(), 1000);
+        // Toast
+        const toast = document.createElement('div');
+        toast.className = 'zoo-unlock-toast';
+        toast.innerHTML = `🎊 解鎖新夥伴！<strong>${def.emoji} ${def.name}</strong> 加入動物園！`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+        ZRT.mode[def.id] = 'dance';
+        setTimeout(() => { ZRT.mode[def.id] = 'idle'; zooRender(); }, 4000);
+      }
+    });
+  }
+  // Badge pop
+  const badge = document.getElementById('zooFeedBadge');
+  if (badge) { badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop'); }
+  zooSave(); zooRender();
+}
+
+// ═══════════════════════════════════════════════════
+//  MOOD TRACKER
+// ═══════════════════════════════════════════════════
+const MOOD_EMOJI = { happy:'😊', neutral:'😐', sad:'😞' };
+const MOOD_TOAST = { happy:'😊 今天心情不錯！繼續保持！', neutral:'😐 平穩的一天，也很好！', sad:'😞 加油，明天會更好！' };
+
+function setMood(mood) {
+  const key = todayKey();
+  const day = getDay(key);
+  day.mood = (day.mood === mood) ? null : mood; // toggle off if same
+  save();
+  renderMood();
+  renderStatsStrip();
+  if (day.mood) showToast(MOOD_TOAST[mood] || '心情已記錄');
+}
+
+function renderMood() {
+  const today = todayKey();
+  const todayMood = state.dailyData[today]?.mood || null;
+
+  // Buttons: selected state
+  document.querySelectorAll('.mood-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.mood === todayMood);
+  });
+
+  // Date label
+  const lbl = document.getElementById('moodDateLabel');
+  if (lbl) {
+    const now = new Date();
+    lbl.textContent = `${now.getMonth()+1}月${now.getDate()}日`;
+  }
+
+  // History dots: last 7 days (oldest left)
+  const dotsEl = document.getElementById('moodHistDots');
+  if (!dotsEl) return;
+  let html = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const k = dateKey(d);
+    const m = state.dailyData[k]?.mood;
+    const isToday = k === today;
+    const title = `${d.getMonth()+1}/${d.getDate()}${m ? ' · '+MOOD_EMOJI[m] : ''}`;
+    html += `<div class="mood-hist-dot" title="${title}" style="${isToday?'border-color:var(--orange)':''}">${m ? MOOD_EMOJI[m] : '·'}</div>`;
+  }
+  dotsEl.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════
+//  FOCUS ORB
+// ═══════════════════════════════════════════════════
+function getWeekStart() {
+  const d = new Date();
+  d.setDate(d.getDate() - d.getDay()); // back to Sunday
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function orbOnPomoComplete() {
+  state.weekPomos.push(new Date().toISOString());
+  if (state.weekPomos.length > 200) state.weekPomos = state.weekPomos.slice(-200);
+  save();
+}
+
+function getWeekPomoCount() {
+  const weekStart = getWeekStart().getTime();
+  return state.weekPomos.filter(ts => {
+    try { return new Date(ts).getTime() >= weekStart; } catch(e){ return false; }
+  }).length;
+}
+
+function renderFocusOrb() {
+  const count   = getWeekPomoCount();
+  const orbEl   = document.getElementById('focusOrb');
+  const countEl = document.getElementById('orbCount');
+  const statusEl= document.getElementById('orbStatus');
+  const dotsEl  = document.getElementById('orbWeekDots');
+  const weekLbl = document.getElementById('orbWeekLabel');
+
+  if (countEl) countEl.textContent = count;
+
+  // Live charging state
+  let isActive = false;
+  try {
+    const ps = JSON.parse(localStorage.getItem('pomodoro-state') || 'null');
+    isActive = !!(ps && (ps.running || ps.isRunning || ps.active || ps.timerRunning));
+  } catch(e) {}
+
+  if (orbEl) orbEl.classList.toggle('charging', isActive);
+
+  if (statusEl) {
+    if (isActive) {
+      statusEl.textContent = '⚡ 專注充能中…';
+      statusEl.className = 'orb-status active';
+    } else if (count > 0) {
+      statusEl.textContent = `🍅 本週完成 ${count} 個番茄`;
+      statusEl.className = 'orb-status';
+    } else {
+      statusEl.textContent = '啟動番茄鐘開始充能';
+      statusEl.className = 'orb-status';
+    }
+  }
+
+  // Week label (Sun - Sat)
+  if (weekLbl) {
+    const ws = getWeekStart();
+    const we = new Date(ws); we.setDate(ws.getDate() + 6);
+    weekLbl.textContent = `${ws.getMonth()+1}/${ws.getDate()} 週`;
+  }
+
+  // 7-day activity dots
+  if (dotsEl) {
+    const weekStart = getWeekStart();
+    const today = todayKey();
+    let html = '';
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart); d.setDate(weekStart.getDate() + i);
+      const k = dateKey(d);
+      const dayCount = state.weekPomos.filter(ts => ts.startsWith(k)).length;
+      const isToday = k === today;
+      const hasPomo = dayCount > 0;
+      const cls = isToday ? 'today' : hasPomo ? 'has' : '';
+      const title = ['日','一','二','三','四','五','六'][i] + (dayCount ? ` ${dayCount}🍅` : '');
+      html += `<div class="orb-day-dot${cls?' '+cls:''}" title="${title}"></div>`;
+    }
+    dotsEl.innerHTML = html;
+  }
+}
+
+function initZoo() {
+  zooLoad();
+  zooRender();
+  // Movement ticker
+  zooMoveAnimals();
+  setInterval(() => { if (!ZRT.pomoPrev) zooMoveAnimals(); }, 3200);
+  // Pomodoro poll
+  setInterval(zooPollPomodoro, 5000);
+  zooPollPomodoro();
+}
+
+// ═══════════════════════════════════════════════════
+//  GREETING & STATS STRIP
+// ═══════════════════════════════════════════════════
+function renderGreeting() {
+  const h = new Date().getHours();
+  let emoji, text;
+  if      (h >= 5  && h < 12) { emoji = '🌅'; text = '早安，'; }
+  else if (h >= 12 && h < 17) { emoji = '☀️'; text = '午安，'; }
+  else if (h >= 17 && h < 21) { emoji = '🌇'; text = '晚安，'; }
+  else                        { emoji = '🌙'; text = '夜好，'; }
+
+  const greetEmoji = document.getElementById('greetEmoji');
+  const greetTextEl = document.getElementById('greetText');
+  const greetSub   = document.getElementById('greetSub');
+
+  if (greetEmoji)  greetEmoji.textContent  = emoji;
+  if (greetTextEl) greetTextEl.textContent = text;
+
+  const now = new Date();
+  const datePart = now.toLocaleDateString('zh-TW', { month: 'long', day: 'numeric', weekday: 'short' });
+  const timePart = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+  if (greetSub) greetSub.textContent = `${datePart} · ${timePart}`;
+}
+
+function renderStatsStrip() {
+  const today = todayKey();
+
+  // ── Todo counts (today view)
+  const todosToday = state.todos;
+  const doneCount  = todosToday.filter(t => t.done).length;
+  const totalCount = todosToday.length;
+  const spTodo = document.getElementById('spTodo');
+  if (spTodo) spTodo.textContent = `${doneCount}/${totalCount}`;
+
+  // ── Streak from zoo
+  const spStreak = document.getElementById('spStreak');
+  if (spStreak) spStreak.textContent = (typeof zooState !== 'undefined' ? zooState.streak : 0) || 0;
+
+  // ── Weekly pomodoros
+  const spPomo = document.getElementById('spPomo');
+  if (spPomo) spPomo.textContent = getWeekPomoCount();
+
+  // ── Today's mood
+  const todayMood   = state.dailyData[today]?.mood || null;
+  const moodEmoji   = { happy:'😊', neutral:'😐', sad:'😞' };
+  const moodLabel   = { happy:'開心', neutral:'普通', sad:'有點累' };
+  const spMoodIcon  = document.getElementById('spMoodIcon');
+  const spMood      = document.getElementById('spMood');
+  if (spMoodIcon) spMoodIcon.textContent = todayMood ? moodEmoji[todayMood] : '—';
+  if (spMood)     spMood.textContent     = todayMood ? moodLabel[todayMood] : '未記錄';
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+(function init() {
+  const t = localStorage.getItem('theme') || 'light';
+  if (t === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+
+  load();
+
+  journalDate = new Date();
+  const now = new Date();
+  calYear = now.getFullYear(); calMonth = now.getMonth();
+
+  renderGreeting();
+  setInterval(renderGreeting, 60000); // update clock every minute
+
+  renderMotto();
+  renderJournal();
+  renderTodos();
+  renderCal();
+  updateSunReminder();
+  renderMood();
+  renderFocusOrb();
+  initZoo();
+  renderStatsStrip();
+})();
+</script>
+</body>
+</html>

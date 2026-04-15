@@ -1,0 +1,15 @@
+{
+  "name": "code-review",
+  "version": "1.1.0",
+  "description": "Review code for security vulnerabilities, logic correctness, performance, and maintainability, then generate a structured report",
+  "updated_at": "2026-04-09",
+  "tags": [
+    "security",
+    "review",
+    "audit",
+    "code-quality",
+    "shared"
+  ],
+  "source_package_sha256": "a9779647e3c44ed56a6ac2b98b371a022978e36ab19290cbe51ec4940ad744e8",
+  "rendered_from": "canonical-skills/regular-skills/code-review"
+}

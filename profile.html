@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<script src="auth.js"></script>
+<script src="profile.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMSuite — 個人設定</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ━━━ RESET ━━━ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+button{cursor:pointer;border:none;background:none;font:inherit}
+input,select,textarea{font:inherit;border:none;outline:none;background:none;width:100%}
+a{text-decoration:none;color:inherit}
+svg{display:block;flex-shrink:0}
+
+/* ━━━ TOKENS ━━━ */
+:root{
+  --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
+  --b1:#1e1c2e; --b2:#2a2840; --b3:#3a3852;
+  --t1:#f0edfb; --t2:#9490b0; --t3:#58547a; --t4:#35324a;
+  --purple:#c084fc; --purple-d:rgba(192,132,252,.13); --purple-g:rgba(192,132,252,.06);
+  --cyan:#38bdf8;   --cyan-d:rgba(56,189,248,.13);
+  --teal:#2dd4bf;   --teal-d:rgba(45,212,191,.13);
+  --green:#4ade80;  --green-d:rgba(74,222,128,.13);
+  --amber:#fbbf24;  --amber-d:rgba(251,191,36,.13);
+  --orange:#fb923c; --orange-d:rgba(251,146,60,.13);
+  --pink:#f472b6;   --pink-d:rgba(244,114,182,.13);
+  --red:#f87171;    --red-d:rgba(248,113,113,.13);
+  --grad-main:linear-gradient(135deg,#c084fc 0%,#38bdf8 100%);
+  --sb-w:228px; --hdr-h:58px; --r:10px; --r-sm:6px;
+  --hdr-bg:rgba(8,8,15,.9);
+}
+[data-theme="light"]{
+  --bg:#f4f2fb; --s1:#fff; --s2:#edeaf7; --s3:#e2dff2; --s4:#d5d0ea;
+  --b1:#dbd6f0; --b2:#ccc6e4; --b3:#b8b2d8;
+  --t1:#18142a; --t2:#5a5475; --t3:#9088aa; --t4:#b8b0cc;
+  --purple-d:rgba(192,132,252,.14); --cyan-d:rgba(56,189,248,.14);
+  --teal-d:rgba(45,212,191,.14); --green-d:rgba(74,222,128,.14);
+  --amber-d:rgba(251,191,36,.14); --orange-d:rgba(251,146,60,.14);
+  --pink-d:rgba(244,114,182,.14); --red-d:rgba(248,113,113,.14);
+  --hdr-bg:rgba(244,242,251,.92);
+}
+
+body,.sidebar,.hdr,.nav-item,.user-row,.settings-card,.member-row,.field-input{
+  transition:background-color .25s ease,border-color .25s ease,color .2s ease}
+
+/* ━━━ LAYOUT ━━━ */
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
+  min-height:100vh;display:flex;font-size:14px;line-height:1.5}
+.layout{display:flex;width:100%;min-height:100vh}
+
+/* ━━━ SIDEBAR ━━━ */
+.sidebar{width:var(--sb-w);flex-shrink:0;background:var(--s1);border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo-row{display:flex;align-items:center;gap:10px;padding:18px 16px;border-bottom:1px solid var(--b1)}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;color:#fff}
+.logo-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase}
+.logo-label em{font-style:normal;background:var(--grad-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.nav-section{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--t4);
+  padding:12px 10px 6px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:var(--r-sm);
+  font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;text-decoration:none;transition:background .12s,color .12s}
+.nav-item:hover{color:var(--t1);background:var(--s2)}
+.nav-item.active{color:var(--t1);background:var(--purple-g);border-left:2px solid var(--purple);padding-left:10px}
+.nav-item.active .ni{color:var(--purple)}
+.nav-item:hover .ni{color:var(--t2)}
+.ni{color:var(--t3);flex-shrink:0}
+.sb-footer{padding:10px;border-top:1px solid var(--b1);display:flex;align-items:center;gap:4px}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px 10px;flex:1;min-width:0;
+  border-radius:var(--r-sm);cursor:pointer}
+.user-row:hover{background:var(--s2)}
+.av,.avatar{width:30px;height:30px;border-radius:50%;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
+  color:#fff;flex-shrink:0;overflow:hidden}
+.user-name{font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ━━━ MAIN ━━━ */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.hdr{height:var(--hdr-h);display:flex;align-items:center;gap:12px;padding:0 24px;
+  background:var(--hdr-bg);border-bottom:1px solid var(--b1);
+  position:sticky;top:0;z-index:10;backdrop-filter:blur(12px)}
+.hdr-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--t1)}
+.hdr-space{flex:1}
+.icon-btn{width:36px;height:36px;border-radius:var(--r-sm);background:var(--s2);
+  border:1px solid var(--b1);color:var(--t2);display:flex;align-items:center;justify-content:center;
+  transition:all .15s}
+.icon-btn:hover{color:var(--t1);border-color:var(--b2);background:var(--s3)}
+
+.content{padding:28px 32px;max-width:860px;display:flex;flex-direction:column;gap:24px}
+
+/* ━━━ PROFILE HERO ━━━ */
+.profile-hero{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  padding:28px 32px;display:flex;align-items:center;gap:28px;position:relative;overflow:hidden}
+.profile-hero::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(192,132,252,.07) 0%,transparent 70%);
+  top:-100px;right:-60px;pointer-events:none}
+.avatar-wrap{position:relative;flex-shrink:0}
+.hero-av{width:80px;height:80px;border-radius:50%;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;
+  color:#fff;overflow:hidden;
+  box-shadow:0 0 0 3px var(--b2),0 0 24px rgba(192,132,252,.25)}
+.avatar-edit-btn{position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;
+  background:var(--s4);border:2px solid var(--bg);color:var(--t2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background .15s,color .15s}
+.avatar-edit-btn:hover{background:var(--purple);color:#fff}
+.hero-info{flex:1;min-width:0}
+.hero-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;
+  letter-spacing:-.01em;color:var(--t1);margin-bottom:8px}
+.hero-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.role-badge{font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;
+  background:var(--purple-d);color:var(--purple)}
+.perm-badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:20px}
+.perm-admin {background:rgba(192,132,252,.18);color:#c084fc;border:1px solid rgba(192,132,252,.3)}
+.perm-pm    {background:rgba(56,189,248,.15); color:#38bdf8;border:1px solid rgba(56,189,248,.25)}
+.perm-member{background:rgba(74,222,128,.15); color:#4ade80;border:1px solid rgba(74,222,128,.25)}
+.hero-email{font-size:12px;color:var(--t3);font-family:'Fira Code',monospace}
+
+/* ━━━ SETTINGS CARD ━━━ */
+.settings-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
+.sc-hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px;border-bottom:1px solid var(--b1)}
+.sc-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--t1);display:flex;align-items:center;gap:8px}
+.sc-title-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);
+  box-shadow:0 0 6px var(--purple)}
+.sc-body{padding:24px}
+
+/* ━━━ FORM FIELDS ━━━ */
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 24px}
+.field-group{display:flex;flex-direction:column;gap:7px}
+.field-group.full{grid-column:1/-1}
+.field-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t3)}
+.field-input{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
+  padding:10px 14px;font-size:13px;color:var(--t1);transition:border-color .15s,background .15s}
+.field-input:focus{border-color:var(--purple);background:var(--s3);outline:none}
+.field-input[readonly]{color:var(--t3);cursor:default}
+.field-input[readonly]:focus{border-color:var(--b2);background:var(--s2)}
+.field-input select{appearance:none}
+
+.lang-toggle{display:flex;gap:6px}
+.lang-btn{padding:8px 18px;border-radius:var(--r-sm);font-size:13px;font-weight:600;
+  border:1px solid var(--b2);color:var(--t2);background:var(--s2);transition:all .15s}
+.lang-btn:hover{border-color:var(--b3);color:var(--t1)}
+.lang-btn.active{background:var(--purple-d);border-color:var(--purple);color:var(--purple)}
+
+.form-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  margin-top:20px;padding-top:16px;border-top:1px solid var(--b1)}
+.btn-save-prof{display:flex;align-items:center;gap:7px;padding:9px 20px;
+  border-radius:var(--r-sm);background:var(--grad-main);color:#fff;font-size:13px;
+  font-weight:600;transition:opacity .15s,box-shadow .15s}
+.btn-save-prof:hover{opacity:.88;box-shadow:0 0 24px rgba(192,132,252,.4)}
+
+/* ━━━ WORKSPACE MEMBERS ━━━ */
+.member-list{display:flex;flex-direction:column}
+.member-row{display:flex;align-items:center;gap:14px;padding:13px 24px;
+  border-bottom:1px solid var(--b1);transition:background .1s}
+.member-row:last-child{border-bottom:none}
+.member-row:hover{background:var(--s2)}
+.member-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.member-info{flex:1;min-width:0}
+.member-name{font-size:13px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:6px}
+.member-email{font-size:11px;color:var(--t3);font-family:'Fira Code',monospace;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.member-role{font-size:12px;color:var(--t2);flex-shrink:0;min-width:100px}
+.member-perm{font-size:10px;font-weight:700;letter-spacing:.05em;padding:3px 9px;
+  border-radius:20px;flex-shrink:0}
+.member-status{font-size:11px;padding:2px 8px;border-radius:12px;flex-shrink:0;font-weight:600}
+.status-active{background:var(--green-d);color:var(--green)}
+.status-invited{background:var(--amber-d);color:var(--amber)}
+.self-tag{font-size:9px;font-weight:700;letter-spacing:.06em;padding:1px 6px;border-radius:10px;
+  background:var(--purple-d);color:var(--purple);text-transform:uppercase}
+.member-remove{width:28px;height:28px;border-radius:var(--r-sm);flex-shrink:0;color:var(--t3);
+  display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;
+  border:1px solid transparent}
+.member-remove:hover{background:var(--red-d);color:var(--red);border-color:rgba(248,113,113,.25)}
+
+/* Invite form */
+.invite-divider{height:1px;background:var(--b1);margin:0}
+.invite-section{padding:20px 24px;background:var(--s2);border-top:1px solid var(--b1)}
+.invite-title{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--t3);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.invite-grid{display:grid;grid-template-columns:2fr 1.4fr 1.4fr 1.2fr auto;gap:10px;align-items:end}
+.invite-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--r-sm);
+  background:var(--grad-main);color:#fff;font-size:12px;font-weight:600;white-space:nowrap;
+  transition:opacity .15s;height:38px}
+.invite-btn:hover{opacity:.85}
+
+/* ━━━ SECURITY SECTION ━━━ */
+.security-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.security-item{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r-sm);
+  padding:14px 16px}
+.security-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--t4);margin-bottom:6px}
+.security-val{font-family:'Fira Code',monospace;font-size:12px;color:var(--t2)}
+.btn-danger{display:flex;align-items:center;gap:8px;padding:9px 18px;border-radius:var(--r-sm);
+  background:var(--red-d);border:1px solid rgba(248,113,113,.25);color:var(--red);
+  font-size:13px;font-weight:600;transition:all .15s}
+.btn-danger:hover{background:rgba(248,113,113,.22);border-color:rgba(248,113,113,.4)}
+
+/* ━━━ AVATAR MODAL ━━━ */
+.av-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px)}
+.av-modal-overlay.show{opacity:1;pointer-events:all}
+.av-modal{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);
+  padding:24px;width:380px;transform:scale(.95) translateY(8px);transition:transform .2s}
+.av-modal-overlay.show .av-modal{transform:scale(1) translateY(0)}
+.av-modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--t1);margin-bottom:18px}
+.av-section-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--t4);margin-bottom:10px}
+.av-upload-btn{display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px;border-radius:var(--r-sm);border:1px dashed var(--b3);color:var(--t2);
+  font-size:13px;font-weight:500;transition:all .15s;cursor:pointer;margin-bottom:18px}
+.av-upload-btn:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-g)}
+.grad-swatches{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px}
+.grad-swatch{width:100%;aspect-ratio:1;border-radius:50%;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;border:2px solid transparent}
+.grad-swatch:hover{transform:scale(1.12);box-shadow:0 0 12px rgba(192,132,252,.4)}
+.grad-swatch.selected{border-color:#fff;box-shadow:0 0 0 2px var(--purple)}
+.av-modal-footer{display:flex;justify-content:space-between;align-items:center;
+  padding-top:16px;border-top:1px solid var(--b1)}
+.btn-link{font-size:12px;color:var(--t3);cursor:pointer;transition:color .15s}
+.btn-link:hover{color:var(--red)}
+.btn-close-modal{padding:8px 20px;border-radius:var(--r-sm);background:var(--s4);
+  color:var(--t1);font-size:13px;font-weight:600;border:1px solid var(--b2);transition:all .15s}
+.btn-close-modal:hover{background:var(--s3)}
+
+/* ━━━ TOAST ━━━ */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--s4);border:1px solid var(--b3);border-radius:8px;
+  padding:10px 18px;font-size:13px;font-weight:500;color:var(--t1);
+  display:flex;align-items:center;gap:10px;z-index:300;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast-error{border-color:rgba(248,113,113,.4);background:var(--red-d);color:var(--red)}
+.toast-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.toast-error .toast-dot{background:var(--red)}
+
+/* ━━━ GRAIN ━━━ */
+body::after{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E")}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ━━━ SIDEBAR ━━━ -->
+<aside class="sidebar">
+  <div class="logo-row">
+    <div class="logo-icon">PM</div>
+    <div class="logo-label">PM<em>Suite</em></div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">工作區</div>
+    <a class="nav-item" href="index.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      總覽
+    </a>
+    <a class="nav-item" href="projects.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>
+      專案
+    </a>
+    <a class="nav-item" href="tasks.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      任務
+    </a>
+    <a class="nav-item" href="sprint-review.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Sprint Review
+    </a>
+    <div class="nav-section">工具</div>
+    <a class="nav-item" href="pomodoro-timer.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
+      番茄鐘
+    </a>
+    <a class="nav-item" href="#">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      文件
+    </a>
+    <a class="nav-item active" href="profile.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      設定
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="user-row">
+      <div class="av" id="sidebarAv">?</div>
+      <div>
+        <div class="user-name" id="sidebarName">載入中…</div>
+        <div class="user-role" id="sidebarRole"></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ━━━ MAIN ━━━ -->
+<div class="main">
+  <header class="hdr">
+    <div class="hdr-title">個人設定</div>
+    <div class="hdr-space"></div>
+    <button class="icon-btn" onclick="toggleTheme()" title="切換主題">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </header>
+
+  <div class="content">
+
+    <!-- ═══ PROFILE HERO ═══ -->
+    <div class="profile-hero">
+      <div class="avatar-wrap">
+        <div class="hero-av" id="heroAv">?</div>
+        <button class="avatar-edit-btn" onclick="openAvatarPicker()" title="更換頭像">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+      <div class="hero-info">
+        <div class="hero-name" id="heroName">載入中</div>
+        <div class="hero-meta">
+          <span class="role-badge" id="heroRole">—</span>
+          <span class="perm-badge perm-member" id="permBadge">MEMBER</span>
+        </div>
+        <div class="hero-email" id="heroEmail">—</div>
+      </div>
+    </div>
+
+    <!-- ═══ 個人資訊 ═══ -->
+    <div class="settings-card">
+      <div class="sc-hdr">
+        <div class="sc-title">
+          <div class="sc-title-dot"></div>
+          個人資訊
+        </div>
+      </div>
+      <div class="sc-body">
+        <div class="field-grid">
+          <div class="field-group">
+            <div class="field-label">顯示名稱</div>
+            <input class="field-input" type="text" id="inputName" placeholder="請輸入名稱">
+          </div>
+          <div class="field-group">
+            <div class="field-label">電子郵件</div>
+            <input class="field-input" type="text" id="inputEmail" readonly>
+          </div>
+          <div class="field-group">
+            <div class="field-label">角色</div>
+            <input class="field-input" type="text" id="inputRole" readonly>
+          </div>
+          <div class="field-group">
+            <div class="field-label">偏好語言</div>
+            <div class="lang-toggle" id="langToggle">
+              <button class="lang-btn active" data-lang="zh-TW" onclick="selectLang(this)">繁體中文</button>
+              <button class="lang-btn" data-lang="en" onclick="selectLang(this)">English</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save-prof" onclick="savePersonalInfo()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            儲存變更
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 工作區成員 ═══ -->
+    <div class="settings-card">
+      <div class="sc-hdr">
+        <div class="sc-title">
+          <div class="sc-title-dot" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></div>
+          工作區成員
+        </div>
+        <span style="font-size:11px;color:var(--t4);font-family:'Fira Code',monospace" id="memberCount">0 位成員</span>
+      </div>
+      <div class="member-list" id="memberList"></div>
+
+      <!-- Invite section (ADMIN only) -->
+      <div id="inviteSection" style="display:none">
+        <div class="invite-divider"></div>
+        <div class="invite-section">
+          <div class="invite-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            邀請新成員
+          </div>
+          <form onsubmit="inviteUser(event)">
+            <div class="invite-grid">
+              <div class="field-group">
+                <div class="field-label">Email</div>
+                <input class="field-input" type="email" id="inviteEmail" placeholder="user@example.com">
+              </div>
+              <div class="field-group">
+                <div class="field-label">姓名</div>
+                <input class="field-input" type="text" id="inviteName" placeholder="顯示名稱">
+              </div>
+              <div class="field-group">
+                <div class="field-label">職稱</div>
+                <input class="field-input" type="text" id="inviteRole" placeholder="e.g. 前端工程師">
+              </div>
+              <div class="field-group">
+                <div class="field-label">權限</div>
+                <select class="field-input" id="invitePerms" style="cursor:pointer">
+                  <option value="MEMBER">MEMBER</option>
+                  <option value="PM">PM</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+              </div>
+              <div style="display:flex;align-items:flex-end">
+                <button type="submit" class="invite-btn">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  傳送邀請
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 帳號安全 ═══ -->
+    <div class="settings-card">
+      <div class="sc-hdr">
+        <div class="sc-title">
+          <div class="sc-title-dot" style="background:var(--amber);box-shadow:0 0 6px var(--amber)"></div>
+          帳號安全
+        </div>
+      </div>
+      <div class="sc-body">
+        <div class="security-grid">
+          <div class="security-item">
+            <div class="security-label">登入時間</div>
+            <div class="security-val" id="sessionLogin">—</div>
+          </div>
+          <div class="security-item">
+            <div class="security-label">工作階段過期</div>
+            <div class="security-val" id="sessionExpiry">—</div>
+          </div>
+          <div class="security-item">
+            <div class="security-label">認證方式</div>
+            <div class="security-val" id="sessionMethod">Email / Password</div>
+          </div>
+          <div class="security-item">
+            <div class="security-label">工作階段 Token</div>
+            <div class="security-val" id="sessionToken" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div>
+          </div>
+        </div>
+        <button class="btn-danger" onclick="doLogout()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          登出此帳號
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ━━━ AVATAR PICKER MODAL ━━━ -->
+<div class="av-modal-overlay" id="avatarModal" onclick="closeAvatarPicker(event)">
+  <div class="av-modal" onclick="event.stopPropagation()">
+    <div class="av-modal-title">更換頭像</div>
+
+    <div class="av-section-label">上傳圖片</div>
+    <label class="av-upload-btn" for="avatarFileInput">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      點擊上傳（JPG / PNG，最大 2MB）
+      <input type="file" id="avatarFileInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
+    </label>
+
+    <div class="av-section-label">選擇漸層</div>
+    <div class="grad-swatches" id="gradSwatches"></div>
+
+    <div class="av-modal-footer">
+      <button class="btn-link" onclick="removeAvatar()">移除頭像</button>
+      <button class="btn-close-modal" onclick="closeAvatarPicker()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ TOAST ━━━ -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg">已儲存</span>
+</div>
+
+<script>
+// ━━━ THEME ━━━
+const savedTheme = localStorage.getItem('pmsuite-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('pmsuite-theme', t);
+}
+
+// ━━━ TOAST ━━━
+function showToast(msg, type = '') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.className = 'toast show' + (type === 'error' ? ' toast-error' : '');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+// ━━━ GRADIENT PRESETS ━━━
+const GRAD_PRESETS = [
+  'linear-gradient(135deg,#c084fc,#38bdf8)',
+  'linear-gradient(135deg,#38bdf8,#2dd4bf)',
+  'linear-gradient(135deg,#f472b6,#fb923c)',
+  'linear-gradient(135deg,#4ade80,#2dd4bf)',
+  'linear-gradient(135deg,#c084fc,#f472b6)',
+  'linear-gradient(135deg,#fb923c,#fbbf24)',
+  'linear-gradient(135deg,#f472b6,#c084fc)',
+  'linear-gradient(135deg,#38bdf8,#4ade80)',
+  'linear-gradient(135deg,#fbbf24,#f472b6)',
+  'linear-gradient(135deg,#2dd4bf,#c084fc)',
+  'linear-gradient(135deg,#fb923c,#c084fc)',
+  'linear-gradient(135deg,#4ade80,#38bdf8)',
+];
+
+// ━━━ HTML ESCAPE ━━━
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ━━━ UPDATE HERO ━━━
+function updateHero(user) {
+  // Big avatar
+  const av = document.getElementById('heroAv');
+  if (user.photoURL) {
+    av.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">`;
+    av.style.background = 'none';
+  } else {
+    av.textContent = (user.name || '?')[0];
+    av.style.background = user.grad || 'linear-gradient(135deg,#c084fc,#38bdf8)';
+  }
+
+  // Sidebar avatar sync
+  const sbAv = document.getElementById('sidebarAv');
+  if (sbAv) {
+    if (user.photoURL) {
+      sbAv.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">`;
+      sbAv.style.background = 'none';
+    } else {
+      sbAv.textContent = (user.name || '?')[0];
+      sbAv.style.background = user.grad || 'linear-gradient(135deg,#c084fc,#38bdf8)';
+    }
+    document.getElementById('sidebarName').textContent = user.name || '使用者';
+    document.getElementById('sidebarRole').textContent = user.role || '成員';
+  }
+
+  document.getElementById('heroName').textContent = user.name || '使用者';
+  document.getElementById('heroRole').textContent = user.role || '成員';
+  document.getElementById('heroEmail').textContent = user.email || '';
+
+  const permBadge = document.getElementById('permBadge');
+  const perm = user.permissions || 'MEMBER';
+  permBadge.textContent = perm;
+  permBadge.className = 'perm-badge perm-' + perm.toLowerCase();
+
+  // Update selected swatch
+  document.querySelectorAll('.grad-swatch').forEach(sw => {
+    sw.classList.toggle('selected', sw.dataset.grad === user.grad);
+  });
+}
+
+// ━━━ INIT ━━━
+document.addEventListener('DOMContentLoaded', () => {
+  const user = PMProfile.getCurrentUser();
+  if (!user) return;
+
+  // Form values
+  document.getElementById('inputName').value   = user.name  || '';
+  document.getElementById('inputEmail').value  = user.email || '';
+  document.getElementById('inputRole').value   = user.role  || '';
+
+  // Language toggle
+  const lang = user.lang || 'zh-TW';
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+
+  updateHero(user);
+
+  // Session info
+  try {
+    const sd = JSON.parse(localStorage.getItem('pmsuite-session'));
+    if (sd) {
+      document.getElementById('sessionLogin').textContent =
+        new Date(sd.loginAt).toLocaleString('zh-TW', {dateStyle:'medium',timeStyle:'short'});
+      document.getElementById('sessionExpiry').textContent =
+        new Date(sd.expiresAt).toLocaleString('zh-TW', {dateStyle:'medium',timeStyle:'short'});
+      document.getElementById('sessionToken').textContent = sd.token || '—';
+      if (sd.method === 'google') document.getElementById('sessionMethod').textContent = 'Google OAuth';
+    }
+  } catch {}
+
+  // Workspace
+  renderWorkspace(user);
+  if ((user.permissions || 'MEMBER') === 'ADMIN') {
+    document.getElementById('inviteSection').style.display = 'block';
+  }
+
+  // Build gradient swatches
+  const swContainer = document.getElementById('gradSwatches');
+  swContainer.innerHTML = GRAD_PRESETS.map(g => `
+    <div class="grad-swatch${user.grad === g ? ' selected' : ''}"
+         style="background:${g}" data-grad="${g}"
+         onclick="selectGradient('${g}')"></div>
+  `).join('');
+});
+
+// ━━━ LANGUAGE ━━━
+let _selectedLang = 'zh-TW';
+function selectLang(btn) {
+  _selectedLang = btn.dataset.lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ━━━ SAVE PERSONAL INFO ━━━
+function savePersonalInfo() {
+  const user = PMProfile.getCurrentUser();
+  if (!user) return;
+
+  const name = document.getElementById('inputName').value.trim();
+  if (!name) { showToast('名稱不能為空', 'error'); return; }
+
+  const lang = document.querySelector('.lang-btn.active')?.dataset.lang || 'zh-TW';
+  PMProfile.updateProfile(user.id, { name, lang });
+
+  const updated = PMProfile.getCurrentUser();
+  updateHero(updated);
+  showToast('個人資訊已更新');
+}
+
+// ━━━ WORKSPACE ━━━
+function renderWorkspace(currentUser) {
+  const members = PMProfile.getWorkspace();
+  const isAdmin = (currentUser.permissions || 'MEMBER') === 'ADMIN';
+  document.getElementById('memberCount').textContent = members.length + ' 位成員';
+
+  const PERM_STYLE = {
+    ADMIN:  'background:rgba(192,132,252,.15);color:#c084fc;border:1px solid rgba(192,132,252,.3)',
+    PM:     'background:rgba(56,189,248,.13); color:#38bdf8;border:1px solid rgba(56,189,248,.25)',
+    MEMBER: 'background:rgba(74,222,128,.13); color:#4ade80;border:1px solid rgba(74,222,128,.25)',
+  };
+
+  document.getElementById('memberList').innerHTML = members.map(m => {
+    const isSelf  = m.id === currentUser.id;
+    const ps      = PERM_STYLE[m.permissions] || PERM_STYLE.MEMBER;
+    const avHtml  = m.photoURL
+      ? `<img src="${m.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`
+      : escHtml((m.name || '?')[0]);
+    const avBg    = m.photoURL ? 'none' : (m.grad || '#666');
+
+    return `
+    <div class="member-row">
+      <div class="member-av" style="background:${avBg}">${avHtml}</div>
+      <div class="member-info">
+        <div class="member-name">
+          ${escHtml(m.name)}
+          ${isSelf ? '<span class="self-tag">你</span>' : ''}
+        </div>
+        <div class="member-email" title="${escHtml(m.email || '')}">${escHtml(m.email || '—')}</div>
+      </div>
+      <div class="member-role">${escHtml(m.role || '—')}</div>
+      <span class="member-perm" style="${ps}">${m.permissions || 'MEMBER'}</span>
+      <span class="member-status ${m.status === 'invited' ? 'status-invited' : 'status-active'}">
+        ${m.status === 'invited' ? '待確認' : '已加入'}
+      </span>
+      ${isAdmin && !isSelf
+        ? `<button class="member-remove" onclick="removeMember('${m.id}')" title="移除成員">
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+           </button>`
+        : '<div style="width:28px"></div>'}
+    </div>`;
+  }).join('');
+}
+
+function removeMember(uid) {
+  const m = PMProfile.getMember(uid);
+  if (!m || !confirm(`確定要將「${m.name}」從工作區移除嗎？`)) return;
+  PMProfile.removeUser(uid);
+  renderWorkspace(PMProfile.getCurrentUser());
+  showToast(`「${m.name}」已從工作區移除`);
+}
+
+function inviteUser(e) {
+  e.preventDefault();
+  const email = document.getElementById('inviteEmail').value.trim();
+  const name  = document.getElementById('inviteName').value.trim();
+  const role  = document.getElementById('inviteRole').value.trim();
+  const perms = document.getElementById('invitePerms').value;
+
+  if (!email) { showToast('請輸入 Email 地址', 'error'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Email 格式不正確', 'error'); return; }
+
+  const result = PMProfile.inviteUser({ email, name, role, permissions: perms });
+  if (!result.ok) { showToast(result.error, 'error'); return; }
+
+  document.getElementById('inviteEmail').value = '';
+  document.getElementById('inviteName').value  = '';
+  document.getElementById('inviteRole').value  = '';
+  document.getElementById('invitePerms').value = 'MEMBER';
+
+  renderWorkspace(PMProfile.getCurrentUser());
+  showToast(`邀請已發送至 ${email}`);
+}
+
+// ━━━ AVATAR PICKER ━━━
+function openAvatarPicker() {
+  document.getElementById('avatarModal').classList.add('show');
+}
+function closeAvatarPicker(e) {
+  if (!e || e.target === document.getElementById('avatarModal')) {
+    document.getElementById('avatarModal').classList.remove('show');
+  }
+}
+
+function selectGradient(grad) {
+  const user = PMProfile.getCurrentUser();
+  PMProfile.updateProfile(user.id, { grad, photoURL: null });
+  updateHero(PMProfile.getCurrentUser());
+  document.getElementById('avatarModal').classList.remove('show');
+  showToast('頭像顏色已更新');
+}
+
+function handleAvatarUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('圖片檔案需小於 2MB', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const user = PMProfile.getCurrentUser();
+    PMProfile.updateProfile(user.id, { photoURL: ev.target.result });
+    updateHero(PMProfile.getCurrentUser());
+    document.getElementById('avatarModal').classList.remove('show');
+    showToast('頭像已更新');
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function removeAvatar() {
+  const user = PMProfile.getCurrentUser();
+  PMProfile.updateProfile(user.id, { photoURL: null });
+  updateHero(PMProfile.getCurrentUser());
+  document.getElementById('avatarModal').classList.remove('show');
+  showToast('頭像已移除');
+}
+
+// ━━━ LOGOUT ━━━
+function doLogout() {
+  const user = PMProfile.getCurrentUser();
+  if (confirm(`確定要登出 ${user?.name || ''} 嗎？`)) window.PMAuth.logout();
+}
+</script>
+</body>
+</html>

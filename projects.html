@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<script src="auth.js"></script>
+<script src="profile.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMSuite — 所有專案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ━━━ RESET ━━━ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+button{cursor:pointer;border:none;background:none;font:inherit}
+input,select,textarea{font:inherit;border:none;outline:none;background:none;width:100%}
+a{text-decoration:none;color:inherit}
+svg{display:block;flex-shrink:0}
+[contenteditable]{outline:none}
+
+/* ━━━ TOKENS ━━━ */
+:root {
+  --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
+  --b1:#1e1c2e; --b2:#2a2840; --b3:#3a3852;
+  --t1:#f0edfb; --t2:#9490b0; --t3:#58547a; --t4:#35324a;
+  --purple:#c084fc; --purple-d:rgba(192,132,252,.13); --purple-g:rgba(192,132,252,.06);
+  --cyan:#38bdf8;   --cyan-d:rgba(56,189,248,.13);
+  --teal:#2dd4bf;   --teal-d:rgba(45,212,191,.13);
+  --green:#4ade80;  --green-d:rgba(74,222,128,.13);
+  --amber:#fbbf24;  --amber-d:rgba(251,191,36,.13);
+  --orange:#fb923c; --orange-d:rgba(251,146,60,.13);
+  --pink:#f472b6;   --pink-d:rgba(244,114,182,.13);
+  --red:#f87171;    --red-d:rgba(248,113,113,.13);
+  --grad-main:linear-gradient(135deg,#c084fc 0%,#38bdf8 100%);
+  --grad-fire:linear-gradient(135deg,#f472b6 0%,#fb923c 100%);
+  --grad-life:linear-gradient(135deg,#4ade80 0%,#2dd4bf 100%);
+  --sb-w:228px; --hdr-h:58px; --r:10px; --r-sm:6px;
+  --hdr-bg:rgba(8,8,15,.9); --ghost-op:.05;
+}
+[data-theme="light"] {
+  --bg:#f4f2fb; --s1:#fff; --s2:#edeaf7; --s3:#e2dff2; --s4:#d5d0ea;
+  --b1:#dbd6f0; --b2:#ccc6e4; --b3:#b8b2d8;
+  --t1:#18142a; --t2:#5a5475; --t3:#9088aa; --t4:#b8b0cc;
+  --purple-d:rgba(192,132,252,.14); --cyan-d:rgba(56,189,248,.14);
+  --teal-d:rgba(45,212,191,.14); --green-d:rgba(74,222,128,.14);
+  --amber-d:rgba(251,191,36,.14); --orange-d:rgba(251,146,60,.14);
+  --pink-d:rgba(244,114,182,.14); --red-d:rgba(248,113,113,.14);
+  --hdr-bg:rgba(244,242,251,.92); --ghost-op:.07;
+}
+
+body,
+.sidebar,.hdr,.card,.search,.icon-btn,.nav-item,
+.filter-tab,.modal-backdrop,.modal-box {
+  transition: background-color .28s ease, border-color .28s ease, color .2s ease;
+}
+
+body::after{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E")}
+
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
+  min-height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5}
+
+/* ━━━ SIDEBAR ━━━ */
+.sidebar{width:var(--sb-w);min-height:100vh;background:var(--s1);
+  border-right:1px solid var(--b1);display:flex;flex-direction:column;
+  flex-shrink:0;position:relative;z-index:20}
+.logo{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
+  padding:0 20px;border-bottom:1px solid var(--b1)}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;
+  flex-shrink:0;box-shadow:0 0 18px rgba(192,132,252,.35)}
+.logo-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--t1)}
+.logo-label em{font-style:normal;background:var(--grad-main);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:1px}
+.nav-section{font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--t4);padding:12px 10px 5px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;
+  border-radius:var(--r-sm);color:var(--t3);font-size:13.5px;font-weight:500;
+  cursor:pointer;transition:all .15s;text-decoration:none}
+.nav-item:hover{color:var(--t1);background:var(--s2)}
+.nav-item.active{color:var(--t1);background:var(--purple-g);
+  border-left:2px solid var(--purple);padding-left:10px}
+.ni{color:var(--t4);transition:color .15s;flex-shrink:0}
+.nav-item.active .ni{color:var(--purple)}
+.nav-item:hover .ni{color:var(--t2)}
+.nav-chip{margin-left:auto;font-family:'Fira Code',monospace;font-size:10px;font-weight:500;
+  padding:1px 7px;border-radius:10px;background:var(--s3);color:var(--t2);border:1px solid var(--b2)}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--b1)}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:var(--r-sm);cursor:pointer;transition:background .15s}
+.user-row:hover{background:var(--s2)}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:14px;color:#fff;flex-shrink:0;background:var(--grad-main)}
+.user-name{font-size:13px;font-weight:600;color:var(--t1)}
+.user-role{font-size:11px;color:var(--t3)}
+
+/* ━━━ MAIN ━━━ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.hdr{height:var(--hdr-h);display:flex;align-items:center;gap:14px;
+  padding:0 28px;border-bottom:1px solid var(--b1);background:var(--hdr-bg);
+  backdrop-filter:blur(16px);position:sticky;top:0;z-index:10;flex-shrink:0}
+.hdr-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;
+  letter-spacing:.03em;color:var(--t1)}
+.hdr-title span{color:var(--t3);font-weight:400;font-size:14px;margin-left:8px;
+  font-family:'Plus Jakarta Sans',sans-serif}
+.search{display:flex;align-items:center;gap:9px;background:var(--s2);
+  border:1px solid var(--b1);border-radius:var(--r-sm);padding:8px 14px;
+  width:230px;transition:border-color .15s,box-shadow .15s}
+.search:focus-within{border-color:var(--purple);box-shadow:0 0 0 3px var(--purple-g)}
+.search input{color:var(--t1);font-size:13px}
+.search input::placeholder{color:var(--t4)}
+.hdr-space{flex:1}
+.icon-btn{width:36px;height:36px;border-radius:var(--r-sm);background:var(--s2);
+  border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;
+  color:var(--t3);transition:all .15s}
+.icon-btn:hover{color:var(--t1);border-color:var(--b2);background:var(--s3)}
+.btn-primary{display:flex;align-items:center;gap:7px;background:var(--grad-main);color:#fff;
+  padding:8px 18px;border-radius:var(--r-sm);font-size:13px;font-weight:700;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;
+  box-shadow:0 0 20px rgba(192,132,252,.3);transition:all .2s;white-space:nowrap}
+.btn-primary:hover{box-shadow:0 0 32px rgba(192,132,252,.5);transform:translateY(-1px)}
+
+/* ━━━ CONTENT ━━━ */
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+/* ━━━ FILTER TABS ━━━ */
+.filter-row{display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--b1);
+  padding-bottom:0}
+.filter-tab{display:flex;align-items:center;gap:8px;padding:10px 16px;
+  font-size:13px;font-weight:500;color:var(--t3);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color .15s,border-color .15s;background:none;border-top:none;border-left:none;border-right:none}
+.filter-tab:hover{color:var(--t2)}
+.filter-tab.active{color:var(--t1);border-bottom:2px solid transparent;
+  background:linear-gradient(var(--bg),var(--bg)) padding-box,
+             var(--grad-main) border-box;
+  border-bottom:2px solid transparent;
+  position:relative}
+.filter-tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;
+  height:2px;background:var(--grad-main)}
+.tab-count{font-family:'Fira Code',monospace;font-size:10px;padding:1px 7px;
+  border-radius:10px;background:var(--s3);color:var(--t2);border:1px solid var(--b2)}
+.filter-tab.active .tab-count{background:var(--purple-d);color:var(--purple);border-color:transparent}
+
+/* ━━━ PROJECT GRID ━━━ */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  padding:0;overflow:hidden;cursor:pointer;
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+  animation:cardIn .4s cubic-bezier(.16,1,.3,1) both;
+  position:relative;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.35);
+  border-color:var(--b3)}
+
+/* priority left border */
+.card[data-priority="urgent"]{border-left:3px solid var(--red)}
+.card[data-priority="high"]  {border-left:3px solid var(--orange)}
+.card[data-priority="medium"]{border-left:3px solid var(--cyan)}
+.card[data-priority="low"]   {border-left:3px solid var(--green)}
+
+.card-inner{padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px;flex:1}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.type-badge{font-size:10px;font-weight:600;letter-spacing:.04em;padding:3px 9px;
+  border-radius:20px;background:var(--s3);color:var(--t3);border:1px solid var(--b2)}
+.priority-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot-urgent{background:var(--red)}
+.dot-high{background:var(--orange)}
+.dot-medium{background:var(--cyan)}
+.dot-low{background:var(--green)}
+.card-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;
+  color:var(--t1);letter-spacing:.01em;line-height:1.2}
+.card-desc{font-size:12.5px;color:var(--t3);line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.phase-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+  padding:4px 11px;border-radius:20px;width:fit-content}
+.phase-delivering{background:var(--purple-d);color:var(--purple)}
+.phase-planning  {background:var(--amber-d); color:var(--amber)}
+.phase-done      {background:var(--teal-d);  color:var(--teal)}
+.phase-paused    {background:var(--s3);      color:var(--t3)}
+
+/* Progress */
+.progress-section{}
+.progress-top{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:7px}
+.progress-label{font-size:11px;color:var(--t3);font-weight:500}
+.progress-pct{font-family:'Fira Code',monospace;font-size:11px;color:var(--t2);font-weight:500}
+.progress-bar{height:5px;background:var(--s3);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:var(--grad-main);
+  transition:width .6s cubic-bezier(.16,1,.3,1)}
+.progress-fill.done{background:var(--grad-life)}
+.progress-fill.paused{background:linear-gradient(90deg,var(--t3),var(--t4))}
+
+/* Card footer */
+.card-footer{display:flex;align-items:center;gap:10px;padding:12px 18px;
+  border-top:1px solid var(--b1);background:var(--s2)}
+.avatars{display:flex}
+.mini-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:11px;color:#fff;border:2px solid var(--s1);margin-left:-8px;flex-shrink:0}
+.mini-av:first-child{margin-left:0}
+.footer-stat{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t3);margin-left:auto}
+.footer-sep{width:1px;height:14px;background:var(--b2)}
+
+/* ━━━ EMPTY STATE ━━━ */
+.empty-state{display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;padding:64px 32px;color:var(--t3);text-align:center}
+.empty-state.show{display:flex}
+.empty-state svg{opacity:.35}
+.empty-state h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;color:var(--t2)}
+
+/* ━━━ MODAL ━━━ */
+.modal-backdrop{position:fixed;inset:0;z-index:900;
+  background:rgba(8,8,15,.7);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-backdrop.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--s1);border:1px solid var(--b2);border-radius:14px;
+  width:560px;max-width:95vw;max-height:92vh;overflow-y:auto;
+  transform:scale(.95) translateY(10px);transition:transform .28s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 24px 72px rgba(0,0,0,.55)}
+.modal-box::-webkit-scrollbar{width:4px}
+.modal-box::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+.modal-backdrop.open .modal-box{transform:scale(1) translateY(0)}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:20px 24px 16px;border-bottom:1px solid var(--b1)}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;
+  color:var(--t1);letter-spacing:.04em}
+.modal-close{width:32px;height:32px;border-radius:var(--r-sm);color:var(--t3);
+  display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover{background:var(--s3);color:var(--t1)}
+.modal-body{padding:20px 24px 0}
+.form-row{display:grid;gap:14px;margin-bottom:16px}
+.form-row.two{grid-template-columns:1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--t3)}
+.form-input,.form-select,.form-textarea{background:var(--s2);border:1px solid var(--b2);
+  border-radius:var(--r-sm);padding:9px 13px;color:var(--t1);font-size:13px;
+  transition:border-color .15s,box-shadow .15s;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  border-color:var(--purple);box-shadow:0 0 0 3px var(--purple-g);outline:none}
+.form-select option{background:var(--s2);color:var(--t1)}
+.form-textarea{resize:vertical;min-height:80px;font-size:13px;line-height:1.55}
+.form-input.error{border-color:var(--red)}
+
+/* Priority pills */
+.priority-pills{display:flex;gap:8px;flex-wrap:wrap}
+.prio-pill{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;
+  border:1.5px solid var(--b2);color:var(--t3);cursor:pointer;transition:all .15s}
+.prio-pill:hover{border-color:var(--b3);color:var(--t2)}
+.prio-pill.active-urgent{background:var(--red-d);color:var(--red);border-color:var(--red)}
+.prio-pill.active-high{background:var(--orange-d);color:var(--orange);border-color:var(--orange)}
+.prio-pill.active-medium{background:var(--cyan-d);color:var(--cyan);border-color:var(--cyan)}
+.prio-pill.active-low{background:var(--green-d);color:var(--green);border-color:var(--green)}
+
+.modal-footer{display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  padding:16px 24px;border-top:1px solid var(--b1);margin-top:20px}
+.btn-cancel{padding:8px 18px;border-radius:var(--r-sm);font-size:13px;font-weight:600;
+  color:var(--t3);border:1px solid var(--b2);background:var(--s2);transition:all .15s}
+.btn-cancel:hover{color:var(--t1);border-color:var(--b3);background:var(--s3)}
+
+/* ━━━ TOAST ━━━ */
+.toast{position:fixed;bottom:28px;right:28px;z-index:1000;
+  background:var(--s3);border:1px solid var(--b3);border-radius:10px;
+  padding:12px 20px;font-size:13px;font-weight:600;color:var(--t1);
+  display:flex;align-items:center;gap:10px;
+  transform:translateY(20px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 8px 32px rgba(0,0,0,.4);pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">PM</div>
+    <div class="logo-label">PM<em>Suite</em></div>
+  </div>
+  <nav class="nav">
+    <a class="nav-item" href="index.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      控制台
+    </a>
+    <a class="nav-item active" href="projects.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><path d="M16 3v4M8 3v4"/></svg>
+      專案
+    </a>
+    <a class="nav-item" href="tasks.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      任務
+      <span class="nav-chip">9</span>
+    </a>
+    <a class="nav-item" href="sprint-review.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Sprint Review
+    </a>
+    <div class="nav-section">工具</div>
+    <a class="nav-item" href="pomodoro-timer.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
+      番茄鐘
+    </a>
+    <a class="nav-item" href="#">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      文件
+    </a>
+    <a class="nav-item" href="profile.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      設定
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="user-row">
+      <div class="av">PM</div>
+      <div>
+        <div class="user-name">王小明</div>
+        <div class="user-role">Project Manager</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-title">所有專案<span>6 個專案</span></div>
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" color="var(--t4)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="searchInput" type="text" placeholder="搜尋專案…" oninput="filterProjects()">
+    </div>
+    <div class="hdr-space"></div>
+    <button class="btn-primary" onclick="openModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      新增專案
+    </button>
+    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="切換主題">
+      <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <!-- Filter Tabs -->
+    <div class="filter-row">
+      <button class="filter-tab active" data-filter="all" onclick="setFilter(this,'all')">
+        全部 <span class="tab-count" id="cnt-all">6</span>
+      </button>
+      <button class="filter-tab" data-filter="delivering" onclick="setFilter(this,'delivering')">
+        進行中 <span class="tab-count" id="cnt-delivering">2</span>
+      </button>
+      <button class="filter-tab" data-filter="done" onclick="setFilter(this,'done')">
+        已完成 <span class="tab-count" id="cnt-done">1</span>
+      </button>
+      <button class="filter-tab" data-filter="paused" onclick="setFilter(this,'paused')">
+        暫停 <span class="tab-count" id="cnt-paused">1</span>
+      </button>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="grid" id="projectGrid">
+
+      <!-- Card 1: 電商平台重構 -->
+      <div class="card" data-status="delivering" data-priority="high" data-name="電商平台重構" style="animation-delay:.05s" onclick="location.href='project-detail.html'">
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="type-badge">功能開發</span>
+            <span class="priority-dot dot-high" title="高優先"></span>
+          </div>
+          <div class="card-name">電商平台重構</div>
+          <div class="card-desc">全面重構電商前後端架構，提升系統效能與可維護性，導入微服務設計模式。</div>
+          <div class="phase-badge phase-delivering">🚀 交付中</div>
+          <div class="progress-section">
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">68%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:68%"></div></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="avatars">
+            <div class="mini-av" style="background:linear-gradient(135deg,#c084fc,#38bdf8)" title="王小明">王</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#38bdf8,#2dd4bf)" title="李大華">李</div>
+          </div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            18 任務
+          </div>
+          <div class="footer-sep"></div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026/05/01
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: 行動 App 開發 -->
+      <div class="card" data-status="planning" data-priority="medium" data-name="行動 App 開發" style="animation-delay:.10s">
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="type-badge">新專案</span>
+            <span class="priority-dot dot-medium" title="中優先"></span>
+          </div>
+          <div class="card-name">行動 App 開發</div>
+          <div class="card-desc">開發 iOS / Android 雙平台行動應用，整合推播通知與離線快取功能。</div>
+          <div class="phase-badge phase-planning">📋 規劃中</div>
+          <div class="progress-section">
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">23%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:23%"></div></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="avatars">
+            <div class="mini-av" style="background:linear-gradient(135deg,#f472b6,#fb923c)" title="陳美玲">陳</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#4ade80,#2dd4bf)" title="張志偉">張</div>
+          </div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            7 任務
+          </div>
+          <div class="footer-sep"></div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026/06/15
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: 客服系統整合 -->
+      <div class="card" data-status="done" data-priority="low" data-name="客服系統整合" style="animation-delay:.15s">
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="type-badge">整合</span>
+            <span class="priority-dot dot-low" title="低優先"></span>
+          </div>
+          <div class="card-name">客服系統整合</div>
+          <div class="card-desc">整合第三方客服平台 API，串接工單系統，自動化客服流程與報表產出。</div>
+          <div class="phase-badge phase-done">✅ 已完成</div>
+          <div class="progress-section">
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">100%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill done" style="width:100%"></div></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="avatars">
+            <div class="mini-av" style="background:linear-gradient(135deg,#2dd4bf,#4ade80)" title="林小芸">林</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#fbbf24,#fb923c)" title="黃建國">黃</div>
+          </div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            24 任務
+          </div>
+          <div class="footer-sep"></div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026/03/31
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: 資料分析儀表板 -->
+      <div class="card" data-status="paused" data-priority="urgent" data-name="資料分析儀表板" style="animation-delay:.20s">
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="type-badge">功能開發</span>
+            <span class="priority-dot dot-urgent" title="緊急"></span>
+          </div>
+          <div class="card-name">資料分析儀表板</div>
+          <div class="card-desc">建立即時資料視覺化儀表板，整合多個資料源，支援自訂圖表與匯出功能。</div>
+          <div class="phase-badge phase-paused">⏸ 暫停</div>
+          <div class="progress-section">
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">45%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill paused" style="width:45%"></div></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="avatars">
+            <div class="mini-av" style="background:linear-gradient(135deg,#c084fc,#38bdf8)" title="王小明">王</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#38bdf8,#2dd4bf)" title="李大華">李</div>
+          </div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            11 任務
+          </div>
+          <div class="footer-sep"></div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026/07/30
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5: API 閘道器升級 -->
+      <div class="card" data-status="delivering" data-priority="high" data-name="API 閘道器升級" style="animation-delay:.25s">
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="type-badge">維護</span>
+            <span class="priority-dot dot-high" title="高優先"></span>
+          </div>
+          <div class="card-name">API 閘道器升級</div>
+          <div class="card-desc">升級 API 閘道器至新版本，提升安全性、限流機制，並優化路由效能。</div>
+          <div class="phase-badge phase-delivering">🚀 交付中</div>
+          <div class="progress-section">
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">80%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="avatars">
+            <div class="mini-av" style="background:linear-gradient(135deg,#f472b6,#fb923c)" title="陳美玲">陳</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#4ade80,#2dd4bf)" title="張志偉">張</div>
+          </div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            9 任務
+          </div>
+          <div class="footer-sep"></div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026/04/20
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 6: 使用者通知系統 -->
+      <div class="card" data-status="planning" data-priority="medium" data-name="使用者通知系統" style="animation-delay:.30s">
+        <div class="card-inner">
+          <div class="card-top">
+            <span class="type-badge">功能開發</span>
+            <span class="priority-dot dot-medium" title="中優先"></span>
+          </div>
+          <div class="card-name">使用者通知系統</div>
+          <div class="card-desc">建置多管道通知系統，支援 Email、App 推播、簡訊，並提供偏好設定介面。</div>
+          <div class="phase-badge phase-planning">📋 規劃中</div>
+          <div class="progress-section">
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">12%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="avatars">
+            <div class="mini-av" style="background:linear-gradient(135deg,#2dd4bf,#4ade80)" title="林小芸">林</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#fbbf24,#fb923c)" title="黃建國">黃</div>
+          </div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            4 任務
+          </div>
+          <div class="footer-sep"></div>
+          <div class="footer-stat">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            2026/08/01
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /grid -->
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" color="var(--t3)"><path d="M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>
+      <h3>找不到符合條件的專案</h3>
+      <p style="font-size:13px;color:var(--t4)">試試調整篩選條件或搜尋關鍵字</p>
+    </div>
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ADD PROJECT MODAL -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event)">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-hdr">
+      <div class="modal-title">新增專案</div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="addProjectForm" onsubmit="submitProject(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">專案名稱 <span style="color:var(--red)">*</span></label>
+            <input type="text" class="form-input" id="projName" placeholder="輸入專案名稱…" required>
+          </div>
+        </div>
+        <div class="form-row two">
+          <div class="form-group">
+            <label class="form-label">專案類型</label>
+            <select class="form-select" id="projType">
+              <option value="功能開發">功能開發</option>
+              <option value="新專案">新專案</option>
+              <option value="整合">整合</option>
+              <option value="維護">維護</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">專案階段</label>
+            <select class="form-select" id="projPhase">
+              <option value="planning">規劃中</option>
+              <option value="delivering">交付中</option>
+              <option value="done">已完成</option>
+              <option value="paused">暫停</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">優先順序</label>
+            <div class="priority-pills" id="priorityPills">
+              <button type="button" class="prio-pill" data-p="urgent" onclick="selectPriority(this)">緊急</button>
+              <button type="button" class="prio-pill active-high" data-p="high" onclick="selectPriority(this)">高</button>
+              <button type="button" class="prio-pill" data-p="medium" onclick="selectPriority(this)">中</button>
+              <button type="button" class="prio-pill" data-p="low" onclick="selectPriority(this)">低</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row two">
+          <div class="form-group">
+            <label class="form-label">前端負責人</label>
+            <input type="text" class="form-input" id="projFE" placeholder="姓名…">
+          </div>
+          <div class="form-group">
+            <label class="form-label">後端負責人</label>
+            <input type="text" class="form-input" id="projBE" placeholder="姓名…">
+          </div>
+        </div>
+        <div class="form-row two">
+          <div class="form-group">
+            <label class="form-label">開始日期</label>
+            <input type="date" class="form-input" id="projStart">
+          </div>
+          <div class="form-group">
+            <label class="form-label">預計完成日期</label>
+            <input type="date" class="form-input" id="projEnd">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">描述 <span style="color:var(--t4);font-size:9px;letter-spacing:0;text-transform:none;font-weight:400">(選填)</span></label>
+            <textarea class="form-textarea" id="projDesc" placeholder="簡短描述專案目標與範圍…"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-primary" onclick="submitProject(event)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        建立專案
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg">專案已建立</span>
+</div>
+
+<script>
+/* ── THEME ── */
+const savedTheme = localStorage.getItem('pmsuite-theme');
+if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('pmsuite-theme', next);
+}
+
+/* ── FILTER STATE ── */
+let currentFilter = 'all';
+let searchQuery = '';
+
+const statusMap = {
+  delivering: 'delivering',
+  planning: 'planning',
+  done: 'done',
+  paused: 'paused'
+};
+
+function getCards() {
+  return Array.from(document.querySelectorAll('#projectGrid .card'));
+}
+
+function updateCounts() {
+  const cards = getCards();
+  const total = cards.length;
+  const counts = { delivering: 0, done: 0, paused: 0 };
+  cards.forEach(c => {
+    const s = c.dataset.status;
+    if (counts[s] !== undefined) counts[s]++;
+  });
+  document.getElementById('cnt-all').textContent = total;
+  document.getElementById('cnt-delivering').textContent = counts.delivering;
+  document.getElementById('cnt-done').textContent = counts.done;
+  document.getElementById('cnt-paused').textContent = counts.paused;
+}
+
+function filterProjects() {
+  searchQuery = document.getElementById('searchInput').value.toLowerCase();
+  applyFilters();
+}
+
+function setFilter(btn, filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const cards = getCards();
+  let visible = 0;
+  cards.forEach(card => {
+    const matchFilter = currentFilter === 'all' || card.dataset.status === currentFilter;
+    const name = card.dataset.name.toLowerCase();
+    const matchSearch = !searchQuery || name.includes(searchQuery);
+    const show = matchFilter && matchSearch;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  const empty = document.getElementById('emptyState');
+  empty.classList.toggle('show', visible === 0);
+}
+
+/* ── MODAL ── */
+let selectedPriority = 'high';
+
+function openModal() {
+  document.getElementById('modalBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('addProjectForm').reset();
+  // reset priority
+  document.querySelectorAll('.prio-pill').forEach(p => {
+    p.className = 'prio-pill';
+    if (p.dataset.p === 'high') p.classList.add('active-high');
+  });
+  selectedPriority = 'high';
+}
+
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('modalBackdrop')) closeModal();
+}
+
+function selectPriority(btn) {
+  document.querySelectorAll('.prio-pill').forEach(p => {
+    p.className = 'prio-pill';
+  });
+  selectedPriority = btn.dataset.p;
+  btn.classList.add('active-' + selectedPriority);
+}
+
+/* ── SUBMIT PROJECT ── */
+function submitProject(e) {
+  if (e) e.preventDefault();
+  const nameEl = document.getElementById('projName');
+  const name = nameEl.value.trim();
+  if (!name) {
+    nameEl.classList.add('error');
+    nameEl.focus();
+    setTimeout(() => nameEl.classList.remove('error'), 2000);
+    return;
+  }
+
+  const type = document.getElementById('projType').value;
+  const phaseVal = document.getElementById('projPhase').value;
+  const fe = document.getElementById('projFE').value.trim() || '待指派';
+  const be = document.getElementById('projBE').value.trim() || '待指派';
+  const endDate = document.getElementById('projEnd').value || '';
+  const desc = document.getElementById('projDesc').value.trim() || '暫無描述。';
+
+  const phaseLabels = {
+    planning: '📋 規劃中',
+    delivering: '🚀 交付中',
+    done: '✅ 已完成',
+    paused: '⏸ 暫停'
+  };
+  const phaseClasses = {
+    planning: 'phase-planning',
+    delivering: 'phase-delivering',
+    done: 'phase-done',
+    paused: 'phase-paused'
+  };
+  const dotClasses = {
+    urgent: 'dot-urgent',
+    high: 'dot-high',
+    medium: 'dot-medium',
+    low: 'dot-low'
+  };
+  const progressClasses = {
+    done: 'done',
+    paused: 'paused'
+  };
+
+  const feInitial = fe.charAt(0);
+  const beInitial = be.charAt(0);
+  const displayDate = endDate ? endDate.replace(/-/g, '/') : '未設定';
+  const pct = 0;
+  const pFill = progressClasses[phaseVal] || '';
+  const delay = getCards().length * 0.05;
+
+  const cardHtml = `
+    <div class="card" data-status="${phaseVal}" data-priority="${selectedPriority}" data-name="${name}" style="animation-delay:${delay}s">
+      <div class="card-inner">
+        <div class="card-top">
+          <span class="type-badge">${type}</span>
+          <span class="priority-dot ${dotClasses[selectedPriority]}"></span>
+        </div>
+        <div class="card-name">${name}</div>
+        <div class="card-desc">${desc}</div>
+        <div class="phase-badge ${phaseClasses[phaseVal]}">${phaseLabels[phaseVal]}</div>
+        <div class="progress-section">
+          <div class="progress-top">
+            <span class="progress-label">整體進度</span>
+            <span class="progress-pct">${pct}%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill ${pFill}" style="width:${pct}%"></div></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="avatars">
+          <div class="mini-av" style="background:linear-gradient(135deg,#c084fc,#38bdf8)" title="${fe}">${feInitial}</div>
+          <div class="mini-av" style="background:linear-gradient(135deg,#38bdf8,#2dd4bf)" title="${be}">${beInitial}</div>
+        </div>
+        <div class="footer-stat">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          0 任務
+        </div>
+        <div class="footer-sep"></div>
+        <div class="footer-stat">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          ${displayDate}
+        </div>
+      </div>
+    </div>`;
+
+  const grid = document.getElementById('projectGrid');
+  grid.insertAdjacentHTML('beforeend', cardHtml);
+
+  updateCounts();
+  applyFilters();
+  closeModal();
+  showToast(`「${name}」已成功建立`);
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+/* ── INIT ── */
+updateCounts();
+</script>
+</body>
+</html>

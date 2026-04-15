@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMSuite — 新增任務 Modal Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<!-- Tailwind CDN (demo only — prod uses CLI) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        bg:   '#08080f', s1:'#0e0d14', s2:'#141320', s3:'#1c1a2a',
+        b1:   '#1e1c2e', b2:'#2a2840', b3:'#3a3852',
+        t1:   '#f0edfb', t2:'#9490b0', t3:'#58547a', t4:'#35324a',
+      },
+      fontFamily: {
+        condensed: ['"Barlow Condensed"'],
+        sans:      ['"Plus Jakarta Sans"'],
+        mono:      ['"Fira Code"'],
+      },
+      animation: {
+        'modal-in':   'modalIn .22s cubic-bezier(.16,1,.3,1) both',
+        'spin-slow':  'spin 1s linear infinite',
+        'bounce-sm':  'bounceSm .3s ease',
+        'fade-up':    'fadeUp .4s ease both',
+      },
+      keyframes: {
+        modalIn:  { from:{opacity:0,transform:'scale(.96) translateY(8px)'}, to:{opacity:1,transform:'scale(1) translateY(0)'} },
+        bounceSm: { '0%,100%':{transform:'scale(1)'}, '50%':{transform:'scale(1.15)'} },
+        fadeUp:   { from:{opacity:0,transform:'translateY(12px)'}, to:{opacity:1,transform:'translateY(0)'} },
+      },
+    },
+  },
+};
+</script>
+<style>
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-thumb{background:#1c1a2a;border-radius:2px}
+  /* ── Selection ── */
+  ::selection{background:rgba(192,132,252,.3)}
+  /* ── Grain overlay ── */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.028'/%3E%3C/svg%3E");
+    opacity:.5;
+  }
+  /* Transition theme */
+  *{transition:background-color .25s, border-color .25s, color .18s;}
+  /* select option background */
+  select option{background:#141320;color:#f0edfb}
+  /* input caret */
+  input,select,textarea{caret-color:#c084fc}
+  /* No outline on contenteditable */
+  [contenteditable]{outline:none}
+</style>
+</head>
+<body class="font-sans bg-bg text-t1 min-h-screen flex items-center justify-center p-6" id="body">
+
+<!-- ── Background Demo Canvas ── -->
+<div class="fixed inset-0 flex items-center justify-center opacity-20 select-none pointer-events-none">
+  <div class="text-center">
+    <div class="font-condensed font-black text-[100px] leading-none text-transparent bg-clip-text"
+         style="background:linear-gradient(135deg,#c084fc,#38bdf8)">PM</div>
+    <div class="text-t3 text-sm tracking-[.3em] uppercase mt-2">Modal Demo</div>
+  </div>
+</div>
+
+<!-- ── Trigger button ── -->
+<button
+  id="open-btn"
+  onclick="openModal()"
+  class="relative z-10 flex items-center gap-2.5 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:-translate-y-0.5"
+  style="background:linear-gradient(135deg,#c084fc,#38bdf8);box-shadow:0 0 28px rgba(192,132,252,.4);letter-spacing:.06em;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif;font-size:15px"
+>
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+  新增任務
+</button>
+
+<!-- ══════════════════════════════════════════
+     MODAL OVERLAY
+══════════════════════════════════════════ -->
+<div
+  id="overlay"
+  class="fixed inset-0 z-50 hidden items-center justify-center p-4"
+  style="background:rgba(0,0,0,.65);backdrop-filter:blur(6px)"
+  onclick="handleOverlayClick(event)"
+>
+  <!-- Panel -->
+  <div
+    id="modal-panel"
+    class="w-full max-w-[480px] rounded-xl overflow-hidden shadow-2xl"
+    style="background:#0e0d14;border:1px solid #1e1c2e;animation:modalIn .22s cubic-bezier(.16,1,.3,1) both"
+  >
+    <!-- Rainbow top bar -->
+    <div class="h-px w-full" style="background:linear-gradient(90deg,#c084fc,#38bdf8,#2dd4bf)"></div>
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid #1e1c2e">
+      <div class="flex items-center gap-2.5">
+        <div class="w-6 h-6 rounded-md flex items-center justify-center"
+             style="background:linear-gradient(135deg,#c084fc,#38bdf8)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <h2 class="font-condensed font-bold text-t1 tracking-widest uppercase" style="font-size:15px">新增任務</h2>
+      </div>
+      <button onclick="closeModal()"
+        class="w-7 h-7 rounded-md flex items-center justify-center text-t3 hover:text-t1 hover:bg-white/5 transition-all">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Form body -->
+    <form onsubmit="return false" class="px-6 py-5 flex flex-col gap-5">
+
+      <!-- ① Task title -->
+      <div class="flex flex-col gap-2">
+        <label class="flex items-center gap-1.5 text-t3 font-semibold" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase">
+          任務名稱 <span style="color:#fb923c">*</span>
+        </label>
+        <input
+          id="inp-title"
+          type="text"
+          placeholder="簡短描述這個任務…"
+          oninput="validateTitle()"
+          onkeydown="if(event.key==='Enter')handleSave()"
+          class="w-full rounded-lg px-3.5 py-2.5 text-sm outline-none placeholder-t4 text-t1"
+          style="background:#141320;border:1px solid #1e1c2e;transition:border-color .15s,box-shadow .15s;font-size:13px"
+          onfocus="this.style.borderColor='#c084fc';this.style.boxShadow='0 0 0 3px rgba(192,132,252,.15)'"
+          onblur="validateTitle();this.style.borderColor=titleErr?'rgba(248,113,113,.5)':'#1e1c2e';this.style.boxShadow='none'"
+        />
+        <p id="err-title" class="text-[11px] hidden" style="color:#f87171">⚠ 任務名稱不能為空</p>
+      </div>
+
+      <!-- ② Project select -->
+      <div class="flex flex-col gap-2">
+        <label class="flex items-center gap-1.5 text-t3 font-semibold" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+          所屬專案 <span style="color:#fb923c">*</span>
+        </label>
+        <div class="relative">
+          <select
+            id="sel-project"
+            onchange="validateProject()"
+            class="w-full appearance-none rounded-lg px-3.5 py-2.5 pr-9 text-sm outline-none cursor-pointer text-t1"
+            style="background:#141320;border:1px solid #1e1c2e;transition:border-color .15s,box-shadow .15s;font-size:13px"
+            onfocus="this.style.borderColor='#c084fc';this.style.boxShadow='0 0 0 3px rgba(192,132,252,.15)'"
+            onblur="validateProject();this.style.borderColor=projErr?'rgba(248,113,113,.5)':'#1e1c2e';this.style.boxShadow='none'"
+          >
+            <option value="">選擇專案…</option>
+            <option value="p1">🚀 後端 API 專案</option>
+            <option value="p2">🎨 前端設計系統</option>
+            <option value="p3">📱 行動應用開發</option>
+            <option value="p4">🔐 認證與權限</option>
+          </select>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-t3"
+               width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <p id="err-project" class="text-[11px] hidden" style="color:#f87171">⚠ 請選擇所屬專案</p>
+      </div>
+
+      <!-- ③ Priority -->
+      <div class="flex flex-col gap-2">
+        <label class="text-t3 font-semibold" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase">優先級</label>
+        <div class="flex gap-2 flex-wrap" id="priority-group">
+          <!-- urgent -->
+          <button type="button" onclick="setPriority('urgent',this)"
+            class="priority-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+            data-val="urgent"
+            style="border-color:#2a2840;color:#58547a">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+            緊急
+          </button>
+          <!-- high -->
+          <button type="button" onclick="setPriority('high',this)"
+            class="priority-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+            data-val="high"
+            style="border-color:#2a2840;color:#58547a">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+            高
+          </button>
+          <!-- medium (default active) -->
+          <button type="button" onclick="setPriority('medium',this)"
+            class="priority-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all active-medium"
+            data-val="medium"
+            style="background:rgba(56,189,248,.1);color:#38bdf8;border-color:rgba(56,189,248,.3);box-shadow:0 0 0 2px rgba(56,189,248,.3)">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            中
+          </button>
+          <!-- low -->
+          <button type="button" onclick="setPriority('low',this)"
+            class="priority-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+            data-val="low"
+            style="border-color:#2a2840;color:#58547a">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            低
+          </button>
+          <!-- none -->
+          <button type="button" onclick="setPriority('none',this)"
+            class="priority-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+            data-val="none"
+            style="border-color:#2a2840;color:#58547a">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            無
+          </button>
+        </div>
+      </div>
+
+      <!-- ④ Estimated Pomodoros -->
+      <div class="flex flex-col gap-2">
+        <label class="flex items-center gap-1.5 text-t3 font-semibold" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+          預計番茄鐘數
+        </label>
+        <div class="flex items-center gap-4 rounded-lg px-4 py-3" style="background:#141320;border:1px solid #1e1c2e">
+
+          <!-- Stepper -->
+          <div class="flex items-center gap-3 shrink-0">
+            <button type="button" onclick="decPomodoros()"
+              id="btn-dec"
+              class="w-7 h-7 rounded-md flex items-center justify-center text-t2 font-bold text-base leading-none transition-all"
+              style="border:1px solid #2a2840">
+              −
+            </button>
+            <span id="pomo-count" class="font-mono font-bold text-t1 text-base w-6 text-center"
+                  style="font-family:'Fira Code',monospace">1</span>
+            <button type="button" onclick="incPomodoros()"
+              id="btn-inc"
+              class="w-7 h-7 rounded-md flex items-center justify-center text-t2 font-bold text-base leading-none transition-all"
+              style="border:1px solid #2a2840">
+              +
+            </button>
+          </div>
+
+          <!-- Tomatoes -->
+          <div id="pomo-tomatoes" class="flex flex-wrap gap-1 flex-1 min-h-6 items-center">
+            <span class="text-base leading-none">🍅</span>
+          </div>
+
+          <!-- Minutes -->
+          <span id="pomo-minutes" class="text-t3 shrink-0"
+                style="font-family:'Fira Code',monospace;font-size:11px">≈ 25m</span>
+        </div>
+        <p class="text-t4" style="font-size:11px">每個番茄鐘 = 25 分鐘，預計工時自動換算存入任務</p>
+      </div>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-between px-6 py-4" style="border-top:1px solid #1e1c2e">
+      <!-- Summary -->
+      <div id="footer-summary" class="flex items-center gap-2" style="font-size:11px;color:#58547a">
+        <div id="priority-dot" class="w-1.5 h-1.5 rounded-full" style="background:#38bdf8"></div>
+        <span id="summary-text">中優先 · 🍅×1</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="closeModal()"
+          class="px-4 py-2 text-sm rounded-lg text-t3 hover:text-t2 hover:bg-white/5 transition-all">
+          取消
+        </button>
+        <button id="btn-save" onclick="handleSave()"
+          class="flex items-center gap-2 px-5 py-2 text-sm rounded-lg font-bold text-white transition-all hover:-translate-y-px"
+          style="background:linear-gradient(135deg,#c084fc,#38bdf8);box-shadow:0 0 18px rgba(192,132,252,.3);
+                 font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;text-transform:uppercase;font-size:14px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          建立任務
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Toast container ══ -->
+<div id="toast-area" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none" style="min-width:280px"></div>
+
+<!-- Keyframe for modal -->
+<style>
+@keyframes modalIn {
+  from{opacity:0;transform:scale(.96) translateY(8px)}
+  to  {opacity:1;transform:scale(1)   translateY(0)}
+}
+@keyframes toastIn {
+  from{opacity:0;transform:translateX(20px) scale(.96)}
+  to  {opacity:1;transform:translateX(0)    scale(1)}
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+
+<script>
+// ─── State ────────────────────────────────────
+let pomodoros = 1;
+let priority  = 'medium';
+let titleErr  = false;
+let projErr   = false;
+
+// Simulated task store
+const taskStore = [];
+
+const PRIORITY_STYLES = {
+  urgent: { bg:'rgba(248,113,113,.1)', color:'#f87171', border:'rgba(248,113,113,.3)', dot:'#f87171', label:'緊急' },
+  high:   { bg:'rgba(251,146,60,.1)',  color:'#fb923c', border:'rgba(251,146,60,.3)',  dot:'#fb923c', label:'高' },
+  medium: { bg:'rgba(56,189,248,.1)',  color:'#38bdf8', border:'rgba(56,189,248,.3)',  dot:'#38bdf8', label:'中' },
+  low:    { bg:'rgba(74,222,128,.1)',  color:'#4ade80', border:'rgba(74,222,128,.3)',  dot:'#4ade80', label:'低' },
+  none:   { bg:'rgba(156,163,175,.1)', color:'#9ca3af', border:'rgba(156,163,175,.2)', dot:'#9ca3af', label:'無' },
+};
+
+// ─── Open / Close ────────────────────────────
+function openModal() {
+  // Reset form
+  document.getElementById('inp-title').value = '';
+  document.getElementById('sel-project').value = '';
+  pomodoros = 1; updatePomodoros();
+  setPriorityStyle('medium');
+  hideError('title'); hideError('project');
+  titleErr = false; projErr = false;
+
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => {
+    document.getElementById('modal-panel').style.animation = 'modalIn .22s cubic-bezier(.16,1,.3,1) both';
+  });
+  setTimeout(() => document.getElementById('inp-title').focus(), 80);
+}
+
+function closeModal() {
+  document.getElementById('overlay').style.display = 'none';
+}
+
+function handleOverlayClick(e) {
+  if (e.target.id === 'overlay') closeModal();
+}
+
+// ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ─── Priority ─────────────────────────────────
+function setPriority(val, btn) {
+  priority = val;
+  setPriorityStyle(val);
+  updateSummary();
+}
+
+function setPriorityStyle(val) {
+  priority = val;
+  const cfg = PRIORITY_STYLES[val];
+  document.querySelectorAll('.priority-btn').forEach(b => {
+    if (b.dataset.val === val) {
+      b.style.background   = cfg.bg;
+      b.style.color        = cfg.color;
+      b.style.borderColor  = cfg.border;
+      b.style.boxShadow    = `0 0 0 2px ${cfg.border}`;
+    } else {
+      b.style.background   = 'transparent';
+      b.style.color        = '#58547a';
+      b.style.borderColor  = '#2a2840';
+      b.style.boxShadow    = 'none';
+    }
+  });
+  // update dot
+  document.getElementById('priority-dot').style.background = cfg.dot;
+}
+
+// ─── Pomodoros ────────────────────────────────
+function incPomodoros() { if (pomodoros < 20) { pomodoros++; updatePomodoros(); } }
+function decPomodoros() { if (pomodoros > 0)  { pomodoros--; updatePomodoros(); } }
+
+function updatePomodoros() {
+  document.getElementById('pomo-count').textContent = pomodoros;
+  const mins = pomodoros * 25;
+  document.getElementById('pomo-minutes').textContent = pomodoros > 0 ? `≈ ${mins}m` : '';
+
+  // Tomatoes
+  const area = document.getElementById('pomo-tomatoes');
+  if (pomodoros === 0) {
+    area.innerHTML = '<span style="font-size:11px;color:#35324a">尚未設定預估</span>';
+  } else {
+    const show = Math.min(pomodoros, 8);
+    const rest = pomodoros > 8 ? pomodoros - 8 : 0;
+    area.innerHTML =
+      Array.from({length: show}).map(() => '<span style="font-size:15px;line-height:1">🍅</span>').join('') +
+      (rest > 0 ? `<span style="font-size:11px;color:#9490b0;font-family:\'Fira Code\',monospace">+${rest}</span>` : '');
+  }
+
+  // stepper buttons
+  document.getElementById('btn-dec').style.color = pomodoros <= 0  ? '#35324a' : '#9490b0';
+  document.getElementById('btn-inc').style.color = pomodoros >= 20 ? '#35324a' : '#9490b0';
+  document.getElementById('btn-dec').disabled = pomodoros <= 0;
+  document.getElementById('btn-inc').disabled = pomodoros >= 20;
+
+  updateSummary();
+}
+
+// ─── Summary ──────────────────────────────────
+function updateSummary() {
+  const cfg = PRIORITY_STYLES[priority];
+  document.getElementById('priority-dot').style.background = cfg.dot;
+  const pomoText = pomodoros > 0 ? ` · 🍅×${pomodoros}` : '';
+  document.getElementById('summary-text').textContent = `${cfg.label}優先${pomoText}`;
+}
+
+// ─── Validation ──────────────────────────────
+function validateTitle() {
+  const val = document.getElementById('inp-title').value.trim();
+  titleErr = val.length === 0;
+  const errEl = document.getElementById('err-title');
+  if (titleErr) {
+    errEl.textContent = '⚠ 任務名稱不能為空';
+    errEl.classList.remove('hidden');
+    document.getElementById('inp-title').style.borderColor = 'rgba(248,113,113,.5)';
+  } else if (val.length < 2) {
+    errEl.textContent = '⚠ 名稱至少需要 2 個字元';
+    errEl.classList.remove('hidden');
+    titleErr = true;
+    document.getElementById('inp-title').style.borderColor = 'rgba(248,113,113,.5)';
+  } else {
+    errEl.classList.add('hidden');
+    document.getElementById('inp-title').style.borderColor = '#1e1c2e';
+  }
+  return !titleErr;
+}
+
+function validateProject() {
+  projErr = !document.getElementById('sel-project').value;
+  const errEl = document.getElementById('err-project');
+  if (projErr) {
+    errEl.classList.remove('hidden');
+    document.getElementById('sel-project').style.borderColor = 'rgba(248,113,113,.5)';
+  } else {
+    errEl.classList.add('hidden');
+    document.getElementById('sel-project').style.borderColor = '#1e1c2e';
+  }
+  return !projErr;
+}
+
+function hideError(field) {
+  document.getElementById('err-'+field)?.classList.add('hidden');
+}
+
+// ─── Save ─────────────────────────────────────
+async function handleSave() {
+  const titleOk   = validateTitle();
+  const projectOk = validateProject();
+  if (!titleOk || !projectOk) return;
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.innerHTML = `
+    <svg style="animation:spin .8s linear infinite" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+    </svg> 建立中…`;
+  btn.style.opacity = '.7';
+
+  await new Promise(r => setTimeout(r, 380));
+
+  const title    = document.getElementById('inp-title').value.trim();
+  const project  = document.getElementById('sel-project');
+  const projName = project.options[project.selectedIndex].text;
+  const estMin   = pomodoros * 25;
+
+  // Simulate addTask()
+  const task = {
+    id:               'task-' + Date.now(),
+    title,
+    projectName:      projName,
+    priority,
+    estimatedMinutes: estMin,
+    pomodoroCount:    pomodoros,
+    createdAt:        new Date().toISOString(),
+  };
+  taskStore.push(task);
+  console.log('[Store] addTask called:', task);
+
+  showToast(`任務「${title}」已建立 🍅×${pomodoros}`, 'success');
+  closeModal();
+
+  // Reset button
+  btn.disabled = false;
+  btn.style.opacity = '1';
+  btn.innerHTML = `
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg> 建立任務`;
+}
+
+// ─── Toast ────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const area  = document.getElementById('toast-area');
+  const el    = document.createElement('div');
+  const color = type === 'success' ? '#2dd4bf' : '#f87171';
+  const icon  = type === 'success'
+    ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+    : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+
+  el.className = 'pointer-events-auto flex items-center gap-3 rounded-lg px-4 py-3 shadow-2xl';
+  el.style.cssText = `background:#0e0d14;border:1px solid ${color}30;animation:toastIn .22s cubic-bezier(.16,1,.3,1) both;`;
+  el.innerHTML = `
+    <span style="color:${color};flex-shrink:0">${icon}</span>
+    <span style="font-size:13px;color:#f0edfb;flex:1">${msg}</span>
+    <button onclick="this.closest('div').remove()" style="color:#58547a;flex-shrink:0;cursor:pointer;opacity:.7" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>`;
+  area.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// Init
+updatePomodoros();
+updateSummary();
+</script>
+</body>
+</html>
