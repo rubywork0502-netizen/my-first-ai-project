@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMSuite — 文件檔案室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ━━━ RESET ━━━ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+button{cursor:pointer;border:none;background:none;font:inherit}
+input,select,textarea{font:inherit;border:none;outline:none;background:none;width:100%}
+a{text-decoration:none;color:inherit}
+svg{display:block;flex-shrink:0}
+
+/* ━━━ DESIGN TOKENS — mirrors personal-space.html exactly ━━━ */
+:root {
+  --bg:#F5F0FF;
+  --s1:#FFFFFF; --s2:#EDE7FC; --s3:#E3DAFC; --s4:#D5CBFB;
+  --b1:#E2DAF7; --b2:#CABEF2; --b3:#B0A2E8;
+  --t1:#1E1647; --t2:#524778; --t3:#8C7EB8; --t4:#C0B6E0;
+  --orange:#E47A3B; --orange-d:rgba(228,122,59,.12);
+  --gold:#F2C94C;   --gold-d:rgba(242,201,76,.12);
+  --violet:#7F56D9; --violet-d:rgba(127,86,217,.12);
+  --purple:#7F56D9; --purple-d:rgba(127,86,217,.14); --purple-g:rgba(127,86,217,.07);
+  --cyan:#38bdf8;   --cyan-d:rgba(56,189,248,.13);
+  --green:#4ade80;  --green-d:rgba(74,222,128,.13);
+  --red:#ef4444;    --red-d:rgba(239,68,68,.13);
+  --grad-main:linear-gradient(135deg,#7F56D9 0%,#E47A3B 100%);
+  --sb-w:228px; --hdr-h:58px; --r:12px; --r-sm:7px;
+  --hdr-bg:rgba(245,240,255,.88);
+}
+[data-theme="dark"] {
+  --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
+  --b1:#1e1c2e; --b2:#2a2840; --b3:#3a3852;
+  --t1:#f0edfb; --t2:#9490b0; --t3:#58547a; --t4:#35324a;
+  --purple:#c084fc; --purple-d:rgba(192,132,252,.13); --purple-g:rgba(192,132,252,.06);
+  --orange:#fb923c; --orange-d:rgba(251,146,60,.13);
+  --gold:#fbbf24;   --gold-d:rgba(251,191,36,.13);
+  --violet:#a855f7; --violet-d:rgba(168,85,247,.13);
+  --grad-main:linear-gradient(135deg,#c084fc,#fb923c);
+  --hdr-bg:rgba(8,8,15,.88);
+}
+
+/* ━━━ BODY & GRAIN ━━━ */
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
+  min-height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.035'/%3E%3C/svg%3E")}
+
+/* ━━━ BACKGROUND ORBS — identical to personal-space ━━━ */
+.ps-orbs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px)}
+.orb-1{width:480px;height:480px;
+  background:radial-gradient(circle,rgba(127,86,217,.14) 0%,transparent 70%);
+  top:-80px;right:60px;animation:orbA 22s ease-in-out infinite alternate}
+.orb-2{width:320px;height:320px;
+  background:radial-gradient(circle,rgba(228,122,59,.1) 0%,transparent 70%);
+  bottom:60px;left:220px;animation:orbB 28s ease-in-out infinite alternate}
+.orb-3{width:200px;height:200px;
+  background:radial-gradient(circle,rgba(244,114,182,.1) 0%,transparent 70%);
+  top:50%;left:50%;animation:orbC 18s ease-in-out infinite alternate}
+@keyframes orbA{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-30px,40px) scale(1.08)}}
+@keyframes orbB{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,-28px) scale(0.92)}}
+@keyframes orbC{0%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-50%) scale(1.2) rotate(30deg)}}
+
+/* ━━━ SIDEBAR ━━━ */
+.sidebar{width:var(--sb-w);min-height:100vh;background:var(--s1);
+  border-right:1px solid var(--b1);display:flex;flex-direction:column;
+  flex-shrink:0;position:relative;z-index:20}
+.logo{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
+  padding:0 20px;border-bottom:1px solid var(--b1)}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;
+  flex-shrink:0;box-shadow:0 0 20px rgba(127,86,217,.35)}
+.logo-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--t1)}
+.logo-label em{font-style:normal;background:var(--grad-main);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:1px;overflow-y:auto}
+.nav-section{font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--t4);padding:12px 10px 5px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;
+  border-radius:var(--r-sm);color:var(--t3);font-size:13.5px;font-weight:500;
+  cursor:pointer;transition:all .15s;text-decoration:none}
+.nav-item:hover{color:var(--t1);background:var(--s2)}
+.nav-item:hover .ni{color:var(--t2)}
+.nav-item.active{color:var(--t1);background:var(--purple-g);
+  border-left:2px solid var(--purple);padding-left:10px}
+.nav-item.active .ni{color:var(--purple)}
+.ni{color:var(--t4);transition:color .15s;flex-shrink:0}
+.nav-chip{margin-left:auto;font-family:'Fira Code',monospace;font-size:10px;font-weight:500;
+  padding:1px 7px;border-radius:10px;background:var(--s3);color:var(--t2);border:1px solid var(--b2)}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--b1)}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:var(--r-sm);cursor:pointer;transition:background .15s}
+.user-row:hover{background:var(--s2)}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#fff;
+  flex-shrink:0;background:var(--grad-main)}
+.user-name{font-size:13px;font-weight:600;color:var(--t1)}
+.user-role{font-size:11px;color:var(--t3)}
+
+/* ━━━ MAIN ━━━ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;position:relative;z-index:1}
+
+/* ━━━ HEADER ━━━ */
+.hdr{height:var(--hdr-h);display:flex;align-items:center;gap:14px;
+  padding:0 24px;background:var(--hdr-bg);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.04);
+  position:sticky;top:0;z-index:10;flex-shrink:0}
+.hdr-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;
+  letter-spacing:.02em;color:var(--t1);display:flex;align-items:baseline;gap:10px}
+.hdr-title span{font-size:12px;font-weight:500;color:var(--t3);
+  font-family:'Fira Code',monospace;letter-spacing:.04em}
+.hdr-search{display:flex;align-items:center;gap:9px;flex:1;max-width:460px;
+  background:rgba(255,255,255,.6);border:1px solid var(--b1);
+  border-radius:24px;padding:8px 18px;transition:border-color .2s,box-shadow .2s}
+.hdr-search:focus-within{border-color:var(--purple);box-shadow:0 0 0 3px var(--purple-d)}
+.hdr-search input{font-size:13px;font-weight:500;color:var(--t1)}
+.hdr-search input::placeholder{color:var(--t4)}
+.hdr-space{flex:1}
+.btn-upload{display:flex;align-items:center;gap:8px;
+  background:var(--grad-main);color:#fff;
+  padding:9px 20px;border-radius:20px;font-size:12.5px;font-weight:600;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  box-shadow:0 4px 16px rgba(127,86,217,.28);
+  transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .2s;white-space:nowrap}
+.btn-upload:hover{transform:scale(1.05) translateY(-1px);box-shadow:0 6px 22px rgba(127,86,217,.4)}
+.icon-btn{width:34px;height:34px;border-radius:var(--r-sm);
+  background:transparent;border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--t3);transition:all .15s}
+.icon-btn:hover{background:var(--s2);color:var(--t1);border-color:var(--b2)}
+
+/* ━━━ SCROLL WRAPPER ━━━ */
+.doc-scroll{flex:1;overflow-y:auto;padding:0 24px 28px;display:flex;flex-direction:column}
+.doc-scroll::-webkit-scrollbar{width:4px}
+.doc-scroll::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* ━━━ SECTION HEADER ━━━ */
+.recent-section{padding:20px 0 0}
+.section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.section-hdr-title{font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--t3)}
+.section-hdr-line{flex:1;height:1px;background:var(--b1)}
+
+/* ━━━ RECENT BAR ━━━ */
+.recent-list{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
+.recent-list::-webkit-scrollbar{height:3px}
+.recent-list::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.recent-chip{flex-shrink:0;display:flex;align-items:center;gap:10px;
+  padding:9px 14px 9px 11px;
+  background:var(--s1);border:1px solid var(--b1);
+  border-radius:var(--r);cursor:pointer;
+  transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .18s,border-color .15s}
+.recent-chip:hover{transform:translateY(-2px);border-color:var(--b2);
+  box-shadow:0 6px 20px rgba(127,86,217,.1)}
+.recent-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.recent-info{display:flex;flex-direction:column;gap:1px}
+.recent-name{font-size:12px;font-weight:600;color:var(--t1);max-width:140px;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.recent-meta{font-size:10px;color:var(--t3);font-family:'Fira Code',monospace}
+.recent-type{font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:6px}
+
+/* ━━━ TWO-COLUMN LAYOUT ━━━ */
+.doc-layout{display:flex;gap:0;flex:1;margin-top:20px}
+
+/* ── Folder panel ── */
+.folder-panel{width:196px;flex-shrink:0;display:flex;flex-direction:column;gap:2px;
+  padding-right:16px;border-right:1px solid var(--b1)}
+.folder-item{display:flex;align-items:center;gap:9px;padding:8px 11px;
+  border-radius:var(--r-sm);cursor:pointer;font-weight:500;font-size:13px;color:var(--t3);
+  transition:all .15s}
+.folder-item:hover{background:var(--s2);color:var(--t1)}
+.folder-item.active{background:var(--purple-g);color:var(--t1);
+  border-left:2px solid var(--purple);padding-left:9px}
+.folder-icon{font-size:15px;line-height:1}
+.folder-name{flex:1}
+.folder-count{font-family:'Fira Code',monospace;font-size:10px;font-weight:500;
+  padding:1px 7px;border-radius:8px;background:var(--s3);color:var(--t2)}
+.folder-item.active .folder-count{background:var(--purple-d);color:var(--purple)}
+
+/* Filter tags */
+.filter-tags{display:flex;flex-wrap:wrap;gap:5px;padding:10px 4px 4px}
+.ftag{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;cursor:pointer;
+  border:1px solid transparent;transition:all .15s}
+.ftag:hover{opacity:.85}
+.ftag-all {background:var(--s3);color:var(--t2);border-color:var(--b2)}
+.ftag-all.active{background:var(--purple);color:#fff}
+.ftag-pdf {background:rgba(228,122,59,.1);color:#C85C1A;border-color:rgba(228,122,59,.22)}
+.ftag-pdf.active{background:#E47A3B;color:#fff}
+.ftag-word{background:var(--s3);color:var(--t2);border-color:var(--b2)}
+.ftag-word.active{background:var(--purple);color:#fff}
+.ftag-excel{background:rgba(74,222,128,.1);color:#2d6a47;border-color:rgba(74,222,128,.22)}
+.ftag-excel.active{background:#22c55e;color:#fff}
+
+/* ── Doc area ── */
+.doc-main{flex:1;padding-left:20px;display:flex;flex-direction:column}
+.doc-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.doc-folder-label{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:.04em;color:var(--t1);display:flex;align-items:center;gap:8px}
+.doc-count{font-size:10.5px;font-weight:500;color:var(--t3);font-family:'Fira Code',monospace}
+.view-toggle{display:flex;gap:3px}
+.vt-btn{width:28px;height:28px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;
+  color:var(--t4);border:1px solid var(--b1);background:transparent;transition:all .15s}
+.vt-btn.active,.vt-btn:hover{color:var(--purple);background:var(--purple-d);border-color:var(--b2)}
+
+/* Grid view */
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(218px,1fr));gap:12px}
+
+/* List view */
+.doc-list{display:flex;flex-direction:column;gap:7px}
+
+/* ━━━ DOC CARD — mirrors projects.html card style ━━━ */
+.doc-card{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  overflow:hidden;cursor:pointer;
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+  box-shadow:none;
+  display:flex;flex-direction:column;
+  animation:cardIn .4s cubic-bezier(.16,1,.3,1) both;
+  position:relative}
+/* left-border accent by file type — same as priority border on project cards */
+.doc-card[data-type="pdf"]  {border-left:3px solid var(--orange)}
+.doc-card[data-type="word"] {border-left:3px solid var(--purple)}
+.doc-card[data-type="excel"]{border-left:3px solid var(--green)}
+.doc-card[data-type="other"]{border-left:3px solid var(--t4)}
+.doc-card:hover{transform:translateY(-4px);
+  box-shadow:0 16px 40px rgba(127,86,217,.14);
+  border-color:var(--b3)}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* card inner padding — same pattern as .card-inner */
+.doc-card-inner{padding:16px 18px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
+
+.doc-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.doc-type-badge{font-size:10px;font-weight:600;letter-spacing:.04em;padding:3px 9px;
+  border-radius:20px;border:1px solid var(--b2);background:var(--s3);color:var(--t3)}
+.doc-folder-badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;
+  background:var(--purple-d);color:var(--purple);border:1px solid transparent}
+
+/* type accent colours on badges */
+.badge-pdf  {background:var(--orange-d);color:var(--orange);border-color:transparent}
+.badge-word {background:var(--purple-d);color:var(--purple);border-color:transparent}
+.badge-excel{background:var(--green-d);color:#2d6a47;border-color:transparent}
+.badge-other{background:var(--s3);color:var(--t3);border-color:var(--b2)}
+
+.doc-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;
+  color:var(--t1);letter-spacing:.01em;line-height:1.2;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.doc-desc{font-size:12.5px;color:var(--t3);line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.doc-tags{display:flex;flex-wrap:wrap;gap:4px}
+.doc-tag{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;
+  background:var(--s3);color:var(--t3);border:1px solid var(--b2)}
+
+.doc-card-foot{display:flex;align-items:center;gap:8px;padding:11px 18px;
+  border-top:1px solid var(--b1);background:var(--s2)}
+.doc-date{font-size:11px;color:var(--t3);font-family:'Fira Code',monospace}
+.doc-size{font-size:11px;color:var(--t4);font-family:'Fira Code',monospace}
+.foot-sep{width:1px;height:13px;background:var(--b2)}
+.doc-actions{margin-left:auto;display:flex;gap:3px}
+.doc-action{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  color:var(--t4);transition:all .15s}
+.doc-action:hover{background:var(--s3);color:var(--red)}
+
+/* ── List card variant ── */
+.doc-card.list-mode{flex-direction:row;align-items:center;border-radius:var(--r-sm)}
+.doc-card.list-mode .doc-card-inner{flex-direction:row;align-items:center;
+  padding:11px 18px;gap:14px;flex:1}
+.doc-card.list-mode .doc-card-top{flex-shrink:0}
+.doc-card.list-mode .doc-folder-badge{display:none}
+.doc-card.list-mode .doc-name{font-size:15px;-webkit-line-clamp:1;flex:1;margin:0}
+.doc-card.list-mode .doc-desc{display:none}
+.doc-card.list-mode .doc-tags{flex-shrink:0}
+.doc-card.list-mode .doc-card-foot{border:none;background:none;
+  padding:11px 18px 11px 0;flex-shrink:0}
+
+/* Empty state */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:64px 32px;color:var(--t3);text-align:center;grid-column:1/-1}
+.empty-state .es-icon{font-size:48px;opacity:.35}
+.empty-state h3{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;
+  letter-spacing:.04em;color:var(--t2)}
+.empty-state p{font-size:13px;max-width:280px;line-height:1.6}
+
+/* ━━━ MODAL ━━━ */
+.modal-backdrop{position:fixed;inset:0;z-index:900;
+  background:rgba(30,22,71,.2);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-backdrop.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--s1);
+  border:1px solid var(--b1);border-radius:20px;
+  width:520px;max-width:95vw;max-height:92vh;overflow-y:auto;
+  transform:scale(.95) translateY(12px);
+  transition:transform .3s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 24px 72px rgba(127,86,217,.22),0 0 0 1px var(--b1)}
+.modal-box::-webkit-scrollbar{width:3px}
+.modal-box::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.modal-backdrop.open .modal-box{transform:scale(1) translateY(0)}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:20px 24px 14px;border-bottom:1px solid var(--b1)}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;
+  letter-spacing:.04em;color:var(--t1);display:flex;align-items:center;gap:10px}
+.modal-close{width:30px;height:30px;border-radius:var(--r-sm);color:var(--t3);
+  display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover{background:var(--s2);color:var(--t1)}
+.modal-body{padding:18px 24px}
+.form-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.form-label{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--t3)}
+.form-input,.form-select,.form-textarea{
+  background:var(--s2);border:1px solid var(--b1);
+  border-radius:var(--r-sm);padding:9px 12px;color:var(--t1);font-size:13px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;
+  transition:border-color .15s,box-shadow .15s;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  border-color:var(--purple);box-shadow:0 0 0 3px var(--purple-d);outline:none}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--t4)}
+.form-select option{background:var(--s1);color:var(--t1)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Upload zone */
+.upload-zone{border:1.5px dashed var(--b2);border-radius:var(--r);
+  padding:26px;display:flex;flex-direction:column;align-items:center;
+  gap:10px;cursor:pointer;transition:all .15s;background:var(--s2);
+  margin-bottom:14px;text-align:center}
+.upload-zone:hover{border-color:var(--purple);background:var(--purple-d)}
+.upload-zone .uz-icon{font-size:32px}
+.upload-zone .uz-text{font-size:12.5px;font-weight:600;color:var(--purple)}
+.upload-zone .uz-sub{font-size:11px;color:var(--t3)}
+
+
+.modal-footer{display:flex;align-items:center;justify-content:flex-end;gap:9px;
+  padding:14px 24px;border-top:1px solid var(--b1)}
+.btn-cancel{padding:8px 18px;border-radius:20px;font-size:12.5px;font-weight:600;
+  color:var(--t2);border:1px solid var(--b2);background:var(--s2);
+  font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s}
+.btn-cancel:hover{background:var(--s3);border-color:var(--b3)}
+.btn-save{display:flex;align-items:center;gap:7px;
+  background:var(--grad-main);color:#fff;
+  padding:8px 20px;border-radius:20px;font-size:12.5px;font-weight:600;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  box-shadow:0 4px 16px rgba(127,86,217,.28);
+  transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .2s}
+.btn-save:hover{transform:scale(1.04) translateY(-1px);box-shadow:0 6px 22px rgba(127,86,217,.4)}
+
+/* ━━━ TOAST ━━━ */
+.toast{position:fixed;bottom:24px;right:24px;z-index:950;
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-sm);
+  padding:11px 16px;font-size:12.5px;font-weight:600;color:var(--t1);
+  display:flex;align-items:center;gap:10px;
+  transform:translateY(16px);opacity:0;
+  transition:all .3s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 8px 32px rgba(127,86,217,.16);pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0}
+
+/* ━━━ SCROLLBAR ━━━ */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--b3)}
+
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+</style>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+<!-- ━━━ BACKGROUND ORBS ━━━ -->
+<div class="ps-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- ━━━ SIDEBAR ━━━ -->
+<aside class="sidebar">
+  <a class="logo" href="index.html">
+    <div class="logo-icon">PM</div>
+    <span class="logo-label">PM<em>Suite</em></span>
+  </a>
+  <nav class="nav">
+    <div class="nav-section">主選單</div>
+    <a class="nav-item" href="index.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      控制台
+    </a>
+    <a class="nav-item" href="projects.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      專案
+    </a>
+    <a class="nav-item" href="tasks.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      任務
+    </a>
+    <a class="nav-item" href="sprint-review.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Sprint Review
+    </a>
+    <div class="nav-section">工具</div>
+    <a class="nav-item" href="pomodoro-timer.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
+      番茄鐘
+    </a>
+    <a class="nav-item" href="personal-space.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M3 21c0-4.2 4-7 9-7s9 2.8 9 7"/></svg>
+      個人中心
+    </a>
+    <a class="nav-item active" href="docs.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      文件
+    </a>
+    <div class="nav-section">個人</div>
+    <a class="nav-item" href="profile.html">
+      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      設定
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="user-row">
+      <div class="av">PM</div>
+      <div>
+        <div class="user-name" id="sbUserName">王小明</div>
+        <div class="user-role">Project Manager</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ━━━ MAIN ━━━ -->
+<div class="main">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-title">文件檔案室 <span id="docCountLabel">載入中…</span></div>
+    <div class="hdr-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--t4);flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="searchInput" type="text" placeholder="搜尋文件名稱、標籤…" oninput="renderDocs()">
+    </div>
+    <div class="hdr-space"></div>
+    <button class="icon-btn" onclick="toggleView()" id="viewToggleBtn" title="切換檢視">
+      <svg id="viewIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    </button>
+    <button class="btn-upload" onclick="openModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      上傳文件
+    </button>
+  </header>
+
+  <!-- SCROLL CONTENT -->
+  <div class="doc-scroll">
+
+    <!-- 最近開啟 -->
+    <div class="recent-section">
+      <div class="section-hdr">
+        <span class="section-hdr-title">最近開啟</span>
+        <div class="section-hdr-line"></div>
+      </div>
+      <div class="recent-list" id="recentList"></div>
+    </div>
+
+    <!-- Two-column layout -->
+    <div class="doc-layout">
+
+      <!-- Folder panel -->
+      <div class="folder-panel">
+        <div id="folderList"></div>
+        <div class="filter-tags" id="filterTags"></div>
+      </div>
+
+      <!-- Doc main area -->
+      <div class="doc-main">
+        <div class="doc-toolbar">
+          <div>
+            <div class="doc-folder-label" id="folderLabel">📂 全部文件</div>
+            <div class="doc-count" id="docCount"></div>
+          </div>
+          <div class="view-toggle">
+            <button class="vt-btn active" id="vt-grid" onclick="setViewMode('grid')" title="格狀">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </button>
+            <button class="vt-btn" id="vt-list" onclick="setViewMode('list')" title="列表">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="docContainer" class="doc-grid"></div>
+      </div>
+
+    </div>
+  </div><!-- /doc-scroll -->
+
+</div><!-- /main -->
+
+<!-- ━━━ UPLOAD MODAL ━━━ -->
+<div class="modal-backdrop" id="modal" onclick="handleBackdropClick(event)">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        上傳新文件
+      </div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Upload zone -->
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <div class="uz-icon">☁️</div>
+        <div class="uz-text">點擊選擇檔案或拖曳至此</div>
+        <div class="uz-sub" id="uploadZoneSub">支援 PDF、Word、Excel 等格式</div>
+        <input type="file" id="fileInput" style="display:none" onchange="handleFileSelect(event)">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">文件名稱 *</label>
+        <input class="form-input" id="docName" type="text" placeholder="輸入文件名稱…">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">文件簡介</label>
+        <textarea class="form-textarea" id="docDesc" placeholder="輸入文件摘要或說明…"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">所屬資料夾</label>
+          <select class="form-select" id="docFolder">
+            <option value="meeting">📋 會議紀錄</option>
+            <option value="project">🚀 專案文件</option>
+            <option value="admin">📜 行政規章</option>
+            <option value="draft">✏️ 個人草稿</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">文件類型</label>
+          <select class="form-select" id="docType">
+            <option value="PDF">PDF</option>
+            <option value="Word">Word</option>
+            <option value="Excel">Excel</option>
+            <option value="Other">其他</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:14px">
+        <label class="form-label">標籤（逗號分隔）</label>
+        <input class="form-input" id="docTags" type="text" placeholder="例：重要, 行銷, Q2">
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-save" onclick="saveDoc()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        儲存文件
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ TOAST ━━━ -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+/* ━━━ CONSTANTS ━━━ */
+const STORAGE_KEY  = 'pmsuite-docs-v1';
+const RECENT_KEY   = 'pmsuite-docs-recent';
+const MAX_RECENT   = 8;
+
+const FOLDER_META = {
+  all:     { label:'全部文件',  icon:'📂' },
+  meeting: { label:'會議紀錄',  icon:'📋' },
+  project: { label:'專案文件',  icon:'🚀' },
+  admin:   { label:'行政規章',  icon:'📜' },
+  draft:   { label:'個人草稿',  icon:'✏️' },
+};
+const FILE_TYPES = ['全部','PDF','Word','Excel'];
+
+const DEFAULT_DOCS = [
+  {id:'d1',name:'2026 Q1 全體會議紀錄',folder:'meeting',type:'PDF',date:'2026-04-10',tags:['PDF','重要'],size:'1.8 MB',desc:'Q1 季度全體會議重點紀錄與決議事項'},
+  {id:'d2',name:'電商平台重構提案書',folder:'project',type:'Word',date:'2026-04-08',tags:['Word','進行中'],size:'3.2 MB',desc:'電商平台前後端重構的完整規劃提案'},
+  {id:'d3',name:'2026 年度預算表',folder:'admin',type:'Excel',date:'2026-04-05',tags:['Excel','財務'],size:'0.9 MB',desc:'2026 年度各部門預算規劃與分配'},
+  {id:'d4',name:'新產品功能構思',folder:'draft',type:'Word',date:'2026-04-12',tags:['Word','草稿'],size:'0.4 MB',desc:'下一版本產品功能腦力激盪草稿'},
+  {id:'d5',name:'行銷策略周報',folder:'meeting',type:'PDF',date:'2026-04-09',tags:['PDF','行銷'],size:'2.1 MB',desc:'本週行銷活動執行進度與數據分析'},
+  {id:'d6',name:'API 技術規格書',folder:'project',type:'PDF',date:'2026-04-06',tags:['PDF','技術'],size:'4.5 MB',desc:'RESTful API 設計規格與端點文件'},
+  {id:'d7',name:'員工手冊 2026 版',folder:'admin',type:'PDF',date:'2026-03-28',tags:['PDF','人資'],size:'5.2 MB',desc:'2026 年度最新員工規章與福利說明'},
+  {id:'d8',name:'App 設計稿筆記',folder:'draft',type:'Word',date:'2026-04-14',tags:['Word','設計'],size:'0.7 MB',desc:'行動 App 畫面設計的個人草稿筆記'},
+  {id:'d9',name:'Sprint 3 復盤報告',folder:'meeting',type:'Excel',date:'2026-04-01',tags:['Excel','Sprint'],size:'1.3 MB',desc:'Sprint 3 各任務完成狀況與改善建議'},
+  {id:'d10',name:'品牌視覺規範',folder:'project',type:'PDF',date:'2026-03-25',tags:['PDF','設計'],size:'8.4 MB',desc:'PMSuite 品牌設計系統完整規範文件'},
+];
+
+/* ━━━ STATE ━━━ */
+let docs      = [];
+let recentIds = [];
+let activeFolder = 'all';
+let activeType   = '全部';
+let viewMode     = 'grid';
+
+/* ━━━ STORAGE ━━━ */
+function loadData(){
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    docs = stored ? JSON.parse(stored) : [...DEFAULT_DOCS];
+    const sr = localStorage.getItem(RECENT_KEY);
+    recentIds = sr ? JSON.parse(sr) : ['d5','d2','d8','d1'];
+  } catch(e) {
+    docs = [...DEFAULT_DOCS];
+    recentIds = ['d5','d2','d8','d1'];
+  }
+}
+function saveData(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(docs));
+  localStorage.setItem(RECENT_KEY, JSON.stringify(recentIds));
+}
+
+/* ━━━ RECENT ━━━ */
+function openDoc(id){
+  recentIds = [id, ...recentIds.filter(r=>r!==id)].slice(0, MAX_RECENT);
+  saveData();
+  renderRecent();
+  showToast('已開啟文件');
+}
+
+/* ━━━ RENDER ━━━ */
+function renderAll(){
+  renderFolders();
+  renderFilterTags();
+  renderRecent();
+  renderDocs();
+  updateDocCount();
+}
+
+function renderFolders(){
+  const list = document.getElementById('folderList');
+  const counts = { all: docs.length };
+  docs.forEach(d=>{ counts[d.folder]=(counts[d.folder]||0)+1; });
+  list.innerHTML = Object.entries(FOLDER_META).map(([id,{label,icon}])=>`
+    <div class="folder-item ${activeFolder===id?'active':''}" onclick="setFolder('${id}')">
+      <span class="folder-icon">${icon}</span>
+      <span class="folder-name">${label}</span>
+      <span class="folder-count">${counts[id]||0}</span>
+    </div>
+  `).join('');
+}
+
+function renderFilterTags(){
+  const tags = document.getElementById('filterTags');
+  tags.innerHTML = FILE_TYPES.map(t=>`
+    <button class="ftag ftag-${t.toLowerCase()} ${activeType===t?'active':''}"
+      onclick="setType('${t}')">${t}</button>
+  `).join('');
+}
+
+const TYPE_DOT_COLOR = {PDF:'#F8AD7C',Word:'#5B7EC9',Excel:'#8EB89A',Other:'rgba(61,53,48,.18)'};
+
+function renderRecent(){
+  const list = document.getElementById('recentList');
+  const recent = recentIds
+    .map(id=>docs.find(d=>d.id===id))
+    .filter(Boolean)
+    .slice(0, MAX_RECENT);
+  if(!recent.length){
+    list.innerHTML='<div style="color:var(--t4);font-size:12px;padding:12px 0;font-weight:500">暫無最近開啟的文件</div>';
+    return;
+  }
+  list.innerHTML = recent.map(d=>`
+    <div class="recent-chip" onclick="openDoc('${d.id}')" style="animation:up .3s both">
+      <div class="recent-dot" style="background:${TYPE_DOT_COLOR[d.type]||'var(--t4)'}"></div>
+      <div class="recent-info">
+        <div class="recent-name">${d.name}</div>
+        <div class="recent-meta">${d.date} · ${d.size}</div>
+      </div>
+      <span class="recent-type doc-type-badge badge-${d.type.toLowerCase()}">${d.type}</span>
+    </div>
+  `).join('');
+}
+
+function getFilteredDocs(){
+  const q = (document.getElementById('searchInput')||{value:''}).value.toLowerCase();
+  return docs.filter(d=>{
+    const folderMatch = activeFolder==='all' || d.folder===activeFolder;
+    const typeMatch   = activeType==='全部' || d.type===activeType;
+    const searchMatch = !q || d.name.toLowerCase().includes(q)
+      || (d.desc||'').toLowerCase().includes(q)
+      || d.tags.some(t=>t.toLowerCase().includes(q));
+    return folderMatch && typeMatch && searchMatch;
+  });
+}
+
+function renderDocs(){
+  const container = document.getElementById('docContainer');
+  const filtered = getFilteredDocs();
+
+  const meta = FOLDER_META[activeFolder];
+  document.getElementById('folderLabel').textContent = `${meta.icon} ${meta.label}`;
+  document.getElementById('docCount').textContent = `${filtered.length} 份文件`;
+  document.getElementById('docCountLabel').textContent = `共 ${docs.length} 份`;
+
+  container.className = viewMode==='grid' ? 'doc-grid' : 'doc-list';
+
+  if(!filtered.length){
+    container.innerHTML=`
+      <div class="empty-state">
+        <div class="es-icon">📭</div>
+        <h3>這裡還沒有文件</h3>
+        <p>試試調整篩選條件，或上傳第一份文件吧！</p>
+      </div>`;
+    return;
+  }
+
+  const FOLDER_LABELS = {meeting:'會議紀錄',project:'專案文件',admin:'行政規章',draft:'個人草稿'};
+  container.innerHTML = filtered.map((d,i)=>`
+    <div class="doc-card ${viewMode==='list'?'list-mode':''}"
+      data-type="${d.type.toLowerCase()}"
+      style="animation-delay:${i*0.04}s" onclick="openDoc('${d.id}')">
+      <div class="doc-card-inner">
+        <div class="doc-card-top">
+          <span class="doc-type-badge badge-${d.type.toLowerCase()}">${d.type}</span>
+          <span class="doc-folder-badge">${FOLDER_LABELS[d.folder]||d.folder}</span>
+        </div>
+        <div class="doc-name">${d.name}</div>
+        ${d.desc?`<div class="doc-desc">${d.desc}</div>`:''}
+        <div class="doc-tags">${d.tags.filter(t=>t!==d.type).map(t=>`<span class="doc-tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="doc-card-foot">
+        <span class="doc-date">${d.date}</span>
+        <div class="foot-sep"></div>
+        <span class="doc-size">${d.size||'—'}</span>
+        <div class="doc-actions">
+          <button class="doc-action" onclick="event.stopPropagation();deleteDoc('${d.id}')" title="刪除">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateDocCount(){
+  document.getElementById('docCountLabel').textContent = `共 ${docs.length} 份`;
+}
+
+/* ━━━ FILTERS ━━━ */
+function setFolder(id){
+  activeFolder = id;
+  renderAll();
+}
+function setType(t){
+  activeType = t;
+  renderFilterTags();
+  renderDocs();
+}
+function setViewMode(mode){
+  viewMode = mode;
+  document.getElementById('vt-grid').classList.toggle('active', mode==='grid');
+  document.getElementById('vt-list').classList.toggle('active', mode==='list');
+  renderDocs();
+}
+function toggleView(){
+  setViewMode(viewMode==='grid'?'list':'grid');
+}
+
+/* ━━━ MODAL ━━━ */
+function openModal(){
+  document.getElementById('docName').value='';
+  document.getElementById('docDesc').value='';
+  document.getElementById('docFolder').value='meeting';
+  document.getElementById('docType').value='PDF';
+  document.getElementById('docTags').value='';
+  document.getElementById('uploadZoneSub').textContent='支援 PDF、Word、Excel 等格式';
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+}
+function handleBackdropClick(e){
+  if(e.target===document.getElementById('modal')) closeModal();
+}
+
+function handleFileSelect(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const name = file.name.replace(/\.[^.]+$/, '');
+  if(!document.getElementById('docName').value) document.getElementById('docName').value = name;
+  document.getElementById('uploadZoneSub').textContent = `已選擇：${file.name}`;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const typeMap = {pdf:'PDF', doc:'Word', docx:'Word', xls:'Excel', xlsx:'Excel'};
+  if(typeMap[ext]) document.getElementById('docType').value=typeMap[ext];
+}
+
+function uuidv4(){
+  return 'doc-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
+}
+
+function saveDoc(){
+  const name = document.getElementById('docName').value.trim();
+  if(!name){ showToast('請輸入文件名稱 ⚠️'); return; }
+  const rawTags = document.getElementById('docTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const type = document.getElementById('docType').value;
+  const tags = rawTags.filter(t=>t!==type);
+  const newDoc = {
+    id:     uuidv4(),
+    name,
+    desc:   document.getElementById('docDesc').value.trim(),
+    folder: document.getElementById('docFolder').value,
+    type,
+    date:   new Date().toISOString().slice(0,10),
+    tags,
+    size:   '—',
+  };
+  docs.unshift(newDoc);
+  saveData();
+  closeModal();
+  renderAll();
+  showToast(`『${name}』已上傳`);
+}
+
+/* ━━━ DELETE ━━━ */
+function deleteDoc(id){
+  if(!confirm('確定要刪除這份文件嗎？')) return;
+  docs = docs.filter(d=>d.id!==id);
+  recentIds = recentIds.filter(r=>r!==id);
+  saveData();
+  renderAll();
+  showToast('已刪除文件');
+}
+
+/* ━━━ TOAST ━━━ */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ━━━ INIT ━━━ */
+loadData();
+renderAll();
+</script>
+</body>
+</html>
