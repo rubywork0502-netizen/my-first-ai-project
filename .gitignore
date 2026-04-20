@@ -1,0 +1,10 @@
+# 敏感設定檔
+.env
+*.log
+
+# 系統暫存檔
+.DS_Store
+Thumbs.db
+
+# 套件依賴（未來如果你有用 npm 的話）
+node_modules/
