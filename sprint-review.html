@@ -54,10 +54,10 @@ svg{display:block;flex-shrink:0}
 body,aside,.hdr,.card,.panel,.stat-c{transition:background-color .28s,border-color .28s,color .2s}
 
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
-  min-height:100vh;display:flex;overflow:hidden;font-size:14px}
+  height:100vh;display:flex;overflow:hidden;font-size:14px}
 
 /* ── SIDEBAR ── */
-.sidebar{width:var(--sb-w);min-height:100vh;background:var(--s1);border-right:1px solid var(--b1);
+.sidebar{width:var(--sb-w);height:100vh;background:var(--s1);border-right:1px solid var(--b1);
   display:flex;flex-direction:column;flex-shrink:0;z-index:20}
 .logo{height:var(--hdr-h);display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid var(--b1)}
 .logo-icon{width:30px;height:30px;border-radius:8px;background:var(--grad-main);
@@ -108,7 +108,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .btn-save:hover{box-shadow:0 0 32px rgba(192,132,252,.5);transform:translateY(-1px)}
 
 /* ── CONTENT ── */
-.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.content{flex:1;overflow-y:auto;min-height:0;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
 .content::-webkit-scrollbar{width:5px}
 .content::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
 
