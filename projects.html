@@ -121,87 +121,121 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
 .content::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
 .content::-webkit-scrollbar-track{background:transparent}
 
+/* ━━━ TOKENS OVERRIDE — cleaner palette ━━━ */
+:root{
+  --bg:#F9FAFB;--s1:#FFFFFF;--s2:#F9FAFB;--s3:#F3F4F6;--s4:#E5E7EB;
+  --b1:#E5E7EB;--b2:#D1D5DB;--b3:#9CA3AF;
+  --t1:#111827;--t2:#374151;--t3:#6B7280;--t4:#9CA3AF;
+  --purple:#5B21B6;--purple-d:rgba(91,33,182,.08);--purple-g:rgba(91,33,182,.05);
+  --indigo:#4F46E5;
+  --green:#059669;--green-d:rgba(5,150,105,.08);
+  --amber:#D97706;--amber-d:rgba(217,119,6,.08);
+  --red:#DC2626;--red-d:rgba(220,38,38,.08);
+  --cyan:#0284C7;--cyan-d:rgba(2,132,199,.08);
+  --grad-main:linear-gradient(135deg,#5B21B6 0%,#4F46E5 100%);
+  --grad-life:linear-gradient(135deg,#059669 0%,#0D9488 100%);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:0 4px 12px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.04);
+}
+[data-theme="dark"]{
+  --bg:#0F0F13;--s1:#18181F;--s2:#1E1E27;--s3:#25252F;--s4:#2D2D3A;
+  --b1:#2A2A36;--b2:#35354A;--b3:#4B4B65;
+  --t1:#F1F0FB;--t2:#A8A5C8;--t3:#6B687A;--t4:#3D3B50;
+  --purple:#A78BFA;--purple-d:rgba(167,139,250,.1);--purple-g:rgba(167,139,250,.05);
+  --indigo:#818CF8;
+  --green:#34D399;--green-d:rgba(52,211,153,.1);
+  --amber:#FCD34D;--amber-d:rgba(252,211,77,.1);
+  --red:#F87171;--red-d:rgba(248,113,113,.1);
+  --cyan:#38BDF8;--cyan-d:rgba(56,189,248,.1);
+  --grad-main:linear-gradient(135deg,#A78BFA 0%,#818CF8 100%);
+}
+
 /* ━━━ TOOLBAR ━━━ */
-.toolbar{display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--b1);
-  padding:0 24px;flex-shrink:0;background:var(--s1);
+.toolbar{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--b1);
+  padding:0 24px;flex-shrink:0;background:var(--s1);overflow-x:auto;
   transition:background .28s,border-color .28s}
-.filter-tab{display:flex;align-items:center;gap:7px;padding:10px 14px;
+.toolbar::-webkit-scrollbar{display:none}
+.filter-tab{display:inline-flex;align-items:center;gap:6px;padding:11px 14px;
   font-size:13px;font-weight:500;color:var(--t3);cursor:pointer;
   border:none;border-bottom:2px solid transparent;margin-bottom:-1px;
-  transition:color .15s,border-color .15s;background:none;position:relative}
+  transition:color .15s,border-color .15s;background:none;white-space:nowrap;flex-shrink:0}
 .filter-tab:hover{color:var(--t2)}
-.filter-tab.active{color:var(--purple)}
-.filter-tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;
-  height:2px;background:var(--purple);border-radius:1px}
+.filter-tab.active{color:var(--purple);border-bottom-color:var(--purple);font-weight:600}
 .tab-count{font-family:'JetBrains Mono',monospace;font-size:10px;padding:1px 6px;
-  border-radius:8px;background:var(--s3);color:var(--t3);border:1px solid var(--b1)}
-.filter-tab.active .tab-count{background:var(--purple-g);color:var(--purple);border-color:transparent}
-.toolbar-sep{width:1px;height:20px;background:var(--b1);margin:0 4px}
-
-/* View toggle */
-.view-toggle{display:flex;align-items:center;gap:2px;margin-left:auto;
-  background:var(--s3);border:1px solid var(--b1);border-radius:var(--r-sm);padding:3px}
+  border-radius:8px;background:var(--s3);color:var(--t3);border:1px solid var(--b1);
+  transition:all .15s}
+.filter-tab.active .tab-count{background:var(--purple-d);color:var(--purple);border-color:transparent}
+.toolbar-gap{flex:1;min-width:12px}
+.view-toggle{display:flex;align-items:center;gap:2px;flex-shrink:0;
+  background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:3px}
 .vt-btn{padding:4px 10px;border-radius:4px;font-size:12px;font-weight:500;
   color:var(--t3);transition:all .15s;display:flex;align-items:center;gap:5px}
-.vt-btn.active{background:var(--s1);color:var(--t1);box-shadow:var(--shadow-sm)}
+.vt-btn.active{background:var(--s1);color:var(--t1);box-shadow:0 1px 2px rgba(0,0,0,.06)}
 .vt-btn:hover:not(.active){color:var(--t2)}
 
 /* ━━━ PROJECT GRID ━━━ */
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.content{flex:1;overflow-y:auto;min-height:0;padding:20px 24px;
+  display:flex;flex-direction:column;gap:16px;background:var(--bg)}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-
-.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;
   overflow:hidden;cursor:pointer;
-  transition:transform .2s,box-shadow .2s,border-color .2s;
-  animation:cardIn .35s cubic-bezier(.16,1,.3,1) both;
-  display:flex;flex-direction:column;
-  box-shadow:var(--shadow-sm)}
-.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--b2)}
+  transition:border-color .2s,box-shadow .2s,transform .2s;
+  animation:cardIn .3s cubic-bezier(.16,1,.3,1) both;
+  display:flex;flex-direction:column}
+.card:hover{border-color:var(--b2);box-shadow:var(--shadow-md);transform:translateY(-2px)}
 .card[data-priority="urgent"]{border-left:3px solid var(--red)}
-.card[data-priority="high"]  {border-left:3px solid var(--orange)}
-.card[data-priority="medium"]{border-left:3px solid var(--cyan)}
+.card[data-priority="high"]  {border-left:3px solid var(--amber)}
+.card[data-priority="medium"]{border-left:3px solid var(--indigo)}
 .card[data-priority="low"]   {border-left:3px solid var(--green)}
-.card-inner{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
-.card-top{display:flex;align-items:center;justify-content:space-between}
-.type-badge{font-size:10px;font-weight:600;letter-spacing:.03em;padding:2px 8px;
-  border-radius:20px;background:var(--s3);color:var(--t3);border:1px solid var(--b1)}
-.priority-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.dot-urgent{background:var(--red)} .dot-high{background:var(--orange)}
-.dot-medium{background:var(--cyan)} .dot-low{background:var(--green)}
-.card-name{font-weight:700;font-size:15px;color:var(--t1);line-height:1.3}
-.card-desc{font-size:12px;color:var(--t3);line-height:1.55;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.phase-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
-  padding:3px 10px;border-radius:20px;width:fit-content}
-.phase-delivering{background:var(--purple-d);color:var(--purple)}
-.phase-planning  {background:var(--amber-d);color:var(--amber)}
-.phase-done      {background:var(--green-d);color:var(--green)}
-.phase-paused    {background:var(--s3);color:var(--t3)}
-.progress-section{}
-.progress-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.card-inner{padding:14px 16px;display:flex;flex-direction:column;gap:12px;flex:1}
+.card-top{display:flex;align-items:center;gap:7px}
+.card-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;
+  padding:2px 9px;border-radius:20px;letter-spacing:.03em}
+.st-planning {background:rgba(217,119,6,.08);color:#B45309}
+.st-delivering{background:rgba(79,70,229,.08);color:#4338CA}
+.st-delivery {background:rgba(91,33,182,.08);color:#6D28D9}
+.st-done     {background:rgba(5,150,105,.08);color:#047857}
+.st-other    {background:var(--s3);color:var(--t3)}
+.card-priority{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-left:auto}
+.cp-urgent{background:var(--red)} .cp-high{background:var(--amber)}
+.cp-medium{background:var(--indigo)} .cp-low{background:var(--green)}
+.card-name{font-weight:700;font-size:14.5px;color:var(--t1);line-height:1.3;letter-spacing:-.01em}
+.card-meta{display:flex;align-items:center;gap:7px;margin-top:-4px}
+.card-type{display:inline-flex;align-items:center;font-size:10px;font-weight:600;
+  padding:2px 8px;border-radius:4px;background:var(--s3);color:var(--t3);
+  letter-spacing:.02em;border:1px solid var(--b1);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.card-desc{font-size:11.5px;color:var(--t3);line-height:1.5;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.progress-section{display:flex;flex-direction:column;gap:5px}
+.progress-top{display:flex;align-items:center;justify-content:space-between}
 .progress-label{font-size:11px;color:var(--t3);font-weight:500}
-.progress-pct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2)}
-.progress-bar{height:4px;background:var(--s3);border-radius:2px;overflow:hidden}
+.progress-pct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2);font-weight:600}
+.progress-bar{height:3px;background:var(--s4);border-radius:2px;overflow:hidden}
 .progress-fill{height:100%;border-radius:2px;background:var(--grad-main);
-  transition:width .6s cubic-bezier(.16,1,.3,1)}
-.progress-fill.done{background:var(--grad-life)}
-.progress-fill.paused{background:var(--b2)}
-.card-footer{display:flex;align-items:center;gap:8px;padding:10px 16px;
+  transition:width .5s cubic-bezier(.16,1,.3,1)}
+.progress-fill.done  {background:var(--grad-life)}
+.progress-fill.other {background:var(--b2)}
+.card-footer{display:flex;align-items:center;gap:8px;padding:9px 16px;
   border-top:1px solid var(--b1);background:var(--s2)}
 .avatars{display:flex}
-.mini-av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;
-  font-size:11px;color:#fff;border:2px solid var(--s1);margin-left:-6px;flex-shrink:0}
+.mini-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-weight:700;font-size:10px;color:#fff;
+  border:2px solid var(--s1);margin-left:-5px;flex-shrink:0}
 .mini-av:first-child{margin-left:0}
-.footer-stat{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t3);margin-left:auto}
-.footer-sep{width:1px;height:12px;background:var(--b1)}
+.card-due{font-size:11px;color:var(--t3);margin-left:auto;display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace}
+.card-due.late{color:var(--red);font-weight:600}
+.card-tasks{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace}
 
 /* ━━━ EMPTY STATE ━━━ */
 .empty-state{display:none;flex-direction:column;align-items:center;justify-content:center;
   gap:12px;padding:64px 32px;color:var(--t3);text-align:center}
 .empty-state.show{display:flex}
-.empty-state svg{opacity:.3}
-.empty-state h3{font-size:16px;font-weight:600;color:var(--t2)}
+.empty-state svg{opacity:.25}
+.empty-state h3{font-size:15px;font-weight:600;color:var(--t2)}
+.empty-state p{font-size:12px;color:var(--t4)}
 
 /* ━━━ GANTT ━━━ */
 #ganttView{display:none;flex-direction:column;gap:0;
@@ -432,23 +466,29 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
     <button class="filter-tab active" data-filter="all" onclick="setFilter(this,'all')">
       全部 <span class="tab-count" id="cnt-all">6</span>
     </button>
+    <button class="filter-tab" data-filter="planning" onclick="setFilter(this,'planning')">
+      Planning <span class="tab-count" id="cnt-planning">0</span>
+    </button>
     <button class="filter-tab" data-filter="delivering" onclick="setFilter(this,'delivering')">
-      進行中 <span class="tab-count" id="cnt-delivering">2</span>
+      進行中 <span class="tab-count" id="cnt-delivering">0</span>
+    </button>
+    <button class="filter-tab" data-filter="delivery" onclick="setFilter(this,'delivery')">
+      In Delivery <span class="tab-count" id="cnt-delivery">0</span>
     </button>
     <button class="filter-tab" data-filter="done" onclick="setFilter(this,'done')">
-      已完成 <span class="tab-count" id="cnt-done">1</span>
+      Done <span class="tab-count" id="cnt-done">0</span>
     </button>
-    <button class="filter-tab" data-filter="paused" onclick="setFilter(this,'paused')">
-      暫停 <span class="tab-count" id="cnt-paused">1</span>
+    <button class="filter-tab" data-filter="other" onclick="setFilter(this,'other')">
+      其他 <span class="tab-count" id="cnt-other">0</span>
     </button>
-    <div class="toolbar-sep"></div>
+    <div class="toolbar-gap"></div>
     <div class="view-toggle">
       <button class="vt-btn active" id="vt-card" onclick="setView('card')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         卡片
       </button>
       <button class="vt-btn" id="vt-gantt" onclick="setView('gantt')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="14" y2="6"/><line x1="3" y1="12" x2="20" y2="12"/><line x1="3" y1="18" x2="11" y2="18"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="14" y2="6"/><line x1="3" y1="12" x2="20" y2="12"/><line x1="3" y1="18" x2="11" y2="18"/></svg>
         時間軸
       </button>
     </div>
@@ -458,137 +498,229 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
 
     <!-- Cards Grid -->
     <div class="grid" id="projectGrid">
-      <div class="card" data-status="delivering" data-priority="high" data-name="電商平台重構" style="animation-delay:.05s" onclick="location.href='project-detail.html'">
+
+      <!-- 1: 電商平台重構 → delivering (進行中) -->
+      <div class="card" data-status="delivering" data-priority="high" data-name="電商平台重構"
+        style="animation-delay:.04s" onclick="location.href='project-detail.html'">
         <div class="card-inner">
-          <div class="card-top"><span class="type-badge">功能開發</span><span class="priority-dot dot-high"></span></div>
+          <div class="card-top">
+            <span class="card-status st-delivering">進行中</span>
+            <span class="card-priority cp-high" style="margin-left:auto"></span>
+          </div>
           <div class="card-name">電商平台重構</div>
-          <div class="card-desc">全面重構電商前後端架構，提升系統效能與可維護性，導入微服務設計模式。</div>
-          <div class="phase-badge phase-delivering">🚀 交付中</div>
+          <div class="card-meta">
+            <span class="card-type">e-commerce</span>
+          </div>
+          <div class="card-desc">重構前後端架構，提升系統效能與可維護性，導入微服務設計模式</div>
           <div class="progress-section">
-            <div class="progress-top"><span class="progress-label">整體進度</span><span class="progress-pct">68%</span></div>
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">68%</span>
+            </div>
             <div class="progress-bar"><div class="progress-fill" style="width:68%"></div></div>
           </div>
         </div>
         <div class="card-footer">
           <div class="avatars">
-            <div class="mini-av" style="background:linear-gradient(135deg,#7C3AED,#0EA5E9)">王</div>
-            <div class="mini-av" style="background:linear-gradient(135deg,#0EA5E9,#0D9488)">李</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#5B21B6,#4F46E5)">王</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#0284C7,#0D9488)">李</div>
           </div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>18 任務</div>
-          <div class="footer-sep"></div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026/05/01</div>
+          <div class="card-tasks">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            18
+          </div>
+          <div class="card-due">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            05/01
+          </div>
         </div>
       </div>
 
-      <div class="card" data-status="planning" data-priority="medium" data-name="行動 App 開發" style="animation-delay:.10s">
+      <!-- 2: 行動 App 開發 → planning -->
+      <div class="card" data-status="planning" data-priority="medium" data-name="行動 App 開發"
+        style="animation-delay:.08s">
         <div class="card-inner">
-          <div class="card-top"><span class="type-badge">新專案</span><span class="priority-dot dot-medium"></span></div>
+          <div class="card-top">
+            <span class="card-status st-planning">Planning</span>
+            <span class="card-priority cp-medium" style="margin-left:auto"></span>
+          </div>
           <div class="card-name">行動 App 開發</div>
-          <div class="card-desc">開發 iOS / Android 雙平台行動應用，整合推播通知與離線快取功能。</div>
-          <div class="phase-badge phase-planning">📋 規劃中</div>
+          <div class="card-meta">
+            <span class="card-type">mobile app</span>
+          </div>
+          <div class="card-desc">開發跨平台行動應用，整合推播通知與第三方金流功能</div>
           <div class="progress-section">
-            <div class="progress-top"><span class="progress-label">整體進度</span><span class="progress-pct">23%</span></div>
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">23%</span>
+            </div>
             <div class="progress-bar"><div class="progress-fill" style="width:23%"></div></div>
           </div>
         </div>
         <div class="card-footer">
           <div class="avatars">
-            <div class="mini-av" style="background:linear-gradient(135deg,#EC4899,#F97316)">陳</div>
-            <div class="mini-av" style="background:linear-gradient(135deg,#10B981,#0D9488)">張</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#DC2626,#F97316)">陳</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#059669,#0D9488)">張</div>
           </div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>7 任務</div>
-          <div class="footer-sep"></div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026/06/15</div>
+          <div class="card-tasks">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            7
+          </div>
+          <div class="card-due">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            06/15
+          </div>
         </div>
       </div>
 
-      <div class="card" data-status="done" data-priority="low" data-name="客服系統整合" style="animation-delay:.15s">
+      <!-- 3: 客服系統整合 → done -->
+      <div class="card" data-status="done" data-priority="low" data-name="客服系統整合"
+        style="animation-delay:.12s">
         <div class="card-inner">
-          <div class="card-top"><span class="type-badge">整合</span><span class="priority-dot dot-low"></span></div>
+          <div class="card-top">
+            <span class="card-status st-done">Done</span>
+            <span class="card-priority cp-low" style="margin-left:auto"></span>
+          </div>
           <div class="card-name">客服系統整合</div>
-          <div class="card-desc">整合第三方客服平台 API，串接工單系統，自動化客服流程與報表產出。</div>
-          <div class="phase-badge phase-done">✅ 已完成</div>
+          <div class="card-meta">
+            <span class="card-type">CRM / SaaS</span>
+          </div>
+          <div class="card-desc">整合多通道客服系統，統一管理 Email、即時聊天與工單流程</div>
           <div class="progress-section">
-            <div class="progress-top"><span class="progress-label">整體進度</span><span class="progress-pct">100%</span></div>
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">100%</span>
+            </div>
             <div class="progress-bar"><div class="progress-fill done" style="width:100%"></div></div>
           </div>
         </div>
         <div class="card-footer">
           <div class="avatars">
-            <div class="mini-av" style="background:linear-gradient(135deg,#0D9488,#10B981)">林</div>
-            <div class="mini-av" style="background:linear-gradient(135deg,#F59E0B,#F97316)">黃</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#0D9488,#059669)">林</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#D97706,#F97316)">黃</div>
           </div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>24 任務</div>
-          <div class="footer-sep"></div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026/03/31</div>
+          <div class="card-tasks">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            24
+          </div>
+          <div class="card-due">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            03/31
+          </div>
         </div>
       </div>
 
-      <div class="card" data-status="paused" data-priority="urgent" data-name="資料分析儀表板" style="animation-delay:.20s">
+      <!-- 4: 資料分析儀表板 → other (暫停) -->
+      <div class="card" data-status="other" data-priority="urgent" data-name="資料分析儀表板"
+        style="animation-delay:.16s">
         <div class="card-inner">
-          <div class="card-top"><span class="type-badge">功能開發</span><span class="priority-dot dot-urgent"></span></div>
+          <div class="card-top">
+            <span class="card-status st-other">其他</span>
+            <span class="card-priority cp-urgent" style="margin-left:auto"></span>
+          </div>
           <div class="card-name">資料分析儀表板</div>
-          <div class="card-desc">建立即時資料視覺化儀表板，整合多個資料源，支援自訂圖表與匯出功能。</div>
-          <div class="phase-badge phase-paused">⏸ 暫停</div>
+          <div class="card-meta">
+            <span class="card-type">data analytics</span>
+          </div>
+          <div class="card-desc">建立即時數據分析平台，視覺化業務指標以支援決策判斷</div>
           <div class="progress-section">
-            <div class="progress-top"><span class="progress-label">整體進度</span><span class="progress-pct">45%</span></div>
-            <div class="progress-bar"><div class="progress-fill paused" style="width:45%"></div></div>
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">45%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill other" style="width:45%"></div></div>
           </div>
         </div>
         <div class="card-footer">
           <div class="avatars">
-            <div class="mini-av" style="background:linear-gradient(135deg,#7C3AED,#0EA5E9)">王</div>
-            <div class="mini-av" style="background:linear-gradient(135deg,#0EA5E9,#0D9488)">李</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#5B21B6,#4F46E5)">王</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#0284C7,#0D9488)">李</div>
           </div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>11 任務</div>
-          <div class="footer-sep"></div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026/07/30</div>
+          <div class="card-tasks">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            11
+          </div>
+          <div class="card-due">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            07/30
+          </div>
         </div>
       </div>
 
-      <div class="card" data-status="delivering" data-priority="high" data-name="API 閘道器升級" style="animation-delay:.25s">
+      <!-- 5: API 閘道器升級 → delivery (In Delivery) -->
+      <div class="card" data-status="delivery" data-priority="high" data-name="API 閘道器升級"
+        style="animation-delay:.20s">
         <div class="card-inner">
-          <div class="card-top"><span class="type-badge">維護</span><span class="priority-dot dot-high"></span></div>
+          <div class="card-top">
+            <span class="card-status st-delivery">In Delivery</span>
+            <span class="card-priority cp-high" style="margin-left:auto"></span>
+          </div>
           <div class="card-name">API 閘道器升級</div>
-          <div class="card-desc">升級 API 閘道器至新版本，提升安全性、限流機制，並優化路由效能。</div>
-          <div class="phase-badge phase-delivering">🚀 交付中</div>
+          <div class="card-meta">
+            <span class="card-type">infrastructure</span>
+          </div>
+          <div class="card-desc">升級核心 API 閘道器，強化身份驗證、限流與流量監控機制</div>
           <div class="progress-section">
-            <div class="progress-top"><span class="progress-label">整體進度</span><span class="progress-pct">80%</span></div>
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">80%</span>
+            </div>
             <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
           </div>
         </div>
         <div class="card-footer">
           <div class="avatars">
-            <div class="mini-av" style="background:linear-gradient(135deg,#EC4899,#F97316)">陳</div>
-            <div class="mini-av" style="background:linear-gradient(135deg,#10B981,#0D9488)">張</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#DC2626,#F97316)">陳</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#059669,#0D9488)">張</div>
           </div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>9 任務</div>
-          <div class="footer-sep"></div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026/04/20</div>
+          <div class="card-tasks">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            9
+          </div>
+          <div class="card-due late">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            04/20 逾期
+          </div>
         </div>
       </div>
 
-      <div class="card" data-status="planning" data-priority="medium" data-name="使用者通知系統" style="animation-delay:.30s">
+      <!-- 6: 使用者通知系統 → planning -->
+      <div class="card" data-status="planning" data-priority="medium" data-name="使用者通知系統"
+        style="animation-delay:.24s">
         <div class="card-inner">
-          <div class="card-top"><span class="type-badge">功能開發</span><span class="priority-dot dot-medium"></span></div>
+          <div class="card-top">
+            <span class="card-status st-planning">Planning</span>
+            <span class="card-priority cp-medium" style="margin-left:auto"></span>
+          </div>
           <div class="card-name">使用者通知系統</div>
-          <div class="card-desc">建置多管道通知系統，支援 Email、App 推播、簡訊，並提供偏好設定介面。</div>
-          <div class="phase-badge phase-planning">📋 規劃中</div>
+          <div class="card-meta">
+            <span class="card-type">notification</span>
+          </div>
+          <div class="card-desc">建立統一推播系統，支援 Email、SMS 及 App 站內訊息發送</div>
           <div class="progress-section">
-            <div class="progress-top"><span class="progress-label">整體進度</span><span class="progress-pct">12%</span></div>
+            <div class="progress-top">
+              <span class="progress-label">整體進度</span>
+              <span class="progress-pct">12%</span>
+            </div>
             <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
           </div>
         </div>
         <div class="card-footer">
           <div class="avatars">
-            <div class="mini-av" style="background:linear-gradient(135deg,#0D9488,#10B981)">林</div>
-            <div class="mini-av" style="background:linear-gradient(135deg,#F59E0B,#F97316)">黃</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#0D9488,#059669)">林</div>
+            <div class="mini-av" style="background:linear-gradient(135deg,#D97706,#F97316)">黃</div>
           </div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>4 任務</div>
-          <div class="footer-sep"></div>
-          <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026/08/01</div>
+          <div class="card-tasks">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            4
+          </div>
+          <div class="card-due">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            08/01
+          </div>
         </div>
       </div>
+
     </div><!-- /grid -->
 
     <div class="empty-state" id="emptyState">
@@ -651,10 +783,11 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
           <div class="form-group">
             <label class="form-label">專案階段</label>
             <select class="form-select" id="projPhase">
-              <option value="planning">規劃中</option>
-              <option value="delivering">交付中</option>
-              <option value="done">已完成</option>
-              <option value="paused">暫停</option>
+              <option value="planning">Planning</option>
+              <option value="delivering">進行中</option>
+              <option value="delivery">In Delivery</option>
+              <option value="done">Done</option>
+              <option value="other">其他</option>
             </select>
           </div>
         </div>
@@ -957,45 +1090,63 @@ function setView(v) {
     buildGantt();
   } else {
     gv.classList.remove('show');
-    applyFilters();
+    filterProjects();
   }
 }
 
-/* ── FILTER STATE ── */
+/* ── FILTER ── */
 let currentFilter = 'all';
-let searchQuery = '';
+let currentSearch = '';
 
-function getCards() { return Array.from(document.querySelectorAll('#projectGrid .card')); }
-function updateCounts() {
-  const cards = getCards();
-  const counts = { delivering:0, done:0, paused:0 };
-  cards.forEach(c => { const s = c.dataset.status; if(counts[s]!==undefined) counts[s]++; });
-  document.getElementById('cnt-all').textContent = cards.length;
-  document.getElementById('cnt-delivering').textContent = counts.delivering;
-  document.getElementById('cnt-done').textContent = counts.done;
-  document.getElementById('cnt-paused').textContent = counts.paused;
-  document.getElementById('hdrCount').textContent = cards.length + ' 個專案';
-}
-function filterProjects() { searchQuery = document.getElementById('searchInput').value.toLowerCase(); applyFilters(); }
+const FILTER_MAP = {
+  planning:   s => s === 'planning',
+  delivering: s => s === 'delivering',
+  delivery:   s => s === 'delivery',
+  done:       s => s === 'done',
+  other:      s => s === 'other',
+  all:        s => true,
+};
+
 function setFilter(btn, filter) {
-  if(currentView === 'gantt') return;
   currentFilter = filter;
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
-  applyFilters();
+  filterProjects();
 }
-function applyFilters() {
-  if(currentView !== 'card') return;
-  const cards = getCards();
+
+function filterProjects() {
+  const q = (document.getElementById('searchInput')?.value||'').toLowerCase();
+  currentSearch = q;
   let visible = 0;
-  cards.forEach(card => {
-    const matchFilter = currentFilter === 'all' || card.dataset.status === currentFilter;
-    const matchSearch = !searchQuery || card.dataset.name.toLowerCase().includes(searchQuery);
+  document.querySelectorAll('#projectGrid .card').forEach(card => {
+    const status = card.dataset.status||'';
+    const name   = (card.dataset.name||'').toLowerCase();
+    const matchFilter = FILTER_MAP[currentFilter]?.(status) ?? true;
+    const matchSearch = !q || name.includes(q);
     const show = matchFilter && matchSearch;
     card.style.display = show ? '' : 'none';
-    if(show) visible++;
+    if (show) visible++;
   });
-  document.getElementById('emptyState').classList.toggle('show', visible === 0);
+  document.getElementById('emptyState').classList.toggle('show', visible===0);
+  document.getElementById('emptyState').style.display = visible===0 ? 'flex' : '';
+  const hdr = document.getElementById('hdrCount');
+  if (hdr) hdr.textContent = visible + ' 個專案';
+  updateCounts();
+}
+
+function updateCounts() {
+  const cards = [...document.querySelectorAll('#projectGrid .card')];
+  const q = currentSearch;
+  const count = (filter) => cards.filter(c=>{
+    const matchSearch = !q || (c.dataset.name||'').toLowerCase().includes(q);
+    return FILTER_MAP[filter]?.(c.dataset.status||'') && matchSearch;
+  }).length;
+  document.getElementById('cnt-all').textContent = cards.filter(c=>!q||(c.dataset.name||'').toLowerCase().includes(q)).length;
+  document.getElementById('cnt-planning').textContent = count('planning');
+  document.getElementById('cnt-delivering').textContent = count('delivering');
+  document.getElementById('cnt-delivery').textContent = count('delivery');
+  document.getElementById('cnt-done').textContent = count('done');
+  document.getElementById('cnt-other').textContent = count('other');
 }
 
 /* ── MODAL ── */
@@ -1021,26 +1172,26 @@ function submitProject(e) {
   const name = nameEl.value.trim();
   if(!name) { nameEl.classList.add('error'); nameEl.focus(); setTimeout(()=>nameEl.classList.remove('error'),2000); return; }
 
-  const type = document.getElementById('projType').value;
   const phaseVal = document.getElementById('projPhase').value;
   const endDate = document.getElementById('projEnd').value || '';
   const startDate = document.getElementById('projStart').value || '';
-  const desc = document.getElementById('projDesc').value.trim() || '暫無描述。';
 
-  const phaseLabels = {planning:'📋 規劃中',delivering:'🚀 交付中',done:'✅ 已完成',paused:'⏸ 暫停'};
-  const phaseClasses = {planning:'phase-planning',delivering:'phase-delivering',done:'phase-done',paused:'phase-paused'};
-  const dotClasses = {urgent:'dot-urgent',high:'dot-high',medium:'dot-medium',low:'dot-low'};
-  const pFill = phaseVal === 'done' ? 'done' : phaseVal === 'paused' ? 'paused' : '';
-  const delay = getCards().length * 0.05;
-  const displayDate = endDate ? endDate.replace(/-/g,'/') : '未設定';
+  const statusClasses = {planning:'st-planning',delivering:'st-delivering',delivery:'st-delivery',done:'st-done',other:'st-other'};
+  const statusLabels  = {planning:'Planning',delivering:'進行中',delivery:'In Delivery',done:'Done',other:'其他'};
+  const prioClasses   = {urgent:'cp-urgent',high:'cp-high',medium:'cp-medium',low:'cp-low'};
+  const pFill = phaseVal === 'done' ? 'done' : phaseVal === 'other' ? 'other' : '';
+  const allCards = document.querySelectorAll('#projectGrid .card');
+  const delay = allCards.length * 0.04;
+  const displayDate = endDate ? endDate.slice(5).replace('-','/') : '未設定';
 
   const cardHtml = `
     <div class="card" data-status="${phaseVal}" data-priority="${selectedPriority}" data-name="${name}" style="animation-delay:${delay}s">
       <div class="card-inner">
-        <div class="card-top"><span class="type-badge">${type}</span><span class="priority-dot ${dotClasses[selectedPriority]}"></span></div>
+        <div class="card-top">
+          <span class="card-status ${statusClasses[phaseVal]||'st-other'}">${statusLabels[phaseVal]||phaseVal}</span>
+          <span class="card-priority ${prioClasses[selectedPriority]||'cp-medium'}" style="margin-left:auto"></span>
+        </div>
         <div class="card-name">${name}</div>
-        <div class="card-desc">${desc}</div>
-        <div class="phase-badge ${phaseClasses[phaseVal]}">${phaseLabels[phaseVal]}</div>
         <div class="progress-section">
           <div class="progress-top"><span class="progress-label">整體進度</span><span class="progress-pct">0%</span></div>
           <div class="progress-bar"><div class="progress-fill ${pFill}" style="width:0%"></div></div>
@@ -1048,7 +1199,10 @@ function submitProject(e) {
       </div>
       <div class="card-footer">
         <div class="avatars"><div class="mini-av" style="background:var(--grad-main)">新</div></div>
-        <div class="footer-stat"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${displayDate}</div>
+        <div class="card-due">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          ${displayDate}
+        </div>
       </div>
     </div>`;
 
@@ -1059,13 +1213,12 @@ function submitProject(e) {
     GANTT_PROJECTS.push({
       id:'p'+(GANTT_PROJECTS.length+1), name, start:startDate, end:endDate,
       pct:0, status:phaseVal,
-      color:{urgent:'#EF4444',high:'#F97316',medium:'#0EA5E9',low:'#10B981'}[selectedPriority]||'#7C3AED',
+      color:{urgent:'#DC2626',high:'#D97706',medium:'#4F46E5',low:'#059669'}[selectedPriority]||'#5B21B6',
       tasks:0
     });
   }
 
-  updateCounts();
-  applyFilters();
+  filterProjects();
   closeModal();
   showToast(`「${name}」已成功建立`);
 }
@@ -1079,6 +1232,7 @@ function showToast(msg) {
 
 /* ── INIT ── */
 updateCounts();
+filterProjects();
 </script>
 </body>
 </html>
