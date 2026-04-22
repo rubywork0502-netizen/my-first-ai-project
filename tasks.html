@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PMSuite — 任務管理</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
 /* ━━━ RESET ━━━ */
@@ -18,8 +18,28 @@ a{text-decoration:none;color:inherit}
 svg{display:block;flex-shrink:0}
 [contenteditable]{outline:none}
 
-/* ━━━ TOKENS ━━━ */
+/* ━━━ DESIGN TOKENS — light-first ━━━ */
 :root {
+  --bg:#F8FAFC; --s1:#FFFFFF; --s2:#F8FAFC; --s3:#F1F5F9; --s4:#E8EDF4;
+  --b1:#E2E8F0; --b2:#CBD5E1; --b3:#94A3B8;
+  --t1:#0F172A; --t2:#334155; --t3:#64748B; --t4:#94A3B8;
+  --purple:#7C3AED; --purple-d:rgba(124,58,237,.1); --purple-g:rgba(124,58,237,.06);
+  --cyan:#0EA5E9;   --cyan-d:rgba(14,165,233,.1);
+  --teal:#0D9488;   --teal-d:rgba(13,148,136,.1);
+  --green:#10B981;  --green-d:rgba(16,185,129,.12);
+  --amber:#F59E0B;  --amber-d:rgba(245,158,11,.12);
+  --orange:#F97316; --orange-d:rgba(249,115,22,.12);
+  --pink:#EC4899;   --pink-d:rgba(236,72,153,.12);
+  --red:#EF4444;    --red-d:rgba(239,68,68,.12);
+  --grad-main:linear-gradient(135deg,#7C3AED 0%,#0EA5E9 100%);
+  --grad-life:linear-gradient(135deg,#10B981 0%,#0D9488 100%);
+  --sb-w:220px; --hdr-h:56px; --r:10px; --r-sm:6px;
+  --hdr-bg:rgba(255,255,255,.92);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.04),0 4px 8px rgba(15,23,42,.04);
+  --shadow-md:0 4px 8px rgba(15,23,42,.08),0 16px 32px rgba(15,23,42,.08);
+  --drawer-w:480px;
+}
+[data-theme="dark"] {
   --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
   --b1:#1e1c2e; --b2:#2a2840; --b3:#3a3852;
   --t1:#f0edfb; --t2:#9490b0; --t3:#58547a; --t4:#35324a;
@@ -32,2093 +52,1348 @@ svg{display:block;flex-shrink:0}
   --pink:#f472b6;   --pink-d:rgba(244,114,182,.13);
   --red:#f87171;    --red-d:rgba(248,113,113,.13);
   --grad-main:linear-gradient(135deg,#c084fc 0%,#38bdf8 100%);
-  --grad-fire:linear-gradient(135deg,#f472b6 0%,#fb923c 100%);
-  --grad-life:linear-gradient(135deg,#4ade80 0%,#2dd4bf 100%);
-  --sb-w:228px; --hdr-h:58px; --r:10px; --r-sm:6px;
-  --hdr-bg:rgba(8,8,15,.9); --ghost-op:.05;
-  --drawer-w:480px;
-}
-[data-theme="light"] {
-  --bg:#f4f2fb; --s1:#fff; --s2:#edeaf7; --s3:#e2dff2; --s4:#d5d0ea;
-  --b1:#dbd6f0; --b2:#ccc6e4; --b3:#b8b2d8;
-  --t1:#18142a; --t2:#5a5475; --t3:#9088aa; --t4:#b8b0cc;
-  --purple-d:rgba(192,132,252,.14); --cyan-d:rgba(56,189,248,.14);
-  --teal-d:rgba(45,212,191,.14); --green-d:rgba(74,222,128,.14);
-  --amber-d:rgba(251,191,36,.14); --orange-d:rgba(251,146,60,.14);
-  --pink-d:rgba(244,114,182,.14); --red-d:rgba(248,113,113,.14);
-  --hdr-bg:rgba(244,242,251,.92); --ghost-op:.07;
+  --hdr-bg:rgba(8,8,15,.9);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.22),0 4px 16px rgba(0,0,0,.14);
+  --shadow-md:0 4px 16px rgba(0,0,0,.3),0 16px 48px rgba(0,0,0,.25);
 }
 
-body,
-.sidebar,.hdr,.task-card,.search,.icon-btn,.filter-tab {
-  transition: background-color .28s ease, border-color .28s ease, color .2s ease;
-}
-
-body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E")}
-
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
-  min-height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5}
+/* ━━━ BASE ━━━ */
+body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);
+  height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5;
+  transition:background .28s,color .2s}
 
 /* ━━━ SIDEBAR ━━━ */
-.sidebar{width:var(--sb-w);min-height:100vh;background:var(--s1);
+.sidebar{width:var(--sb-w);height:100vh;background:var(--s1);
   border-right:1px solid var(--b1);display:flex;flex-direction:column;
-  flex-shrink:0;position:relative;z-index:20}
-.logo{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
-  padding:0 20px;border-bottom:1px solid var(--b1)}
-.logo-icon{width:30px;height:30px;border-radius:8px;background:var(--grad-main);
+  flex-shrink:0;position:relative;z-index:20;overflow:hidden}
+.logo{height:var(--hdr-h);display:flex;align-items:center;gap:10px;
+  padding:0 18px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.logo-icon{width:28px;height:28px;border-radius:7px;background:var(--grad-main);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;
-  flex-shrink:0;box-shadow:0 0 18px rgba(192,132,252,.35)}
-.logo-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;
-  letter-spacing:.04em;text-transform:uppercase;color:var(--t1)}
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;color:#fff;flex-shrink:0}
+.logo-label{font-family:'Inter',sans-serif;font-weight:700;font-size:15px;color:var(--t1);letter-spacing:-.01em}
 .logo-label em{font-style:normal;background:var(--grad-main);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:1px}
-.nav-section{font-size:9px;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--t4);padding:12px 10px 5px;font-weight:600}
-.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;
-  border-radius:var(--r-sm);color:var(--t3);font-size:13.5px;font-weight:500;
-  cursor:pointer;transition:all .15s;text-decoration:none}
-.nav-item:hover{color:var(--t1);background:var(--s2)}
-.nav-item.active{color:var(--t1);background:var(--purple-g);
-  border-left:2px solid var(--purple);padding-left:10px}
+.nav{padding:10px 8px;flex:1;display:flex;flex-direction:column;gap:1px;overflow-y:auto}
+.nav::-webkit-scrollbar{width:0}
+.nav-section{font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--t4);padding:14px 10px 5px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:var(--r-sm);color:var(--t3);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.nav-item:hover{color:var(--t1);background:var(--s3)}
+.nav-item.active{color:var(--purple);background:var(--purple-g);font-weight:600}
 .ni{color:var(--t4);transition:color .15s;flex-shrink:0}
 .nav-item.active .ni{color:var(--purple)}
 .nav-item:hover .ni{color:var(--t2)}
-.nav-chip{margin-left:auto;font-family:'Fira Code',monospace;font-size:10px;font-weight:500;
-  padding:1px 7px;border-radius:10px;background:var(--s3);color:var(--t2);border:1px solid var(--b2)}
-.sb-footer{padding:12px 10px;border-top:1px solid var(--b1)}
+.nav-chip{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
+  padding:1px 7px;border-radius:10px;background:var(--s3);color:var(--t3);border:1px solid var(--b2)}
+.nav-chip.hot{background:var(--red-d);color:var(--red);border-color:transparent}
+.sb-footer{padding:10px 8px;border-top:1px solid var(--b1);flex-shrink:0}
 .user-row{display:flex;align-items:center;gap:10px;padding:8px 10px;
   border-radius:var(--r-sm);cursor:pointer;transition:background .15s}
-.user-row:hover{background:var(--s2)}
-.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;
-  font-size:14px;color:#fff;flex-shrink:0;background:var(--grad-main)}
+.user-row:hover{background:var(--s3)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--grad-main);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Inter',sans-serif;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
 .user-name{font-size:13px;font-weight:600;color:var(--t1)}
 .user-role{font-size:11px;color:var(--t3)}
 
 /* ━━━ MAIN ━━━ */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;position:relative}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .hdr{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
-  padding:0 24px;background:var(--hdr-bg);backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--b1);flex-shrink:0;position:relative;z-index:10}
-.hdr-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;
-  letter-spacing:.02em;color:var(--t1);display:flex;align-items:baseline;gap:10px;white-space:nowrap}
-.hdr-title span{font-size:12px;font-weight:600;letter-spacing:.06em;
-  text-transform:uppercase;color:var(--t3);font-family:'Plus Jakarta Sans',sans-serif}
-.hdr-space{flex:1}
-.icon-btn{width:34px;height:34px;border-radius:var(--r-sm);display:flex;align-items:center;
-  justify-content:center;color:var(--t3);transition:all .15s;border:1px solid transparent}
-.icon-btn:hover{background:var(--s3);color:var(--t1);border-color:var(--b2)}
-.btn-primary{display:flex;align-items:center;gap:7px;padding:8px 16px;
-  background:var(--grad-main);border-radius:var(--r-sm);font-size:13px;font-weight:600;
-  color:#fff;transition:opacity .15s;white-space:nowrap}
-.btn-primary:hover{opacity:.88}
+  padding:0 24px;border-bottom:1px solid var(--b1);background:var(--hdr-bg);
+  backdrop-filter:blur(12px);position:sticky;top:0;z-index:15;flex-shrink:0}
+.hdr-left{display:flex;align-items:center;gap:10px;flex:1}
+.hdr-title{font-family:'Inter',sans-serif;font-weight:700;font-size:16px;letter-spacing:-.01em;color:var(--t1)}
+.hdr-sub{font-size:12px;color:var(--t4);font-weight:400;margin-left:2px}
+.hdr-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{width:34px;height:34px;border-radius:var(--r-sm);background:transparent;
+  border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;
+  color:var(--t3);transition:all .15s;position:relative}
+.icon-btn:hover{color:var(--t1);border-color:var(--b2);background:var(--s3)}
+.clock-display{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t4)}
 
-/* ━━━ VIEW TOGGLE ━━━ */
-.view-toggle{display:flex;background:var(--s2);border:1px solid var(--b2);
+/* View toggle */
+.view-toggle{display:flex;background:var(--s3);border:1px solid var(--b1);
   border-radius:var(--r-sm);padding:3px;gap:2px}
-.vt-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:5px;
-  font-size:12px;font-weight:600;color:var(--t3);transition:all .15s;white-space:nowrap}
-.vt-btn:hover{color:var(--t2)}
-.vt-btn.active{background:var(--s4);color:var(--t1);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.vt-btn{padding:4px 10px;border-radius:4px;font-size:12px;font-weight:500;
+  color:var(--t3);transition:all .15s;display:flex;align-items:center;gap:5px}
+.vt-btn.active{background:var(--s1);color:var(--t1);box-shadow:var(--shadow-sm)}
 
-/* ━━━ CONTENT ━━━ */
-.content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.btn-primary{display:flex;align-items:center;gap:6px;background:var(--purple);color:#fff;
+  padding:7px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;
+  box-shadow:0 1px 2px rgba(124,58,237,.2),0 4px 12px rgba(124,58,237,.15);transition:all .2s}
+.btn-primary:hover{background:#6D28D9;transform:translateY(-1px);box-shadow:0 4px 16px rgba(124,58,237,.3)}
+.theme-btn{width:34px;height:34px;border-radius:var(--r-sm);border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .15s}
+.theme-btn:hover{background:var(--s3);color:var(--t1)}
 
-/* ━━━ FILTER BAR ━━━ */
-.filter-bar{display:flex;align-items:center;gap:10px;padding:10px 24px;
-  border-bottom:1px solid var(--b1);flex-shrink:0}
+/* ━━━ TOOLBAR ━━━ */
+.toolbar{display:flex;align-items:center;gap:10px;padding:12px 24px;
+  border-bottom:1px solid var(--b1);flex-shrink:0;background:var(--s1);overflow-x:auto}
+.toolbar::-webkit-scrollbar{height:0}
+.filter-tabs{display:flex;gap:4px}
+.ftab{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  color:var(--t3);cursor:pointer;transition:all .15s;white-space:nowrap;border:1px solid transparent}
+.ftab:hover{color:var(--t1);background:var(--s3)}
+.ftab.active{color:var(--purple);background:var(--purple-d);border-color:var(--purple-g)}
+.toolbar-sep{width:1px;height:20px;background:var(--b1);flex-shrink:0;margin:0 4px}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--s3);
+  border:1px solid var(--b1);border-radius:var(--r-sm);padding:6px 12px;
+  min-width:180px;transition:border-color .15s}
+.search-bar:focus-within{border-color:var(--purple)}
+.search-bar input{font-size:12px;color:var(--t1)}
+.search-bar input::placeholder{color:var(--t4)}
+.autosave-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t4);
+  margin-left:auto;white-space:nowrap;font-family:'JetBrains Mono',monospace;flex-shrink:0;
+  transition:color .3s}
+.autosave-badge.saving{color:var(--amber)}
+.autosave-badge.saved{color:var(--green)}
+.auto-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
 
-/* Search */
-.fb-search{display:flex;align-items:center;gap:8px;background:var(--s2);
-  border:1px solid var(--b2);border-radius:var(--r-sm);padding:6px 12px;
-  transition:border-color .15s,box-shadow .15s;min-width:190px}
-.fb-search:focus-within{border-color:rgba(192,132,252,.5);box-shadow:0 0 0 3px rgba(192,132,252,.07)}
-.fb-search svg{flex-shrink:0;color:var(--t4)}
-.fb-search input{background:transparent;border:none;outline:none;color:var(--t1);
-  font-size:13px;font-family:inherit;width:100%}
-.fb-search input::placeholder{color:var(--t4)}
+/* ━━━ KANBAN LAYOUT ━━━ */
+.kanban-wrapper{flex:1;overflow-x:auto;overflow-y:hidden;padding:20px 24px 0;
+  display:flex;flex-direction:column}
+.kanban-wrapper::-webkit-scrollbar{height:4px;background:transparent}
+.kanban-wrapper::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.kanban-board{display:flex;gap:16px;height:100%;min-width:max-content;
+  padding-bottom:20px;align-items:flex-start}
 
-/* Quick-filter pill tags */
-.fb-quick{display:flex;align-items:center;gap:4px}
-.fb-qtag{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;
-  font-size:12px;font-weight:600;color:var(--t3);border:1px solid var(--b2);
-  transition:all .15s;white-space:nowrap;background:transparent}
-.fb-qtag:hover{color:var(--t1);border-color:var(--b3);background:var(--s2)}
-.fb-qtag.active{color:var(--purple);border-color:rgba(192,132,252,.5);background:var(--purple-d)}
-.fb-qtag.active-today{color:var(--amber);border-color:rgba(251,191,36,.5);background:var(--amber-d)}
-.fb-qtag.active-high{color:var(--red);border-color:rgba(248,113,113,.45);background:var(--red-d)}
+/* ━━━ COLUMN ━━━ */
+.kanban-col{width:284px;flex-shrink:0;display:flex;flex-direction:column;
+  max-height:calc(100vh - var(--hdr-h) - 100px);background:var(--s3);
+  border-radius:var(--r);border:2px solid transparent;transition:border-color .2s,background .2s}
+.kanban-col.drop-active{border-color:var(--purple);background:var(--purple-g)}
+[data-theme="dark"] .kanban-col.drop-active{background:rgba(124,58,237,.1)}
 
-/* Spacer */
-.fb-space{flex:1}
+.col-hdr{display:flex;align-items:center;gap:8px;padding:12px 14px 10px;flex-shrink:0}
+.col-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.col-name{font-size:12px;font-weight:600;color:var(--t2);letter-spacing:.02em;text-transform:uppercase}
+.col-count{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--t4);background:var(--s4);border:1px solid var(--b1);
+  padding:1px 7px;border-radius:10px}
+.col-add{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;color:var(--t4);transition:all .15s;flex-shrink:0}
+.col-add:hover{background:var(--b1);color:var(--t2)}
 
-/* Advanced filter button */
-.fb-adv-btn{display:flex;align-items:center;gap:7px;padding:6px 13px;
-  border-radius:var(--r-sm);font-size:12px;font-weight:600;color:var(--t3);
-  border:1px solid var(--b2);transition:all .15s;background:transparent;position:relative}
-.fb-adv-btn:hover{color:var(--t1);border-color:var(--b3);background:var(--s2)}
-.fb-adv-btn.open{color:var(--purple);border-color:rgba(192,132,252,.5);background:var(--purple-d)}
-.fb-adv-badge{position:absolute;top:-4px;right:-4px;width:8px;height:8px;
-  border-radius:50%;background:var(--purple);border:2px solid var(--bg);display:none}
-.fb-adv-badge.show{display:block}
+.col-inner{flex:1;overflow-y:auto;padding:4px 10px 10px;
+  display:flex;flex-direction:column;gap:8px;min-height:60px}
+.col-inner::-webkit-scrollbar{width:3px}
+.col-inner::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
 
-/* Advanced filter expandable panel */
-.adv-panel{display:none;align-items:center;gap:10px;flex-wrap:wrap;
-  padding:10px 24px 12px;border-bottom:1px solid var(--b1);
-  background:var(--s1);animation:up .15s both}
-.adv-panel.show{display:flex}
-.filter-select{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
-  padding:6px 10px;color:var(--t2);font-size:12px;font-weight:500;cursor:pointer;
-  transition:border-color .15s;appearance:none;padding-right:28px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2358547a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 8px center}
-.filter-select:focus{border-color:var(--purple);outline:none}
-.filter-select option{background:var(--s2);color:var(--t1)}
-.filter-sep{width:1px;height:20px;background:var(--b2)}
-.filter-clear{font-size:12px;font-weight:500;color:var(--t3);
-  padding:5px 10px;border-radius:var(--r-sm);transition:all .15s;display:flex;align-items:center;gap:5px}
-.filter-clear:hover{color:var(--t1);background:var(--s3)}
-.filter-count{font-family:'Fira Code',monospace;font-size:10px;padding:2px 7px;
-  border-radius:8px;background:var(--purple-d);color:var(--purple)}
+.col-empty{display:flex;align-items:center;justify-content:center;
+  padding:24px 16px;color:var(--t4);font-size:12px;text-align:center;
+  border:1.5px dashed var(--b2);border-radius:8px;
+  flex-direction:column;gap:8px}
+.col-empty-icon{width:32px;height:32px;border-radius:8px;background:var(--s4);
+  display:flex;align-items:center;justify-content:center;color:var(--t4)}
 
-/* ━━━ KANBAN VIEW ━━━ */
-.view-kanban{flex:1;overflow-x:auto;overflow-y:hidden;padding:20px 24px;
-  display:flex;gap:16px;align-items:flex-start}
-.view-kanban::-webkit-scrollbar{height:6px}
-.view-kanban::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+.drag-placeholder{height:80px;border:2px dashed var(--purple);border-radius:8px;
+  background:var(--purple-g);opacity:.7;flex-shrink:0;border-collapse:separate}
 
-.kb-col{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:0;
-  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;
-  max-height:calc(100vh - 200px)}
-.kb-col-hdr{display:flex;align-items:center;gap:8px;padding:13px 14px;
-  border-bottom:1px solid var(--b1);flex-shrink:0}
-.kb-col-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.kb-col-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--t1);flex:1}
-.kb-col-count{font-family:'Fira Code',monospace;font-size:10px;padding:2px 7px;
-  border-radius:8px;background:var(--s3);color:var(--t3)}
+/* ━━━ TASK CARD ━━━ */
+.task-card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;
+  padding:13px 14px;cursor:pointer;transition:all .2s;position:relative;
+  box-shadow:var(--shadow-sm);user-select:none}
+.task-card:hover{box-shadow:var(--shadow-md);border-color:var(--b2);transform:translateY(-1px)}
+.task-card.dragging{opacity:.4;transform:scale(.98);box-shadow:0 8px 32px rgba(124,58,237,.25)}
 
-.kb-cards{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
-.kb-cards::-webkit-scrollbar{width:3px}
-.kb-cards::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.card-priority{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.cp-urgent{background:var(--red-d);color:var(--red)}
+.cp-high{background:var(--orange-d);color:var(--orange)}
+.cp-medium{background:var(--purple-d);color:var(--purple)}
+.cp-low{background:var(--green-d);color:var(--green)}
 
-.task-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r-sm);
-  padding:12px 13px 12px 17px;cursor:pointer;transition:all .18s;animation:cardIn .3s both;
-  position:relative;overflow:hidden}
-.task-card:hover{border-color:var(--b3);background:var(--s3);transform:translateY(-1px);
-  box-shadow:0 4px 16px rgba(0,0,0,.25)}
-.task-card.selected{border-color:var(--purple);background:var(--purple-g)}
+.card-due{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t4);
+  display:flex;align-items:center;gap:3px}
+.card-due.overdue{color:var(--red)}
 
-/* ─ Priority colour bar (left edge) ─ */
-.task-card::before{content:'';position:absolute;left:0;top:0;bottom:0;
-  width:4px;transition:background .2s}
-.prio-bar-urgent::before,.prio-bar-high::before{background:var(--red)}
-.prio-bar-medium::before{background:var(--amber)}
-.prio-bar-low::before{background:var(--green)}
-.prio-bar-none::before{background:var(--b2)}
+.card-title{font-size:13px;font-weight:600;color:var(--t1);line-height:1.45;
+  margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-title.done-text{text-decoration:line-through;color:var(--t4)}
 
-/* ─ in_progress: cyan glow ─ */
-.task-card.s-in_progress{border-color:rgba(56,189,248,.28);
-  box-shadow:0 0 0 1px rgba(56,189,248,.1)}
-.task-card.s-in_progress:hover{border-color:rgba(56,189,248,.5);
-  box-shadow:0 4px 16px rgba(0,0,0,.25),0 0 0 1px rgba(56,189,248,.22)}
+.card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:9px}
+.tag{font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;
+  background:var(--s3);color:var(--t3);border:1px solid var(--b1)}
 
-/* ─ in_review: amber edge ─ */
-.task-card.s-in_review{border-color:rgba(251,191,36,.22)}
-.task-card.s-in_review:hover{border-color:rgba(251,191,36,.4)}
+.card-progress{margin-bottom:9px}
+.prog-bar{height:3px;background:var(--s4);border-radius:2px;overflow:hidden;margin-bottom:3px}
+.prog-fill{height:100%;border-radius:2px;background:var(--grad-main);transition:width .4s ease}
+.prog-pct{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t4)}
 
-/* ─ done: dimmed + green bar override ─ */
-.task-card.s-done{opacity:.62}
-.task-card.s-done:hover{opacity:.85}
-.task-card.s-done::before{background:var(--teal)!important}
+.card-footer{display:flex;align-items:center;justify-content:space-between}
+.avatars{display:flex}
+.av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:10px;font-weight:700;color:#fff;
+  border:1.5px solid var(--s1);flex-shrink:0}
+.av+.av{margin-left:-6px}
+.card-project{font-size:10px;color:var(--t4);font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px}
 
-/* Card inner layout */
-.tc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:7px}
-.tc-title-row{display:flex;align-items:flex-start;gap:5px;flex:1;min-width:0}
-.tc-play{display:inline-flex;align-items:center;justify-content:center;
-  width:14px;height:14px;border-radius:3px;background:rgba(56,189,248,.18);
-  color:var(--cyan);flex-shrink:0;margin-top:2px}
-.tc-title{font-size:13px;font-weight:500;color:var(--t1);line-height:1.45;flex:1;min-width:0}
-.tc-title.done{text-decoration:line-through;color:var(--t3)}
-.tc-review-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;
-  padding:1px 7px;border-radius:10px;background:rgba(251,146,60,.15);
-  color:var(--orange);border:1px solid rgba(251,146,60,.3);white-space:nowrap;
-  margin-left:5px;flex-shrink:0;align-self:center}
+/* Done column card overlay */
+.col-done .task-card{opacity:.72}
+.col-done .task-card:hover{opacity:1}
 
-/* Project name — italic micro pill */
-.tc-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.tc-proj{font-size:10.5px;color:var(--t4);display:inline-flex;align-items:center;gap:4px;
-  padding:2px 8px;border-radius:4px;background:var(--s3);font-style:italic}
-.tc-proj-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+/* ━━━ DRAWER OVERLAY ━━━ */
+.drawer-overlay{position:fixed;inset:0;z-index:40;background:rgba(15,23,42,.35);
+  backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-overlay.open{opacity:1;pointer-events:all}
 
-/* Footer */
-.tc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:9px}
-.tc-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;color:#fff;flex-shrink:0}
-.tc-due{font-family:'Fira Code',monospace;font-size:10.5px;color:var(--t4)}
-.tc-due.overdue{color:var(--red)}
-
-/* Mini progress bar */
-.tc-mini-bar{display:flex;align-items:center;gap:5px}
-.tc-mini-track{width:34px;height:3px;border-radius:2px;background:var(--b2);
-  overflow:hidden;flex-shrink:0}
-.tc-mini-fill{height:100%;border-radius:2px;background:var(--grad-life);transition:width .3s}
-.tc-mini-text{font-family:'Fira Code',monospace;font-size:10px;color:var(--t4)}
-
-.kb-add-btn{display:flex;align-items:center;gap:6px;padding:10px 14px;
-  width:100%;border-top:1px solid var(--b1);font-size:12px;color:var(--t4);
-  transition:all .15s;flex-shrink:0}
-.kb-add-btn:hover{color:var(--t2);background:var(--s2)}
-
-/* ━━━ TABLE VIEW ━━━ */
-.view-table{flex:1;overflow:auto;padding:20px 24px}
-.view-table::-webkit-scrollbar{width:6px;height:6px}
-.view-table::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
-
-.task-table{width:100%;border-collapse:collapse}
-.task-table th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--t4);padding:10px 16px;text-align:left;border-bottom:1px solid var(--b1);
-  white-space:nowrap;position:sticky;top:0;background:var(--bg);z-index:2}
-.task-table td{padding:11px 16px;border-bottom:1px solid var(--b1);vertical-align:middle}
-.task-table tr:last-child td{border-bottom:none}
-.task-table tr:hover td{background:var(--s1)}
-.task-table tr.selected td{background:var(--purple-g)}
-.task-table tr{cursor:pointer;transition:background .12s}
-
-.tt-name{display:flex;align-items:center;gap:10px}
-.tt-prio-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.tt-title{font-size:13px;font-weight:500;color:var(--t1)}
-.tt-proj{font-size:11px;color:var(--t3)}
-.tt-status-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
-  padding:3px 10px;border-radius:12px;white-space:nowrap}
-.tt-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;color:#fff}
-.tt-date{font-family:'Fira Code',monospace;font-size:11.5px;color:var(--t3)}
-.tt-date.overdue{color:var(--red)}
-
-/* ━━━ DRAWER ━━━ */
-.drawer-overlay{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,0);
-  pointer-events:none;transition:background .3s}
-.drawer-overlay.open{background:rgba(0,0,0,.4);pointer-events:all}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:var(--drawer-w);z-index:50;
-  background:var(--s1);border-left:1px solid var(--b1);
+/* ━━━ TASK DRAWER ━━━ */
+.task-drawer{position:fixed;top:0;right:0;width:var(--drawer-w);height:100vh;
+  background:var(--s1);border-left:1px solid var(--b1);z-index:50;
   display:flex;flex-direction:column;
   transform:translateX(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);
-  box-shadow:-8px 0 40px rgba(0,0,0,.35)}
-.drawer.open{transform:translateX(0)}
-.drawer-hdr{display:flex;align-items:center;gap:10px;padding:0 20px;
-  height:var(--hdr-h);border-bottom:1px solid var(--b1);flex-shrink:0}
-.drawer-close{width:30px;height:30px;border-radius:var(--r-sm);display:flex;align-items:center;
-  justify-content:center;color:var(--t3);transition:all .15s}
+  box-shadow:-8px 0 32px rgba(15,23,42,.08)}
+.task-drawer.open{transform:translateX(0)}
+
+.drawer-hdr{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 14px;
+  border-bottom:1px solid var(--b1);flex-shrink:0}
+.drawer-title-input{flex:1;font-size:16px;font-weight:700;color:var(--t1);
+  background:transparent;padding:2px 0;border-bottom:2px solid transparent;
+  transition:border-color .2s;min-width:0}
+.drawer-title-input:focus{border-bottom-color:var(--purple)}
+.drawer-close{width:30px;height:30px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--t4);transition:all .15s;flex-shrink:0}
 .drawer-close:hover{background:var(--s3);color:var(--t1)}
-.drawer-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;
-  letter-spacing:.04em;color:var(--t1);flex:1}
-.drawer-body{flex:1;overflow-y:auto;padding:0}
-.drawer-body::-webkit-scrollbar{width:4px}
-.drawer-body::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
 
-/* Drawer sections */
-.dr-section{padding:18px 20px;border-bottom:1px solid var(--b1)}
-.dr-section:last-child{border-bottom:none}
-.dr-task-title{font-size:16px;font-weight:600;color:var(--t1);line-height:1.4;
-  width:100%;background:transparent;border:none;resize:none;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  padding:4px 6px;margin:-4px -6px;border-radius:4px;
-  transition:background .15s}
-.dr-task-title:hover,.dr-task-title:focus{background:var(--s2);outline:none}
+.drawer-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  padding:12px 20px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.dmeta-row{display:flex;flex-direction:column;gap:3px}
+.dmeta-label{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t4)}
+.dmeta-val{font-size:12px;color:var(--t2);display:flex;align-items:center;gap:6px}
+.dmeta-select{font-size:12px;color:var(--t2);background:var(--s3);
+  border:1px solid var(--b1);border-radius:6px;padding:4px 8px;
+  cursor:pointer;width:100%;font-family:inherit}
+.dmeta-select:focus{border-color:var(--purple)}
 
-/* Property rows */
-.dr-props{display:flex;flex-direction:column;gap:0}
-.dr-prop{display:flex;align-items:center;min-height:36px;border-radius:var(--r-sm);
-  padding:4px 8px;transition:background .12s;margin:0 -8px}
-.dr-prop:hover{background:var(--s2)}
-.dr-prop-label{font-size:12px;color:var(--t3);font-weight:500;width:100px;flex-shrink:0;
-  display:flex;align-items:center;gap:6px}
-.dr-prop-label svg{flex-shrink:0}
-.dr-prop-val{flex:1;font-size:13px;color:var(--t1)}
+/* Drawer tabs */
+.drawer-tabs{display:flex;gap:0;border-bottom:1px solid var(--b1);flex-shrink:0;padding:0 20px}
+.dtab{padding:10px 14px;font-size:12px;font-weight:500;color:var(--t3);
+  cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:all .15s;white-space:nowrap}
+.dtab:hover{color:var(--t1)}
+.dtab.active{color:var(--purple);border-bottom-color:var(--purple);font-weight:600}
 
-/* Status select in drawer */
-.dr-status-sel{background:transparent;border:none;font-size:12px;font-weight:600;
-  padding:4px 8px;border-radius:20px;cursor:pointer;appearance:none;
-  padding-right:24px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2358547a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 4px center}
-.dr-status-sel option{background:var(--s2);color:var(--t1)}
+.drawer-body{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.drawer-body::-webkit-scrollbar{width:3px}
+.drawer-body::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
 
-/* Priority tags */
-.priority-tag{display:inline-flex;align-items:center;gap:5px;
-  padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;
-  transition:all .15s;border:1px solid transparent}
-.pt-urgent{background:var(--red-d);color:var(--red);border-color:rgba(248,113,113,.25)}
-.pt-high{background:var(--orange-d);color:var(--orange);border-color:rgba(251,146,60,.25)}
-.pt-medium{background:var(--amber-d);color:var(--amber);border-color:rgba(251,191,36,.25)}
-.pt-low{background:var(--green-d);color:var(--green);border-color:rgba(74,222,128,.25)}
-.pt-none{background:var(--s3);color:var(--t3);border-color:var(--b2)}
+.dtab-content{padding:18px 20px;display:none;flex-direction:column;gap:14px}
+.dtab-content.active{display:flex}
 
-/* Project link */
-.dr-proj-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;
-  font-weight:500;padding:4px 10px;border-radius:var(--r-sm);
-  background:var(--s2);border:1px solid var(--b2);color:var(--t2);
+/* Markdown editor */
+.md-toolbar{display:flex;align-items:center;gap:2px;padding:6px 8px;
+  background:var(--s3);border:1px solid var(--b1);border-bottom:none;border-radius:var(--r-sm) var(--r-sm) 0 0}
+.md-btn{width:26px;height:26px;border-radius:4px;display:flex;align-items:center;
+  justify-content:center;color:var(--t3);font-size:12px;font-weight:700;
   transition:all .15s;cursor:pointer}
-.dr-proj-link:hover{border-color:var(--purple);color:var(--purple)}
-.dr-proj-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.md-btn:hover{background:var(--b1);color:var(--t1)}
+.md-sep{width:1px;height:16px;background:var(--b2);margin:0 3px}
+.md-editor{flex:1;min-height:180px;padding:12px 14px;background:var(--s1);
+  border:1px solid var(--b1);border-radius:0 0 var(--r-sm) var(--r-sm);
+  font-family:'Inter',sans-serif;font-size:13px;color:var(--t1);line-height:1.7;
+  resize:vertical}
+.md-editor:focus{border-color:var(--purple);outline:none}
+.autosave-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t4);
+  font-family:'JetBrains Mono',monospace;height:22px}
+.autosave-dot{width:6px;height:6px;border-radius:50%;background:var(--t4);transition:background .3s}
+.autosave-row.saving .autosave-dot{background:var(--amber);animation:pulse-dot 1s infinite}
+.autosave-row.saved .autosave-dot{background:var(--green)}
+.autosave-row.saving{color:var(--amber)}
+.autosave-row.saved{color:var(--green)}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* Assignee avatar */
-.dr-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;color:#fff;flex-shrink:0}
-.dr-av-info{display:flex;flex-direction:column;gap:1px}
-.dr-av-name{font-size:12px;font-weight:600;color:var(--t1)}
-.dr-av-role{font-size:10px;color:var(--t3)}
+/* Attachments */
+.attach-drop{border:2px dashed var(--b2);border-radius:var(--r);padding:24px;
+  text-align:center;color:var(--t4);transition:all .2s;cursor:pointer}
+.attach-drop:hover{border-color:var(--purple);background:var(--purple-g);color:var(--purple)}
+.attach-icon{width:36px;height:36px;border-radius:8px;background:var(--s3);
+  display:flex;align-items:center;justify-content:center;color:var(--t4);margin:0 auto 8px}
+.attach-list{display:flex;flex-direction:column;gap:6px}
+.attach-item{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:var(--s3);border:1px solid var(--b1);border-radius:var(--r-sm)}
+.attach-name{flex:1;font-size:12px;font-weight:500;color:var(--t1)}
+.attach-size{font-size:11px;color:var(--t4);font-family:'JetBrains Mono',monospace}
+.attach-rm{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;
+  justify-content:center;color:var(--t4);transition:all .15s}
+.attach-rm:hover{background:var(--red-d);color:var(--red)}
 
-/* Date inputs */
-.dr-date-input{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
-  padding:5px 10px;color:var(--t1);font-size:12px;font-family:'Fira Code',monospace;
-  transition:border-color .15s;width:auto}
-.dr-date-input:focus{border-color:var(--purple);outline:none}
-.dr-date-input::-webkit-calendar-picker-indicator{filter:invert(.5)}
+/* Comments */
+.comment-list{display:flex;flex-direction:column;gap:12px}
+.comment{display:flex;gap:10px}
+.comment-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px}
+.comment-body{flex:1;background:var(--s3);border:1px solid var(--b1);
+  border-radius:0 var(--r-sm) var(--r-sm) var(--r-sm);padding:10px 12px}
+.comment-meta{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.comment-name{font-size:12px;font-weight:600;color:var(--t1)}
+.comment-time{font-size:10px;color:var(--t4);font-family:'JetBrains Mono',monospace}
+.comment-text{font-size:13px;color:var(--t2);line-height:1.55}
+.comment-text .mention{color:var(--purple);font-weight:600;background:var(--purple-d);
+  padding:1px 4px;border-radius:3px}
+.comment-input-wrap{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.comment-input{padding:10px 12px;background:var(--s3);border:1px solid var(--b1);
+  border-radius:var(--r-sm);font-size:13px;color:var(--t1);line-height:1.5;
+  resize:none;min-height:72px;transition:border-color .15s;font-family:inherit}
+.comment-input:focus{border-color:var(--purple);outline:none}
+.comment-actions{display:flex;align-items:center;gap:8px}
+.comment-send{display:flex;align-items:center;gap:6px;background:var(--purple);color:#fff;
+  padding:6px 14px;border-radius:var(--r-sm);font-size:12px;font-weight:600;transition:all .15s}
+.comment-send:hover{background:#6D28D9}
+.mention-hint{font-size:11px;color:var(--t4);margin-left:auto}
 
-/* URL inputs */
-.dr-url-wrap{display:flex;align-items:center;gap:8px;flex:1}
-.dr-url-input{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
-  padding:6px 10px;color:var(--t2);font-size:12px;font-family:'Fira Code',monospace;
-  transition:border-color .15s;flex:1}
-.dr-url-input:focus{border-color:var(--cyan);outline:none;color:var(--t1)}
-.dr-url-link{width:28px;height:28px;border-radius:var(--r-sm);display:flex;align-items:center;
-  justify-content:center;color:var(--t4);border:1px solid var(--b2);
-  transition:all .15s;flex-shrink:0;cursor:pointer;background:var(--s2)}
-.dr-url-link:hover{border-color:var(--cyan);color:var(--cyan)}
+/* Mention dropdown */
+.mention-drop{position:absolute;background:var(--s1);border:1px solid var(--b1);
+  border-radius:var(--r-sm);box-shadow:var(--shadow-md);z-index:100;
+  min-width:160px;overflow:hidden;display:none}
+.mention-drop.open{display:block}
+.mention-opt{display:flex;align-items:center;gap:8px;padding:8px 12px;
+  cursor:pointer;transition:background .1s}
+.mention-opt:hover{background:var(--s3)}
+.mention-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.mention-name{font-size:12px;font-weight:500;color:var(--t1)}
 
-/* Docs section */
-.dr-doc-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
-.dr-doc-item{display:flex;align-items:center;gap:8px;padding:7px 10px;
-  background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
-  font-size:12px;color:var(--t2);transition:all .15s}
-.dr-doc-item:hover{border-color:var(--b3);color:var(--t1)}
-.dr-doc-icon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;
-  font-size:11px;flex-shrink:0;background:var(--s3)}
-.dr-doc-name{flex:1;font-size:12px}
-.dr-doc-del{color:var(--t4);transition:color .15s;padding:2px 4px;border-radius:3px}
-.dr-doc-del:hover{color:var(--red)}
-.dr-add-doc-btn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t3);
-  padding:6px 10px;border-radius:var(--r-sm);border:1px dashed var(--b2);
-  transition:all .15s;margin-top:8px;width:100%;justify-content:center}
-.dr-add-doc-btn:hover{border-color:var(--b3);color:var(--t2);background:var(--s2)}
+/* Audit log */
+.audit-list{display:flex;flex-direction:column;gap:0}
+.audit-item{display:flex;gap:12px;padding:10px 0;position:relative}
+.audit-item::after{content:'';position:absolute;left:10px;top:36px;bottom:0;
+  width:1px;background:var(--b1)}
+.audit-item:last-child::after{display:none}
+.audit-icon{width:22px;height:22px;border-radius:50%;background:var(--s3);border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--t3);z-index:1}
+.audit-text{flex:1}
+.audit-action{font-size:12px;color:var(--t1);font-weight:500}
+.audit-who{font-size:11px;color:var(--t3);margin-top:1px}
+.audit-time{font-size:10px;color:var(--t4);font-family:'JetBrains Mono',monospace;margin-top:1px}
 
-/* Sub-tasks */
-.dr-subtask-list{display:flex;flex-direction:column;gap:4px;margin-top:10px}
-.dr-subtask-item{display:flex;align-items:center;gap:9px;padding:7px 10px;
-  border-radius:var(--r-sm);transition:background .12s;group}
-.dr-subtask-item:hover{background:var(--s2)}
-.dr-subtask-cb{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--b3);
-  flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:all .15s;background:transparent}
-.dr-subtask-cb.checked{background:var(--teal);border-color:var(--teal)}
-.dr-subtask-text{flex:1;font-size:13px;color:var(--t1);background:transparent;border:none;
-  font-family:'Plus Jakarta Sans',sans-serif;transition:color .15s}
-.dr-subtask-text.done{color:var(--t4);text-decoration:line-through}
-.dr-subtask-del{color:var(--t4);opacity:0;transition:all .12s;padding:2px 4px;border-radius:3px}
-.dr-subtask-item:hover .dr-subtask-del{opacity:1}
-.dr-subtask-del:hover{color:var(--red);opacity:1}
-.dr-add-subtask{display:flex;align-items:center;gap:8px;padding:7px 10px;
-  border-radius:var(--r-sm);font-size:12px;color:var(--t3);transition:all .15s;
-  margin-top:4px}
-.dr-add-subtask:hover{background:var(--s2);color:var(--t2)}
-.dr-add-subtask-input{flex:1;background:var(--s2);border:1px solid var(--b2);
-  border-radius:var(--r-sm);padding:6px 10px;font-size:12px;color:var(--t1);
-  display:none}
-.dr-add-subtask-input.show{display:block}
+/* ━━━ AUTOMATION PANEL ━━━ */
+.auto-overlay{position:fixed;inset:0;z-index:60;background:rgba(15,23,42,.35);
+  display:none;align-items:flex-start;justify-content:center;padding-top:10vh}
+.auto-overlay.open{display:flex;animation:fadeInBg .18s both}
+.auto-panel{width:520px;max-width:calc(100vw - 40px);background:var(--s1);
+  border:1px solid var(--b1);border-radius:14px;overflow:hidden;
+  animation:slideUp .25s cubic-bezier(.16,1,.3,1) both;
+  box-shadow:0 8px 32px rgba(15,23,42,.12),0 32px 64px rgba(15,23,42,.08)}
+.auto-hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;border-bottom:1px solid var(--b1)}
+.auto-hdr-title{font-size:15px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:8px}
+.auto-list{padding:12px 20px;display:flex;flex-direction:column;gap:10px;max-height:300px;overflow-y:auto}
+.auto-rule{display:flex;align-items:center;gap:10px;padding:12px 14px;
+  background:var(--s3);border:1px solid var(--b1);border-radius:var(--r-sm)}
+.auto-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0}
+.auto-rule-text{flex:1}
+.auto-if{font-size:11px;color:var(--t4);font-weight:500;margin-bottom:2px}
+.auto-then{font-size:12px;color:var(--t1);font-weight:600}
+.auto-toggle{width:36px;height:20px;border-radius:10px;background:var(--purple);
+  position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.auto-toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;
+  background:#fff;top:3px;right:3px;transition:right .2s}
+.auto-toggle.off{background:var(--b2)}
+.auto-toggle.off::after{right:19px}
+.auto-footer{padding:16px 20px;border-top:1px solid var(--b1);display:flex;justify-content:flex-end;gap:8px}
+.btn-ghost{padding:7px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:500;
+  color:var(--t2);border:1px solid var(--b1);transition:all .15s}
+.btn-ghost:hover{background:var(--s3);border-color:var(--b2)}
 
-/* Pomodoro button */
-.pomo-btn{display:flex;align-items:center;gap:10px;width:100%;padding:13px 16px;
-  background:var(--grad-fire);border-radius:var(--r-sm);color:#fff;
-  font-size:13px;font-weight:600;transition:opacity .15s;justify-content:center}
-.pomo-btn:hover{opacity:.88}
-.pomo-btn-wrap{padding:18px 20px}
+/* ━━━ ANIMATIONS ━━━ */
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes slideUp{from{opacity:0;transform:translateY(-12px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes fadeInBg{from{opacity:0}to{opacity:1}}
 
-/* Last edited */
-.dr-last-edit{font-family:'Fira Code',monospace;font-size:10.5px;color:var(--t4)}
-
-/* Description */
-.dr-desc{width:100%;background:transparent;border:none;resize:none;
-  color:var(--t2);font-size:13px;line-height:1.65;
-  font-family:'Plus Jakarta Sans',sans-serif;min-height:80px;
-  padding:4px 6px;margin:-4px -6px;border-radius:4px;transition:background .15s}
-.dr-desc:hover,.dr-desc:focus{background:var(--s2);outline:none;color:var(--t1)}
-.dr-desc:empty::before{content:attr(placeholder);color:var(--t4)}
-
-/* Section headers inside drawer */
-.dr-sec-hdr{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--t4);margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.dr-sec-hdr::after{content:'';flex:1;height:1px;background:var(--b1)}
-
-/* ━━━ GAMIFICATION ━━━ */
-
-/* EXP float badge */
-@keyframes expFloat{
-  0%  {opacity:0;transform:translate(-50%,0) scale(.6)}
-  15% {opacity:1;transform:translate(-50%,-10px) scale(1)}
-  80% {opacity:1;transform:translate(-50%,-44px)}
-  100%{opacity:0;transform:translate(-50%,-64px) scale(.85)}
+/* ━━━ RESPONSIVE ━━━ */
+@media(max-width:900px){
+  .sidebar{position:fixed;left:-100%;transition:left .3s;z-index:50}
+  .sidebar.mobile-open{left:0}
+  :root{--sb-w:250px}
+  .task-drawer{width:100%;max-width:100%}
 }
-.exp-badge{
-  position:fixed;z-index:250;pointer-events:none;
-  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;
-  color:#fbbf24;letter-spacing:.04em;
-  text-shadow:0 0 16px rgba(251,191,36,.8),0 0 32px rgba(251,191,36,.3);
-  animation:expFloat 1.7s cubic-bezier(.16,1,.3,1) both;
+@media(max-width:640px){
+  .kanban-col{width:260px}
+  .hdr{padding:0 16px}
+  .toolbar{padding:10px 16px}
+  .kanban-wrapper{padding:14px 16px 0}
 }
-
-/* Card completing animation */
-@keyframes cardComplete{
-  0%  {transform:scale(1);opacity:1;filter:brightness(1)}
-  30% {transform:scale(.96);filter:brightness(1.15)}
-  100%{transform:scale(.82) translateX(-18px);opacity:0;filter:brightness(1)}
-}
-.task-card.completing{
-  animation:cardComplete .52s cubic-bezier(.4,0,.6,1) both!important;
-  pointer-events:none;z-index:10;
-}
-
-/* Level / XP sidebar block */
-.level-block{border-top:1px solid var(--b1);padding:10px 10px 6px}
-.level-row{display:flex;align-items:center;gap:10px;padding:8px 10px;
-  border-radius:var(--r-sm);margin-bottom:8px;cursor:default;
-  background:linear-gradient(135deg,rgba(192,132,252,.07) 0%,rgba(251,191,36,.07) 100%);
-  border:1px solid rgba(251,191,36,.18)}
-.level-num{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;
-  line-height:1;flex-shrink:0;
-  background:linear-gradient(135deg,#c084fc,#fbbf24);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.level-info{flex:1;min-width:0}
-.level-title-text{font-size:12px;font-weight:700;color:var(--t1);line-height:1.3}
-.level-sub-text{font-size:10px;color:var(--t3);margin-top:1px}
-.xp-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
-.xp-lbl{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t4)}
-.xp-num{font-family:'Fira Code',monospace;font-size:9px;color:var(--t3)}
-.xp-track{height:3px;background:var(--b1);border-radius:2px;overflow:hidden}
-.xp-fill{height:100%;border-radius:2px;
-  background:linear-gradient(90deg,#c084fc,#fbbf24);
-  transition:width .9s cubic-bezier(.16,1,.3,1);
-  box-shadow:0 0 6px rgba(251,191,36,.4)}
-
-/* Level-up modal */
-.levelup-overlay{
-  position:fixed;inset:0;z-index:500;
-  display:flex;align-items:center;justify-content:center;padding:24px;
-  background:rgba(0,0,0,0);backdrop-filter:blur(0px);
-  transition:background .35s,backdrop-filter .35s;
-  pointer-events:none;
-}
-.levelup-overlay.show{background:rgba(0,0,0,.78);backdrop-filter:blur(12px);pointer-events:all}
-@keyframes luCard{
-  0%  {opacity:0;transform:scale(.45) translateY(80px)}
-  65% {opacity:1;transform:scale(1.05) translateY(-6px)}
-  100%{opacity:1;transform:scale(1) translateY(0)}
-}
-@keyframes luPulse{
-  0%,100%{box-shadow:0 0 30px rgba(251,191,36,.2),0 28px 70px rgba(0,0,0,.55)}
-  50%    {box-shadow:0 0 70px rgba(251,191,36,.55),0 28px 70px rgba(0,0,0,.55)}
-}
-@keyframes luNum{
-  0%  {transform:scale(0) rotate(-8deg);opacity:0}
-  70% {transform:scale(1.18) rotate(3deg);opacity:1}
-  100%{transform:scale(1)  rotate(0);opacity:1}
-}
-@keyframes luBadge{
-  0%  {transform:scale(0) rotate(-20deg);opacity:0}
-  65% {transform:scale(1.15) rotate(5deg);opacity:1}
-  100%{transform:scale(1) rotate(0);opacity:1}
-}
-@keyframes starBurst{
-  0%  {transform:translate(0,0) scale(0);opacity:1}
-  100%{transform:translate(var(--sx),var(--sy)) scale(1);opacity:0}
-}
-.levelup-card{
-  position:relative;overflow:hidden;
-  background:var(--s1);border:1px solid rgba(251,191,36,.35);border-radius:22px;
-  padding:48px 56px;text-align:center;max-width:360px;width:100%;
-  opacity:0;pointer-events:none;
-  box-shadow:0 0 30px rgba(251,191,36,.2),0 28px 70px rgba(0,0,0,.55);
-}
-.levelup-card.appear{
-  animation:luCard .65s cubic-bezier(.16,1,.3,1) both,luPulse 3s 1.2s ease-in-out infinite;
-  opacity:1;pointer-events:all;
-}
-.lu-badge-wrap{display:inline-flex;align-items:center;justify-content:center;
-  width:82px;height:82px;border-radius:50%;margin-bottom:18px;
-  background:linear-gradient(135deg,rgba(192,132,252,.2),rgba(251,191,36,.25));
-  border:2px solid rgba(251,191,36,.45);
-  animation:luBadge .5s .25s cubic-bezier(.16,1,.3,1) both;}
-.lu-level-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
-  letter-spacing:.22em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
-.lu-big-num{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:88px;
-  line-height:.85;background:linear-gradient(135deg,#c084fc,#fbbf24);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  margin-bottom:10px;animation:luNum .5s .42s cubic-bezier(.16,1,.3,1) both}
-.lu-title{font-size:17px;font-weight:700;color:var(--t1);margin-bottom:4px}
-.lu-sub{font-size:13px;color:var(--t3);margin-bottom:8px}
-.lu-xp-note{font-family:'Fira Code',monospace;font-size:11px;color:var(--teal);margin-bottom:28px}
-.lu-btn{display:inline-flex;align-items:center;gap:8px;padding:11px 30px;border-radius:var(--r);
-  background:linear-gradient(135deg,#c084fc,#fbbf24);color:#fff;font-weight:700;font-size:14px;
-  transition:opacity .15s,transform .15s;box-shadow:0 0 22px rgba(251,191,36,.35)}
-.lu-btn:hover{opacity:.88;transform:scale(1.04)}
-.lu-star{position:absolute;pointer-events:none;font-size:14px;
-  animation:starBurst .75s cubic-bezier(.2,0,.8,1) both;}
-
-/* ━━━ TOAST ━━━ */
-.toast{position:fixed;bottom:24px;right:28px;z-index:100;
-  background:var(--s3);border:1px solid var(--b3);border-radius:var(--r);
-  padding:11px 18px;font-size:13px;font-weight:600;color:var(--t1);
-  display:flex;align-items:center;gap:10px;
-  transform:translateY(12px);opacity:0;transition:all .3s cubic-bezier(.16,1,.3,1);
-  box-shadow:0 8px 32px rgba(0,0,0,.4);pointer-events:none}
-.toast.show{transform:translateY(0);opacity:1}
-.toast-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0}
-
-/* Empty col */
-.kb-empty{text-align:center;padding:28px 16px;color:var(--t4);font-size:12px}
-
-/* Add task inline input */
-.kb-inline-add{display:flex;flex-direction:column;gap:8px;padding:10px;
-  border-top:1px solid var(--b1);display:none}
-.kb-inline-add.show{display:flex}
-.kb-inline-input{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r-sm);
-  padding:8px 11px;color:var(--t1);font-size:13px;transition:border-color .15s}
-.kb-inline-input:focus{border-color:var(--purple);outline:none}
-.kb-inline-actions{display:flex;gap:6px}
-.kb-inline-ok{padding:5px 12px;background:var(--purple);color:#fff;border-radius:var(--r-sm);
-  font-size:12px;font-weight:600;transition:opacity .15s}
-.kb-inline-ok:hover{opacity:.85}
-.kb-inline-cancel{padding:5px 12px;color:var(--t3);border-radius:var(--r-sm);
-  font-size:12px;font-weight:600;transition:all .15s}
-.kb-inline-cancel:hover{background:var(--s3);color:var(--t2)}
-
-/* Priority dropdown */
-.prio-dropdown{position:absolute;z-index:80;background:var(--s2);border:1px solid var(--b2);
-  border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:160px;overflow:hidden;
-  display:none}
-.prio-dropdown.open{display:block;animation:up .15s both}
-.prio-option{display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:13px;
-  cursor:pointer;transition:background .12s;color:var(--t1)}
-.prio-option:hover{background:var(--s3)}
-
-@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@keyframes drawerIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
-
-/* table done row strikethrough */
-.tt-title.done-row{text-decoration:line-through;color:var(--t3)}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
+<!-- ━━━ SIDEBAR ━━━ -->
+<aside class="sidebar" id="sidebar">
   <div class="logo">
-    <div class="logo-icon">PM</div>
-    <div class="logo-label">PM<em>Suite</em></div>
+    <div class="logo-icon">P</div>
+    <span class="logo-label">PM<em>Suite</em></span>
   </div>
   <nav class="nav">
     <div class="nav-section">工作區</div>
     <a class="nav-item" href="index.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      總覽
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>控制台
     </a>
     <a class="nav-item" href="projects.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>
-      專案
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>專案
     </a>
     <a class="nav-item active" href="tasks.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      任務
-      <span class="nav-chip" id="navChip">9</span>
-    </a>
-    <a class="nav-item" href="project-detail.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-      看板
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>任務<span class="nav-chip hot" id="navChip">9</span>
     </a>
     <a class="nav-item" href="sprint-review.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Sprint Review
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Sprint Review
     </a>
     <div class="nav-section">工具</div>
     <a class="nav-item" href="pomodoro-timer.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
-      番茄鐘
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>番茄鐘
     </a>
     <a class="nav-item" href="personal-space.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M3 21c0-4.2 4-7 9-7s9 2.8 9 7"/><path d="M16.5 3.5c1-1 2.5-.5 3 1s-.5 2.5-1.5 2.5"/></svg>
-      個人中心
-    </a>
-    <a class="nav-item" href="#">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      文件
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M3 21c0-4.2 4-7 9-7s9 2.8 9 7"/></svg>個人中心
     </a>
     <a class="nav-item" href="profile.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      設定
+      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>設定
     </a>
   </nav>
   <div class="sb-footer">
-    <!-- Level / XP block -->
-    <div class="level-block" id="levelBlock">
-      <div class="level-row">
-        <div class="level-num" id="sidebarLevel">1</div>
-        <div class="level-info">
-          <div class="level-title-text" id="sidebarTitle">見習 PM</div>
-          <div class="level-sub-text" id="sidebarSub">0 / 200 EXP</div>
-        </div>
-      </div>
-      <div class="xp-row">
-        <span class="xp-lbl">經驗值</span>
-        <span class="xp-num" id="sidebarXpNum">0 / 200</span>
-      </div>
-      <div class="xp-track"><div class="xp-fill" id="sidebarXpFill" style="width:0%"></div></div>
-    </div>
-    <div class="user-row">
-      <div class="av">王</div>
-      <div>
-        <div class="user-name">王小明</div>
-        <div class="user-role">Project Manager</div>
-      </div>
+    <div class="user-row" id="userRow">
+      <div class="avatar" id="userAvatar">U</div>
+      <div><div class="user-name" id="userName">使用者</div><div class="user-role">專案管理員</div></div>
     </div>
   </div>
 </aside>
 
-<!-- MAIN -->
+<!-- ━━━ MAIN ━━━ -->
 <div class="main">
-  <!-- HEADER -->
   <header class="hdr">
-    <div class="hdr-title">任務管理 <span id="hdrCount">9 個任務</span></div>
-    <div class="hdr-space"></div>
-    <div class="view-toggle">
-      <button class="vt-btn active" id="btnKanban" onclick="setView('kanban')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
-        看板
+    <div class="hdr-left">
+      <div class="hdr-title">任務管理 <span class="hdr-sub" id="taskCountLabel">9 個任務</span></div>
+    </div>
+    <div class="hdr-actions">
+      <span class="clock-display" id="clock">--:--:--</span>
+      <div class="view-toggle">
+        <button class="vt-btn active" id="vt-kanban" onclick="setView('kanban')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="16" rx="1"/></svg>看板
+        </button>
+        <button class="vt-btn" id="vt-list" onclick="setView('list')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>列表
+        </button>
+      </div>
+      <button class="icon-btn" onclick="openAutoPanel()" title="自動化規則">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
       </button>
-      <button class="vt-btn" id="btnTable" onclick="setView('table')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
-        清單
+      <button class="theme-btn" id="themeBtn" title="切換主題">
+        <svg id="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg id="icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+      </button>
+      <button class="btn-primary" onclick="openAddTask()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增任務
       </button>
     </div>
-    <button class="btn-primary" onclick="openNewTaskModal()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      新增任務
-    </button>
-    <button class="icon-btn" onclick="toggleTheme()" title="切換主題">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    </button>
   </header>
 
-  <!-- FILTER BAR -->
-  <div class="filter-bar">
-    <!-- Search -->
-    <div class="fb-search">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="filterSearch" placeholder="搜尋任務…" oninput="applyFilters()" autocomplete="off">
+  <div class="toolbar">
+    <div class="filter-tabs">
+      <button class="ftab active" data-filter="all">全部</button>
+      <button class="ftab" data-filter="todo">待辦</button>
+      <button class="ftab" data-filter="doing">執行中</button>
+      <button class="ftab" data-filter="testing">測試中</button>
+      <button class="ftab" data-filter="done">已完成</button>
+      <button class="ftab" data-filter="urgent">緊急</button>
     </div>
-
-    <!-- Quick filters -->
-    <div class="fb-quick">
-      <button class="fb-qtag" id="qf-mine" onclick="toggleQuickFilter('mine')">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        我的任務
-      </button>
-      <button class="fb-qtag" id="qf-today" onclick="toggleQuickFilter('today')">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        今日截止
-      </button>
-      <button class="fb-qtag" id="qf-high" onclick="toggleQuickFilter('high')">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-        高優先級
-      </button>
+    <div class="toolbar-sep"></div>
+    <div class="search-bar">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" color="var(--t4)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="searchInput" placeholder="搜尋任務..." onInput="filterTasks()">
     </div>
-
-    <div class="fb-space"></div>
-
-    <!-- Advanced filter toggle -->
-    <button class="fb-adv-btn" id="advFilterBtn" onclick="toggleAdvFilter()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-      進階篩選
-      <div class="fb-adv-badge" id="advBadge"></div>
-    </button>
-
-    <span class="filter-count" id="filterCount" style="display:none"></span>
+    <div class="autosave-badge" id="globalSaveBadge">
+      <div class="auto-dot"></div><span id="globalSaveText">已同步</span>
+    </div>
   </div>
 
-  <!-- ADVANCED FILTER PANEL (collapsed by default) -->
-  <div class="adv-panel" id="advPanel">
-    <select class="filter-select" id="filterProject" onchange="applyFilters()">
-      <option value="">所有專案</option>
-    </select>
-    <select class="filter-select" id="filterPriority" onchange="applyFilters()">
-      <option value="">所有優先級</option>
-      <option value="urgent">🔴 緊急</option>
-      <option value="high">🟠 高</option>
-      <option value="medium">🟡 中</option>
-      <option value="low">🟢 低</option>
-      <option value="none">⚪ 無</option>
-    </select>
-    <select class="filter-select" id="filterAssignee" onchange="applyFilters()">
-      <option value="">所有負責人</option>
-    </select>
-    <div class="filter-sep"></div>
-    <button class="filter-clear" onclick="clearFilters()">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      清除全部
-    </button>
+  <div class="kanban-wrapper" id="kanbanWrapper">
+    <div class="kanban-board" id="kanbanBoard">
+      <!-- Columns rendered by JS -->
+    </div>
   </div>
+</div><!-- /main -->
 
-  <!-- CONTENT -->
-  <div class="content">
-    <!-- KANBAN VIEW -->
-    <div class="view-kanban" id="viewKanban"></div>
-    <!-- TABLE VIEW -->
-    <div class="view-table" id="viewTable" style="display:none"></div>
-  </div>
-</div>
-
-<!-- DRAWER OVERLAY -->
+<!-- ━━━ DRAWER OVERLAY ━━━ -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
 
-<!-- TASK DRAWER -->
-<div class="drawer" id="drawer">
+<!-- ━━━ TASK DRAWER ━━━ -->
+<div class="task-drawer" id="taskDrawer">
   <div class="drawer-hdr">
+    <input class="drawer-title-input" id="drawerTitle" placeholder="任務標題..."
+      oninput="triggerAutoSave()">
     <button class="drawer-close" onclick="closeDrawer()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
-    <div class="drawer-title">任務詳情</div>
-    <div class="dr-last-edit" id="drLastEdit"></div>
   </div>
-  <div class="drawer-body" id="drawerBody"></div>
-</div>
 
-<!-- PRIORITY DROPDOWN -->
-<div class="prio-dropdown" id="prioDropdown">
-  <div class="prio-option" onclick="setPriority('urgent')"><span style="color:var(--red)">●</span> 緊急</div>
-  <div class="prio-option" onclick="setPriority('high')"><span style="color:var(--orange)">●</span> 高</div>
-  <div class="prio-option" onclick="setPriority('medium')"><span style="color:var(--amber)">●</span> 中</div>
-  <div class="prio-option" onclick="setPriority('low')"><span style="color:var(--green)">●</span> 低</div>
-  <div class="prio-option" onclick="setPriority('none')"><span style="color:var(--t4)">●</span> 無</div>
-</div>
-
-<!-- LEVEL-UP MODAL -->
-<div class="levelup-overlay" id="levelupOverlay">
-  <div class="levelup-card" id="levelupCard">
-    <div class="lu-badge-wrap">
-      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.8">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-      </svg>
+  <div class="drawer-meta">
+    <div class="dmeta-row">
+      <div class="dmeta-label">狀態</div>
+      <select class="dmeta-select" id="drawerStatus" onchange="updateTaskStatus()">
+        <option value="todo">待辦</option>
+        <option value="doing">執行中</option>
+        <option value="testing">測試中</option>
+        <option value="done">已完成</option>
+      </select>
     </div>
-    <div class="lu-level-label">LEVEL UP!</div>
-    <div class="lu-big-num" id="luNum">2</div>
-    <div class="lu-title" id="luTitle">任務新手</div>
-    <div class="lu-sub" id="luSub">繼續完成任務來提升等級</div>
-    <div class="lu-xp-note" id="luXpNote">+100 EXP 本次獲得</div>
-    <button class="lu-btn" onclick="closeLevelup()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-      太棒了！
-    </button>
+    <div class="dmeta-row">
+      <div class="dmeta-label">優先級</div>
+      <select class="dmeta-select" id="drawerPriority" onchange="triggerAutoSave()">
+        <option value="urgent">🔴 緊急</option>
+        <option value="high">🟠 高</option>
+        <option value="medium">🟣 中</option>
+        <option value="low">🟢 低</option>
+      </select>
+    </div>
+    <div class="dmeta-row">
+      <div class="dmeta-label">截止日</div>
+      <input class="dmeta-select" type="date" id="drawerDue" oninput="triggerAutoSave()">
+    </div>
+    <div class="dmeta-row">
+      <div class="dmeta-label">進度</div>
+      <div class="dmeta-val" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <div style="display:flex;align-items:center;gap:8px;width:100%">
+          <input type="range" id="drawerProgress" min="0" max="100" style="flex:1"
+            oninput="updateDrawerProgress(this.value)">
+          <span id="drawerProgressVal" style="font-size:11px;color:var(--t4);font-family:'JetBrains Mono',monospace;width:32px">0%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="drawer-tabs">
+    <button class="dtab active" data-dtab="desc" onclick="switchDTab(this)">描述</button>
+    <button class="dtab" data-dtab="attach" onclick="switchDTab(this)">附件</button>
+    <button class="dtab" data-dtab="comments" onclick="switchDTab(this)">留言板</button>
+    <button class="dtab" data-dtab="log" onclick="switchDTab(this)">操作紀錄</button>
+  </div>
+
+  <div class="drawer-body">
+    <!-- TAB: 描述 -->
+    <div class="dtab-content active" id="dtab-desc">
+      <div>
+        <div class="md-toolbar">
+          <button class="md-btn" onclick="mdInsert('**','**')" title="粗體"><b>B</b></button>
+          <button class="md-btn" onclick="mdInsert('*','*')" title="斜體"><i>I</i></button>
+          <button class="md-btn" onclick="mdInsert('~~','~~')" title="刪除線"><s>S</s></button>
+          <div class="md-sep"></div>
+          <button class="md-btn" onclick="mdInsert('`','`')" title="行內代碼" style="font-family:'JetBrains Mono',monospace;font-size:11px">``</button>
+          <button class="md-btn" onclick="mdInsertLine('## ')" title="標題" style="font-weight:700;font-size:11px">H</button>
+          <button class="md-btn" onclick="mdInsertLine('- ')" title="列表">≡</button>
+          <button class="md-btn" onclick="mdInsertLine('- [ ] ')" title="待辦清單">☑</button>
+        </div>
+        <textarea class="md-editor" id="mdEditor" placeholder="在這裡撰寫任務描述... 支援 Markdown 格式"
+          oninput="triggerAutoSave()"></textarea>
+      </div>
+      <div class="autosave-row" id="autoSaveRow">
+        <div class="autosave-dot"></div>
+        <span id="autoSaveText">等待輸入</span>
+      </div>
+    </div>
+
+    <!-- TAB: 附件 -->
+    <div class="dtab-content" id="dtab-attach">
+      <div class="attach-drop" id="attachDrop" onclick="document.getElementById('fileInput').click()"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handleFileDrop(event)">
+        <div class="attach-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div style="font-size:13px;color:var(--t3);margin-bottom:4px">拖曳檔案或點擊上傳</div>
+        <div style="font-size:11px;color:var(--t4)">支援 PDF, PNG, JPG, ZIP, DOCX</div>
+      </div>
+      <input type="file" id="fileInput" style="display:none" multiple onchange="handleFileSelect(event)">
+      <div class="attach-list" id="attachList"></div>
+    </div>
+
+    <!-- TAB: 留言板 -->
+    <div class="dtab-content" id="dtab-comments">
+      <div class="comment-list" id="commentList"></div>
+      <div style="position:relative">
+        <textarea class="comment-input" id="commentInput"
+          placeholder="留言... 輸入 @ 可以 @成員" rows="3"
+          onkeydown="handleCommentKey(event)" oninput="handleMentionInput(event)"></textarea>
+        <div class="mention-drop" id="mentionDrop"></div>
+      </div>
+      <div class="comment-actions">
+        <button class="comment-send" onclick="sendComment()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>發送
+        </button>
+        <span class="mention-hint">輸入 @ 提及成員</span>
+      </div>
+    </div>
+
+    <!-- TAB: 操作紀錄 -->
+    <div class="dtab-content" id="dtab-log">
+      <div class="audit-list" id="auditList"></div>
+    </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast">
-  <div class="toast-dot"></div>
-  <span id="toastMsg">已自動儲存</span>
+<!-- ━━━ AUTOMATION PANEL ━━━ -->
+<div class="auto-overlay" id="autoOverlay" onclick="if(event.target===this)closeAutoPanel()">
+  <div class="auto-panel">
+    <div class="auto-hdr">
+      <div class="auto-hdr-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        自動化規則
+      </div>
+      <button class="drawer-close" onclick="closeAutoPanel()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="auto-list">
+      <div class="auto-rule">
+        <div class="auto-icon" style="background:var(--green-d);color:var(--green)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="auto-rule-text">
+          <div class="auto-if">觸發條件：狀態改為「完成」</div>
+          <div class="auto-then">→ 自動更新專案進度條，觸發慶祝動畫</div>
+        </div>
+        <div class="auto-toggle" title="開啟中" onclick="this.classList.toggle('off')"></div>
+      </div>
+      <div class="auto-rule">
+        <div class="auto-icon" style="background:var(--red-d);color:var(--red)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="auto-rule-text">
+          <div class="auto-if">觸發條件：截止日期已超過</div>
+          <div class="auto-then">→ 自動將優先級設為「緊急」並發送通知</div>
+        </div>
+        <div class="auto-toggle" title="開啟中" onclick="this.classList.toggle('off')"></div>
+      </div>
+      <div class="auto-rule">
+        <div class="auto-icon" style="background:var(--purple-d);color:var(--purple)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        </div>
+        <div class="auto-rule-text">
+          <div class="auto-if">觸發條件：新增任務到「待辦」欄</div>
+          <div class="auto-then">→ 自動指派給當前登入者，新增至番茄鐘清單</div>
+        </div>
+        <div class="auto-toggle off" title="關閉中" onclick="this.classList.toggle('off')"></div>
+      </div>
+      <div class="auto-rule">
+        <div class="auto-icon" style="background:var(--amber-d);color:var(--amber)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="auto-rule-text">
+          <div class="auto-if">觸發條件：進度達到 100%</div>
+          <div class="auto-then">→ 自動將狀態更新為「完成」</div>
+        </div>
+        <div class="auto-toggle" title="開啟中" onclick="this.classList.toggle('off')"></div>
+      </div>
+    </div>
+    <div class="auto-footer">
+      <button class="btn-ghost" onclick="closeAutoPanel()">關閉</button>
+      <button class="btn-primary" style="font-size:13px;padding:7px 16px" onclick="closeAutoPanel()">儲存規則</button>
+    </div>
+  </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════
-//  MOCK DATA
-// ═══════════════════════════════════════════════════
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  THEME
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const LS_THEME = 'pms-theme';
+const root = document.documentElement;
+const sys = () => window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+function applyTheme(t) {
+  root.setAttribute('data-theme', t);
+  document.getElementById('icon-sun').style.display  = t === 'dark'  ? 'block' : 'none';
+  document.getElementById('icon-moon').style.display = t === 'light' ? 'block' : 'none';
+}
+applyTheme(localStorage.getItem(LS_THEME) || sys());
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(LS_THEME, next);
+  applyTheme(next);
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CLOCK
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function tick(){const n=new Date(),p=x=>String(x).padStart(2,'0');const el=document.getElementById('clock');if(el)el.textContent=`${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;}
+tick();setInterval(tick,1000);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  DATA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const MEMBERS = {
-  u1: { id:'u1', name:'王小明', initial:'王', role:'前端工程師', grad:'linear-gradient(135deg,#c084fc,#38bdf8)' },
-  u2: { id:'u2', name:'李大華', initial:'李', role:'後端工程師', grad:'linear-gradient(135deg,#38bdf8,#2dd4bf)' },
-  u3: { id:'u3', name:'陳美玲', initial:'陳', role:'設計師',     grad:'linear-gradient(135deg,#f472b6,#fb923c)' },
-  u4: { id:'u4', name:'張志偉', initial:'張', role:'後端工程師', grad:'linear-gradient(135deg,#4ade80,#2dd4bf)' },
+  u1:{id:'u1',name:'王小明',initial:'王',color:'#7C3AED'},
+  u2:{id:'u2',name:'李大華',initial:'李',color:'#0D9488'},
+  u3:{id:'u3',name:'陳美玲',initial:'陳',color:'#EC4899'},
+  u4:{id:'u4',name:'張志偉',initial:'張',color:'#F97316'},
+};
+const MEMBER_LIST = Object.values(MEMBERS);
+
+const COL_CFG = {
+  todo:    {label:'待辦',    color:'#94A3B8', limit:null},
+  doing:   {label:'執行中',  color:'#F97316', limit:null},
+  testing: {label:'測試中',  color:'#0EA5E9', limit:null},
+  done:    {label:'已完成',  color:'#10B981', limit:null},
 };
 
-const PROJECTS_META = {
-  p1:{ id:'p1', name:'電商平台重構', color:'#c084fc', dot:'#c084fc' },
-  p2:{ id:'p2', name:'行動 App 開發', color:'#f472b6', dot:'#f472b6' },
-  p3:{ id:'p3', name:'資料分析儀表板', color:'#38bdf8', dot:'#38bdf8' },
-  p4:{ id:'p4', name:'API 閘道器升級', color:'#2dd4bf', dot:'#2dd4bf' },
-};
-
-const INITIAL_TASKS = [
-  { id:'t1', title:'設計首頁 Banner 輪播元件', projectId:'p1', status:'todo', priority:'high',
-    assigneeId:'u3', startDate:'2026-04-10', dueDate:'2026-04-17',
-    description:'設計並實作首頁 Banner 輪播元件，支援自動播放、手動切換、行動裝置觸控手勢。',
-    todoItems:[
-      {id:'ti1',text:'確認設計規格',completed:true},
-      {id:'ti2',text:'建立元件骨架',completed:false},
-      {id:'ti3',text:'實作輪播動畫',completed:false}
-    ],
-    relatedDocs:['設計稿 Figma','UX 規格書.pdf'],
-    testUrl:'https://staging.example.com', prodUrl:'', updatedAt:'2026-04-09T14:30:00Z' },
-
-  { id:'t2', title:'API 錯誤訊息國際化', projectId:'p1', status:'todo', priority:'medium',
-    assigneeId:'u2', startDate:'', dueDate:'2026-04-20',
-    description:'將 API 所有錯誤訊息進行 i18n 處理，支援繁中、簡中、英文三種語系。',
-    todoItems:[], relatedDocs:[], testUrl:'', prodUrl:'', updatedAt:'2026-04-08T09:00:00Z' },
-
-  { id:'t3', title:'行動端推播通知整合', projectId:'p2', status:'todo', priority:'urgent',
-    assigneeId:'u4', startDate:'', dueDate:'2026-04-15',
-    description:'整合 Firebase Cloud Messaging，實作推播通知功能，包含前景/背景通知處理。',
-    todoItems:[
-      {id:'ti4',text:'FCM SDK 設定',completed:false},
-      {id:'ti5',text:'通知模板設計',completed:false}
-    ],
-    relatedDocs:['FCM 文件.pdf'], testUrl:'', prodUrl:'', updatedAt:'2026-04-07T16:00:00Z' },
-
-  { id:'t4', title:'購物車 API 效能優化', projectId:'p1', status:'in_progress', priority:'high',
-    assigneeId:'u2', startDate:'2026-04-05', dueDate:'2026-04-18',
-    description:'對購物車相關 API 進行效能分析與優化，目標降低 P95 延遲至 200ms 以下。',
-    todoItems:[
-      {id:'ti6',text:'DB 索引分析',completed:true},
-      {id:'ti7',text:'Redis 快取層建置',completed:true},
-      {id:'ti8',text:'負載測試',completed:false}
-    ],
-    relatedDocs:['效能報告.pdf'],
-    testUrl:'https://api-staging.example.com', prodUrl:'https://api.example.com', updatedAt:'2026-04-09T18:00:00Z' },
-
-  { id:'t5', title:'用戶分析報表頁面', projectId:'p3', status:'in_progress', priority:'medium',
-    assigneeId:'u1', startDate:'2026-04-08', dueDate:'2026-04-22',
-    description:'開發用戶行為分析報表頁面，整合圖表庫顯示活躍用戶、留存率、轉換率等指標。',
-    todoItems:[
-      {id:'ti9',text:'圖表庫選型',completed:true},
-      {id:'ti10',text:'API 串接',completed:false},
-      {id:'ti11',text:'響應式排版',completed:false}
-    ],
-    relatedDocs:['設計稿 Figma','數據需求文件.pdf'],
-    testUrl:'https://analytics-staging.example.com', prodUrl:'', updatedAt:'2026-04-10T10:00:00Z' },
-
-  { id:'t6', title:'認證系統 JWT Refresh Token', projectId:'p1', status:'in_review', priority:'urgent',
-    assigneeId:'u2', startDate:'2026-04-01', dueDate:'2026-04-12',
-    description:'實作 JWT Refresh Token 機制，提升認證安全性並延長登入有效期。',
-    todoItems:[
-      {id:'ti12',text:'設計 Token 策略',completed:true},
-      {id:'ti13',text:'實作 Refresh 端點',completed:true},
-      {id:'ti14',text:'Code Review',completed:false}
-    ],
-    relatedDocs:['安全性規格.pdf'],
-    testUrl:'https://auth-staging.example.com', prodUrl:'', updatedAt:'2026-04-09T20:00:00Z' },
-
-  { id:'t7', title:'API 閘道器版本升級', projectId:'p4', status:'in_review', priority:'high',
-    assigneeId:'u4', startDate:'', dueDate:'2026-04-14',
-    description:'將 API Gateway 從 v2 升級至 v3，更新路由規則、限流設定與安全策略。',
-    todoItems:[], relatedDocs:['升級計劃書.pdf','版本差異文件.pdf'],
-    testUrl:'https://gw-staging.example.com', prodUrl:'https://gw.example.com', updatedAt:'2026-04-08T14:00:00Z' },
-
-  { id:'t8', title:'用戶登入頁面重設計', projectId:'p1', status:'done', priority:'medium',
-    assigneeId:'u3', startDate:'2026-03-25', dueDate:'2026-04-05',
-    description:'重新設計用戶登入頁面，改善 UX 流程，加入社交登入選項（Google/GitHub）。',
-    todoItems:[
-      {id:'ti15',text:'設計稿定稿',completed:true},
-      {id:'ti16',text:'前端實作',completed:true},
-      {id:'ti17',text:'社交登入整合',completed:true}
-    ],
-    relatedDocs:['設計稿 Figma'],
-    testUrl:'', prodUrl:'https://example.com/login', updatedAt:'2026-04-05T11:00:00Z' },
-
-  { id:'t9', title:'離線快取功能', projectId:'p2', status:'done', priority:'high',
-    assigneeId:'u1', startDate:'2026-03-20', dueDate:'2026-04-08',
-    description:'實作 App 離線模式，使用 Service Worker 快取關鍵資源，確保基本功能在無網路時可用。',
-    todoItems:[], relatedDocs:[], testUrl:'', prodUrl:'', updatedAt:'2026-04-08T17:00:00Z' },
+let TASKS = JSON.parse(localStorage.getItem('pms-tasks-v2') || 'null') || [
+  {id:'t1',col:'todo',title:'設計登入頁面原型',priority:'high',tags:['UI','設計'],due:'2026-04-22',progress:0,assignees:['u1','u3'],project:'電商平台',
+   desc:'## 設計目標\n\n設計用戶登入頁面的互動原型，包含響應式版面。\n\n**需求：**\n- Email / 密碼輸入欄\n- Google OAuth 整合按鈕\n- 忘記密碼流程',
+   comments:[{user:'u3',text:'線框圖初稿已上傳，請 @王小明 確認視覺風格',time:'2小時前',id:'c1'}],
+   log:[{action:'建立任務',user:'u1',time:'2026-04-18 09:00'},{action:'指派給陳美玲',user:'u1',time:'2026-04-18 09:05'}]},
+  {id:'t2',col:'todo',title:'撰寫 API 整合文件',priority:'medium',tags:['文件','後端'],due:'2026-04-25',progress:0,assignees:['u2'],project:'API 閘道器',
+   desc:'完整記錄所有公開 API 端點的請求/回應格式。',
+   comments:[],log:[{action:'建立任務',user:'u2',time:'2026-04-19 10:00'}]},
+  {id:'t3',col:'doing',title:'實作 REST API 端點',priority:'urgent',tags:['後端','API'],due:'2026-04-18',progress:45,assignees:['u2','u4'],project:'電商平台',
+   desc:'## 待完成端點\n\n- [ ] `POST /auth/login`\n- [ ] `GET /users/:id`\n- [x] `POST /tasks`\n- [ ] `DELETE /tasks/:id`',
+   comments:[{user:'u4',text:'已完成基本架構，Auth middleware 還需要測試',time:'3小時前',id:'c2'}],
+   log:[{action:'建立任務',user:'u1',time:'2026-04-15 08:00'},{action:'狀態更新為「執行中」',user:'u2',time:'2026-04-16 09:30'},{action:'進度更新 45%',user:'u2',time:'2026-04-18 14:00'}]},
+  {id:'t4',col:'doing',title:'撰寫單元測試',priority:'medium',tags:['測試','QA'],due:'2026-04-20',progress:30,assignees:['u1','u2'],project:'電商平台',
+   desc:'為核心模組撰寫單元測試，目標覆蓋率 80%。',
+   comments:[],log:[{action:'建立任務',user:'u1',time:'2026-04-17 11:00'}]},
+  {id:'t5',col:'testing',title:'JWT 驗證模組整合測試',priority:'high',tags:['安全','後端'],due:'2026-04-17',progress:80,assignees:['u4'],project:'API 閘道器',
+   desc:'## 測試範圍\n\n驗證 JWT Token 生成、刷新、失效的完整流程。',
+   comments:[{user:'u2',text:'發現一個 token refresh race condition，@張志偉 請確認',time:'1小時前',id:'c3'}],
+   log:[{action:'建立任務',user:'u4',time:'2026-04-14 10:00'},{action:'狀態更新為「測試中」',user:'u4',time:'2026-04-16 16:00'}]},
+  {id:'t6',col:'testing',title:'前端表單驗證',priority:'low',tags:['前端','UI'],due:'2026-04-19',progress:65,assignees:['u1','u3'],project:'電商平台',
+   desc:'確保所有表單欄位有完整的客戶端驗證。',
+   comments:[],log:[{action:'建立任務',user:'u3',time:'2026-04-15 14:00'}]},
+  {id:'t7',col:'done',title:'完成資料庫 Schema 設計',priority:'high',tags:['後端','DB'],due:'2026-04-15',progress:100,assignees:['u2'],project:'電商平台',
+   desc:'設計並實作完整的資料庫結構，包含索引優化。',
+   comments:[],log:[{action:'建立任務',user:'u2',time:'2026-04-10 08:00'},{action:'狀態更新為「完成」',user:'u2',time:'2026-04-15 17:30'}]},
+  {id:'t8',col:'done',title:'設定 CI/CD 自動化管道',priority:'medium',tags:['DevOps'],due:'2026-04-14',progress:100,assignees:['u1'],project:'API 閘道器',
+   desc:'使用 GitHub Actions 建立完整的 CI/CD 流程。',
+   comments:[],log:[{action:'建立任務',user:'u1',time:'2026-04-08 09:00'},{action:'狀態更新為「完成」',user:'u1',time:'2026-04-14 16:00'}]},
+  {id:'t9',col:'todo',title:'優化資料庫查詢效能',priority:'medium',tags:['後端','效能'],due:'2026-04-28',progress:0,assignees:['u2','u4'],project:'電商平台',
+   desc:'分析慢查詢日誌並進行索引優化，目標提升 50% 查詢效能。',
+   comments:[],log:[{action:'建立任務',user:'u2',time:'2026-04-20 10:00'}]},
 ];
 
-// ═══════════════════════════════════════════════════
-//  ZUSTAND-LIKE STORE (localStorage-backed)
-// ═══════════════════════════════════════════════════
-function createStore(initial) {
-  const STORAGE_KEY = 'projectos-tasks-v1';
-  let saved = null;
-  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) {}
+function saveTasks(){localStorage.setItem('pms-tasks-v2',JSON.stringify(TASKS));}
+function getTask(id){return TASKS.find(t=>t.id===id);}
+function updateTaskColumn(id,col){
+  const t=getTask(id);
+  if(!t)return;
+  const oldCol=t.col;
+  t.col=col;
+  t.log.unshift({action:`狀態從「${COL_CFG[oldCol].label}」更新為「${COL_CFG[col].label}」`,user:'u1',time:nowStr()});
+  if(col==='done')t.progress=100;
+  saveTasks();
+  updateColCounts();
+  updateTaskCountLabel();
+  checkAutomation(t,col);
+}
+function nowStr(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
 
-  let state = {
-    tasks: saved?.tasks ?? Object.fromEntries(initial.map(t => [t.id, t])),
-    // Gamification (persisted)
-    gamification: saved?.gamification ?? {
-      experience: 0, level: 1, totalCompleted: 0, streak: 0,
-    },
-    // UI state (not persisted)
-    selectedTaskId: null,
-    viewMode: 'kanban',
-    filters: { projectId: '', priority: '', assigneeId: '', search: '', quickFilters: new Set() },
-  };
-
-  const subscribers = new Set();
-
-  function persist() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        tasks: state.tasks,
-        gamification: state.gamification,
-      }));
-    } catch(e) {}
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  AUTOMATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function checkAutomation(task, newCol) {
+  const rules = document.querySelectorAll('.auto-toggle:not(.off)');
+  const ruleCount = rules.length;
+  if (newCol === 'done' && ruleCount >= 1) {
+    triggerConfetti();
+    showGlobalSave('✓ 自動化：專案進度已更新');
   }
-
-  return {
-    getState: () => state,
-    setState(updater) {
-      const patch = typeof updater === 'function' ? updater(state) : updater;
-      state = { ...state, ...patch };
-      persist();
-      subscribers.forEach(fn => fn(state));
-    },
-    subscribe(fn) {
-      subscribers.add(fn);
-      return () => subscribers.delete(fn);
-    },
-  };
 }
 
-const store = createStore(INITIAL_TASKS);
-
-// ═══════════════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════════════
-function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random()*16|0;
-    return (c==='x'?r:r&0x3|0x8).toString(16);
-  });
+function triggerConfetti() {
+  if(typeof confetti !== 'undefined') {
+    confetti({particleCount:80,spread:60,origin:{y:.7},colors:['#7C3AED','#0EA5E9','#10B981']});
+  }
 }
 
-function fmtDate(iso) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
-}
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  RENDER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let currentFilter = 'all';
+let searchQuery = '';
 
-function fmtRelative(iso) {
-  if (!iso) return '';
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff/60000);
-  if (m < 1)  return '剛剛';
-  if (m < 60) return `${m} 分鐘前`;
-  const h = Math.floor(m/60);
-  if (h < 24) return `${h} 小時前`;
-  return fmtDate(iso);
-}
-
-function isOverdue(iso) {
-  return iso && new Date(iso) < new Date() && store.getState().tasks;
-}
-
-const PRIORITY_META = {
-  urgent:{ label:'緊急', cls:'pt-urgent', color:'var(--red)',    dot:'#f87171' },
-  high:  { label:'高',   cls:'pt-high',   color:'var(--orange)', dot:'#fb923c' },
-  medium:{ label:'中',   cls:'pt-medium', color:'var(--amber)',  dot:'#fbbf24' },
-  low:   { label:'低',   cls:'pt-low',    color:'var(--green)',  dot:'#4ade80' },
-  none:  { label:'無',   cls:'pt-none',   color:'var(--t3)',     dot:'#35324a' },
-};
-
-const STATUS_META = {
-  todo:        { label:'待辦', dot:'var(--t3)',    bg:'rgba(100,100,100,.15)', color:'var(--t2)' },
-  in_progress: { label:'進行中', dot:'var(--purple)', bg:'var(--purple-d)', color:'var(--purple)' },
-  in_review:   { label:'審查中', dot:'var(--amber)', bg:'var(--amber-d)',   color:'var(--amber)'  },
-  done:        { label:'已完成', dot:'var(--teal)',  bg:'var(--teal-d)',    color:'var(--teal)'   },
-};
-
-const COLUMNS = ['todo','in_progress','in_review','done'];
-const COL_TITLES = { todo:'待辦', in_progress:'進行中', in_review:'審查中', done:'已完成' };
-
-function getFilteredTasks() {
-  const { tasks, filters } = store.getState();
-  const today = new Date().toDateString();
-  return Object.values(tasks).filter(t => {
-    // Advanced dropdown filters
-    if (filters.projectId  && t.projectId  !== filters.projectId)  return false;
-    if (filters.priority   && t.priority   !== filters.priority)   return false;
-    if (filters.assigneeId && t.assigneeId !== filters.assigneeId) return false;
-    // Search
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      const proj = PROJECTS_META[t.projectId];
-      if (!t.title.toLowerCase().includes(q) &&
-          !(proj?.name.toLowerCase().includes(q)) &&
-          !(t.description||'').toLowerCase().includes(q)) return false;
-    }
-    // Quick filters (all active must match)
-    if (filters.quickFilters.has('mine')  && t.assigneeId !== 'u1')  return false;
-    if (filters.quickFilters.has('today') &&
-        !(t.dueDate && new Date(t.dueDate).toDateString() === today)) return false;
-    if (filters.quickFilters.has('high')  &&
-        t.priority !== 'urgent' && t.priority !== 'high')            return false;
+function getFilteredTasks(colId) {
+  return TASKS.filter(t => {
+    if(t.col !== colId) return false;
+    if(currentFilter === 'urgent' && t.priority !== 'urgent') return false;
+    if(['todo','doing','testing','done'].includes(currentFilter) && currentFilter !== 'all' && t.col !== currentFilter) return false;
+    if(searchQuery && !t.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+       !t.tags.some(g=>g.toLowerCase().includes(searchQuery.toLowerCase()))) return false;
     return true;
   });
 }
 
-// ═══════════════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════════════
-let toastTimer = null;
-function showToast(msg = '已自動儲存') {
-  clearTimeout(toastTimer);
-  const el = document.getElementById('toast');
-  document.getElementById('toastMsg').textContent = msg;
-  el.classList.add('show');
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+function renderCard(task) {
+  const pCls = {urgent:'cp-urgent',high:'cp-high',medium:'cp-medium',low:'cp-low'};
+  const pLabel = {urgent:'緊急',high:'高',medium:'中',low:'低'};
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dueDate = task.due ? new Date(task.due) : null;
+  const isOverdue = dueDate && dueDate < today && task.col !== 'done';
+  const dueStr = dueDate ? `${dueDate.getMonth()+1}/${dueDate.getDate()}` : '';
+
+  const avHtml = task.assignees.slice(0,3).map(uid => {
+    const m = MEMBERS[uid];
+    return m ? `<div class="av" style="background:${m.color}" title="${m.name}">${m.initial}</div>` : '';
+  }).join('');
+
+  const tagsHtml = task.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  const doneCls = task.col === 'done' ? 'done-text' : '';
+
+  const div = document.createElement('div');
+  div.className = 'task-card';
+  div.dataset.id = task.id;
+  div.setAttribute('draggable', 'true');
+  div.innerHTML = `
+    <div class="card-top">
+      <span class="card-priority ${pCls[task.priority]}">${pLabel[task.priority]}</span>
+      ${dueStr ? `<span class="card-due ${isOverdue?'overdue':''}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${dueStr}</span>` : ''}
+    </div>
+    <div class="card-title ${doneCls}">${task.title}</div>
+    ${tagsHtml ? `<div class="card-tags">${tagsHtml}</div>` : ''}
+    <div class="card-progress">
+      <div class="prog-bar"><div class="prog-fill" style="width:${task.progress}%"></div></div>
+      <span class="prog-pct">${task.progress}%</span>
+    </div>
+    <div class="card-footer">
+      <div class="avatars">${avHtml}</div>
+      <span class="card-project">${task.project||''}</span>
+    </div>`;
+
+  div.addEventListener('click', () => openDrawer(task.id));
+  initDnd(div);
+  return div;
 }
 
-// ═══════════════════════════════════════════════════
-//  RENDER KANBAN
-// ═══════════════════════════════════════════════════
-function renderKanban() {
-  const container = document.getElementById('viewKanban');
-  const tasks = getFilteredTasks();
-  const { selectedTaskId } = store.getState();
+function renderBoard() {
+  const board = document.getElementById('kanbanBoard');
+  board.innerHTML = '';
+  Object.entries(COL_CFG).forEach(([colId, cfg]) => {
+    const tasks = getFilteredTasks(colId);
+    const col = document.createElement('div');
+    col.className = `kanban-col col-${colId}`;
+    col.dataset.col = colId;
 
-  container.innerHTML = COLUMNS.map(status => {
-    const colTasks = tasks.filter(t => t.status === status)
-      .sort((a,b) => {
-        const po = {urgent:0,high:1,medium:2,low:3,none:4};
-        return po[a.priority] - po[b.priority];
-      });
-    const sm = STATUS_META[status];
-    const pm = PRIORITY_META;
-
-    const cardsHTML = colTasks.length === 0
-      ? `<div class="kb-empty">暫無任務</div>`
-      : colTasks.map(t => {
-          const member  = MEMBERS[t.assigneeId];
-          const proj    = PROJECTS_META[t.projectId];
-          const pMeta   = pm[t.priority] || pm.none;
-          const done    = t.todoItems.filter(ti => ti.completed).length;
-          const total   = t.todoItems.length;
-          const pct     = total > 0 ? Math.round(done / total * 100) : 0;
-          const overdue = t.dueDate && new Date(t.dueDate) < new Date() && status !== 'done';
-          const isDone  = status === 'done';
-          const isIP    = status === 'in_progress';
-          const isIR    = status === 'in_review';
-
-          // Play icon for in_progress
-          const playIcon = isIP
-            ? `<span class="tc-play"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>`
-            : '';
-
-          // Review badge
-          const reviewBadge = isIR
-            ? `<span class="tc-review-badge">待審核</span>`
-            : '';
-
-          return `
-          <div class="task-card prio-bar-${t.priority||'none'} s-${status}${selectedTaskId===t.id?' selected':''}"
-               onclick="openDrawer('${t.id}')" data-id="${t.id}">
-            <div class="tc-top">
-              <div class="tc-title-row">
-                ${playIcon}
-                <div class="tc-title${isDone?' done':''}">${escHtml(t.title)}${reviewBadge}</div>
-              </div>
-            </div>
-            ${proj ? `<div class="tc-meta">
-              <div class="tc-proj">
-                <div class="tc-proj-dot" style="background:${proj.dot}"></div>
-                ${escHtml(proj.name)}
-              </div>
-            </div>` : ''}
-            <div class="tc-footer">
-              <div style="display:flex;align-items:center;gap:6px">
-                ${member ? `<div class="tc-av" style="background:${member.grad}" title="${member.name}">${member.initial}</div>` : ''}
-                ${total > 0 ? `<div class="tc-mini-bar">
-                  <div class="tc-mini-track"><div class="tc-mini-fill" style="width:${pct}%"></div></div>
-                  <span class="tc-mini-text">${done}/${total}</span>
-                </div>` : ''}
-              </div>
-              <div class="tc-due${overdue?' overdue':''}">${t.dueDate ? fmtDate(t.dueDate) : ''}</div>
-            </div>
-          </div>`;
-        }).join('');
-
-    return `
-    <div class="kb-col">
-      <div class="kb-col-hdr">
-        <div class="kb-col-dot" style="background:${sm.dot}"></div>
-        <div class="kb-col-title">${COL_TITLES[status]}</div>
-        <div class="kb-col-count">${colTasks.length}</div>
+    col.innerHTML = `
+      <div class="col-hdr">
+        <div class="col-dot" style="background:${cfg.color}"></div>
+        <span class="col-name">${cfg.label}</span>
+        <span class="col-count" id="cnt-${colId}">${tasks.length}</span>
+        <button class="col-add" onclick="openAddTask('${colId}')" title="新增任務">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
       </div>
-      <div class="kb-cards">${cardsHTML}</div>
-      <div class="kb-inline-add" id="inlineAdd-${status}">
-        <input class="kb-inline-input" id="inlineInput-${status}" placeholder="任務名稱…"
-               onkeydown="handleInlineKey(event,'${status}')">
-        <div class="kb-inline-actions">
-          <button class="kb-inline-ok" onclick="confirmInlineAdd('${status}')">新增</button>
-          <button class="kb-inline-cancel" onclick="hideInlineAdd('${status}')">取消</button>
+      <div class="col-inner" id="col-${colId}"></div>`;
+
+    const inner = col.querySelector('.col-inner');
+    if(tasks.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'col-empty';
+      empty.innerHTML = `<div class="col-empty-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div><span>沒有任務</span>`;
+      inner.appendChild(empty);
+    } else {
+      tasks.forEach(t => inner.appendChild(renderCard(t)));
+    }
+
+    initDropZone(col);
+    board.appendChild(col);
+  });
+}
+
+function updateColCounts() {
+  Object.keys(COL_CFG).forEach(colId => {
+    const el = document.getElementById(`cnt-${colId}`);
+    if(el) el.textContent = TASKS.filter(t=>t.col===colId).length;
+  });
+}
+
+function updateTaskCountLabel() {
+  const el = document.getElementById('taskCountLabel');
+  if(el) el.textContent = `${TASKS.length} 個任務`;
+  const chip = document.getElementById('navChip');
+  if(chip) chip.textContent = TASKS.filter(t=>t.col!=='done').length;
+}
+
+function filterTasks() {
+  searchQuery = document.getElementById('searchInput').value;
+  renderBoard();
+}
+
+document.querySelectorAll('.ftab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderBoard();
+  });
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  DRAG AND DROP
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let dragSrc = null;
+let enterCounters = new WeakMap();
+
+function initDnd(cardEl) {
+  cardEl.addEventListener('dragstart', e => {
+    dragSrc = cardEl;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', cardEl.dataset.id);
+    requestAnimationFrame(() => cardEl.classList.add('dragging'));
+    // Create placeholder
+    const ph = document.createElement('div');
+    ph.className = 'drag-placeholder';
+    ph.id = 'dragPlaceholder';
+  });
+
+  cardEl.addEventListener('dragend', () => {
+    cardEl.classList.remove('dragging');
+    document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drop-active'));
+    const ph = document.getElementById('dragPlaceholder');
+    if(ph) ph.remove();
+    dragSrc = null;
+  });
+}
+
+function initDropZone(colEl) {
+  const inner = colEl.querySelector('.col-inner');
+  let counter = 0;
+
+  colEl.addEventListener('dragenter', e => {
+    e.preventDefault();
+    counter++;
+    colEl.classList.add('drop-active');
+  });
+
+  colEl.addEventListener('dragleave', () => {
+    counter--;
+    if(counter <= 0) { counter = 0; colEl.classList.remove('drop-active'); }
+  });
+
+  colEl.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if(!dragSrc) return;
+
+    let ph = document.getElementById('dragPlaceholder');
+    if(!ph) { ph = document.createElement('div'); ph.className='drag-placeholder'; ph.id='dragPlaceholder'; }
+
+    const afterEl = getDragAfter(inner, e.clientY);
+    if(afterEl == null) inner.appendChild(ph);
+    else inner.insertBefore(ph, afterEl);
+  });
+
+  colEl.addEventListener('drop', e => {
+    e.preventDefault();
+    counter = 0;
+    colEl.classList.remove('drop-active');
+    if(!dragSrc) return;
+
+    const ph = document.getElementById('dragPlaceholder');
+    if(ph && ph.parentNode === inner) {
+      inner.insertBefore(dragSrc, ph);
+      ph.remove();
+    } else {
+      inner.appendChild(dragSrc);
+    }
+
+    const taskId = dragSrc.dataset.id;
+    const newCol = colEl.dataset.col;
+    updateTaskColumn(taskId, newCol);
+
+    // Update card visual for done column
+    const titleEl = dragSrc.querySelector('.card-title');
+    if(newCol === 'done' && titleEl) titleEl.classList.add('done-text');
+    else if(titleEl) titleEl.classList.remove('done-text');
+
+    // Remove empty placeholder if any
+    const empties = inner.querySelectorAll('.col-empty');
+    empties.forEach(el => el.remove());
+  });
+}
+
+function getDragAfter(container, y) {
+  const els = [...container.querySelectorAll('.task-card:not(.dragging)')];
+  return els.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if(offset < 0 && offset > closest.offset) return {offset, element: child};
+    return closest;
+  }, {offset: Number.NEGATIVE_INFINITY}).element;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  DRAWER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let currentTaskId = null;
+let saveTimer = null;
+
+function openDrawer(taskId) {
+  const task = getTask(taskId);
+  if(!task) return;
+  currentTaskId = taskId;
+
+  document.getElementById('drawerTitle').value = task.title;
+  document.getElementById('drawerStatus').value = task.col;
+  document.getElementById('drawerPriority').value = task.priority;
+  if(task.due) document.getElementById('drawerDue').value = task.due;
+  document.getElementById('drawerProgress').value = task.progress;
+  document.getElementById('drawerProgressVal').textContent = task.progress + '%';
+  document.getElementById('mdEditor').value = task.desc || '';
+  document.getElementById('commentInput').value = '';
+
+  renderComments(task.comments || []);
+  renderAuditLog(task.log || []);
+  renderAttachments(task.attachments || []);
+
+  // Reset autosave
+  resetAutoSave();
+
+  // Open
+  document.getElementById('taskDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+
+  // Switch to first tab
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.dtab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelector('[data-dtab="desc"]').classList.add('active');
+  document.getElementById('dtab-desc').classList.add('active');
+}
+
+function closeDrawer() {
+  if(saveTimer) { clearTimeout(saveTimer); saveCurrentTask(); }
+  document.getElementById('taskDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  currentTaskId = null;
+  renderBoard();
+}
+
+function switchDTab(btn) {
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.dtab-content').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('dtab-' + btn.dataset.dtab).classList.add('active');
+}
+
+function updateTaskStatus() {
+  if(!currentTaskId) return;
+  const task = getTask(currentTaskId);
+  const newCol = document.getElementById('drawerStatus').value;
+  if(task && task.col !== newCol) {
+    task.log.unshift({action:`狀態更新為「${COL_CFG[newCol].label}」`,user:'u1',time:nowStr()});
+    task.col = newCol;
+    if(newCol === 'done') { task.progress = 100; document.getElementById('drawerProgress').value = 100; document.getElementById('drawerProgressVal').textContent = '100%'; triggerConfetti(); }
+    renderAuditLog(task.log);
+    saveTasks();
+  }
+}
+
+function updateDrawerProgress(val) {
+  document.getElementById('drawerProgressVal').textContent = val + '%';
+  if(currentTaskId) { const t = getTask(currentTaskId); if(t) { t.progress = parseInt(val); triggerAutoSave(); } }
+}
+
+function saveCurrentTask() {
+  if(!currentTaskId) return;
+  const task = getTask(currentTaskId);
+  if(!task) return;
+  task.title    = document.getElementById('drawerTitle').value;
+  task.priority = document.getElementById('drawerPriority').value;
+  task.due      = document.getElementById('drawerDue').value;
+  task.progress = parseInt(document.getElementById('drawerProgress').value);
+  task.desc     = document.getElementById('mdEditor').value;
+  saveTasks();
+}
+
+// Auto-save
+function triggerAutoSave() {
+  const row = document.getElementById('autoSaveRow');
+  const txt = document.getElementById('autoSaveText');
+  row.className = 'autosave-row saving';
+  txt.textContent = '儲存中...';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    saveCurrentTask();
+    row.className = 'autosave-row saved';
+    txt.textContent = '✓ 已自動儲存';
+    setTimeout(() => resetAutoSave(), 2500);
+  }, 1200);
+}
+
+function resetAutoSave() {
+  clearTimeout(saveTimer);
+  saveTimer = null;
+  const row = document.getElementById('autoSaveRow');
+  const txt = document.getElementById('autoSaveText');
+  if(row) { row.className = 'autosave-row'; txt.textContent = '等待輸入'; }
+}
+
+function showGlobalSave(msg) {
+  const badge = document.getElementById('globalSaveBadge');
+  const txt   = document.getElementById('globalSaveText');
+  if(!badge||!txt) return;
+  badge.className = 'autosave-badge saved';
+  txt.textContent = msg || '✓ 已同步';
+  setTimeout(() => { badge.className = 'autosave-badge'; txt.textContent = '已同步'; }, 3000);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  MARKDOWN EDITOR HELPERS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function mdInsert(before, after) {
+  const el = document.getElementById('mdEditor');
+  const s = el.selectionStart, e = el.selectionEnd;
+  const sel = el.value.slice(s, e) || '文字';
+  el.value = el.value.slice(0,s) + before + sel + after + el.value.slice(e);
+  el.setSelectionRange(s + before.length, s + before.length + sel.length);
+  el.focus(); triggerAutoSave();
+}
+function mdInsertLine(prefix) {
+  const el = document.getElementById('mdEditor');
+  const s = el.selectionStart;
+  const lineStart = el.value.lastIndexOf('\n', s-1) + 1;
+  el.value = el.value.slice(0, lineStart) + prefix + el.value.slice(lineStart);
+  el.focus(); triggerAutoSave();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  COMMENTS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderComments(comments) {
+  const list = document.getElementById('commentList');
+  if(!comments.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px 0;color:var(--t4);font-size:12px">尚無留言，成為第一個留言的人！</div>';
+    return;
+  }
+  list.innerHTML = comments.map(c => {
+    const m = MEMBERS[c.user];
+    const text = (c.text||'').replace(/@(\S+)/g, '<span class="mention">@$1</span>');
+    return `<div class="comment">
+      <div class="comment-av" style="background:${m?m.color:'#7C3AED'}">${m?m.initial:'?'}</div>
+      <div class="comment-body">
+        <div class="comment-meta">
+          <span class="comment-name">${m?m.name:'匿名'}</span>
+          <span class="comment-time">${c.time}</span>
         </div>
+        <div class="comment-text">${text}</div>
       </div>
-      <button class="kb-add-btn" onclick="showInlineAdd('${status}')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        新增任務
-      </button>
     </div>`;
   }).join('');
 }
 
-// ═══════════════════════════════════════════════════
-//  RENDER TABLE
-// ═══════════════════════════════════════════════════
-function renderTable() {
-  const container = document.getElementById('viewTable');
-  const tasks = getFilteredTasks().sort((a,b) => {
-    const so = {todo:0,in_progress:1,in_review:2,done:3};
-    return (so[a.status]||0) - (so[b.status]||0);
-  });
-  const { selectedTaskId } = store.getState();
-
-  if (tasks.length === 0) {
-    container.innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--t4);font-size:13px">無符合條件的任務</div>`;
-    return;
-  }
-
-  container.innerHTML = `
-  <table class="task-table">
-    <thead>
-      <tr>
-        <th>任務名稱</th>
-        <th>專案</th>
-        <th>狀態</th>
-        <th>優先級</th>
-        <th>負責人</th>
-        <th>截止日期</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${tasks.map(t => {
-        const member = MEMBERS[t.assigneeId];
-        const proj = PROJECTS_META[t.projectId];
-        const pm = PRIORITY_META[t.priority] || PRIORITY_META.none;
-        const sm = STATUS_META[t.status] || STATUS_META.todo;
-        const overdue = t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done';
-        const done2  = t.todoItems.filter(ti=>ti.completed).length;
-        const total2 = t.todoItems.length;
-        const pct2   = total2 > 0 ? Math.round(done2/total2*100) : 0;
-        return `
-        <tr onclick="openDrawer('${t.id}')" class="${selectedTaskId===t.id?'selected':''}">
-          <td>
-            <div class="tt-name">
-              <div class="tt-prio-dot" style="background:${pm.dot}"></div>
-              <div>
-                <div class="tt-title${t.status==='done'?' done-row':''}">${escHtml(t.title)}${t.status==='in_review'?'<span style="display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;background:rgba(251,146,60,.15);color:var(--orange);border:1px solid rgba(251,146,60,.3);margin-left:6px;">待審核</span>':''}</div>
-                ${total2 > 0 ? `<div style="display:flex;align-items:center;gap:5px;margin-top:4px">
-                  <div style="width:48px;height:3px;border-radius:2px;background:var(--b2);overflow:hidden">
-                    <div style="width:${pct2}%;height:100%;border-radius:2px;background:var(--grad-life)"></div>
-                  </div>
-                  <span style="font-family:'Fira Code',monospace;font-size:10px;color:var(--t4)">${done2}/${total2}</span>
-                </div>` : ''}
-              </div>
-            </div>
-          </td>
-          <td>
-            ${proj ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--t4);padding:2px 8px;border-radius:4px;background:var(--s3);font-style:italic">
-              <span style="width:5px;height:5px;border-radius:50%;background:${proj.dot};flex-shrink:0;font-style:normal"></span>
-              ${escHtml(proj.name)}
-            </span>` : '—'}
-          </td>
-          <td>
-            <span class="tt-status-badge" style="background:${sm.bg};color:${sm.color}">
-              <span style="width:5px;height:5px;border-radius:50%;background:${sm.dot};display:inline-block;flex-shrink:0"></span>
-              ${sm.label}
-            </span>
-          </td>
-          <td>
-            <span class="priority-tag ${pm.cls}">
-              ${pm.label}
-            </span>
-          </td>
-          <td>
-            ${member ? `<div style="display:flex;align-items:center;gap:7px">
-              <div class="tt-av" style="background:${member.grad}">${member.initial}</div>
-              <span style="font-size:12px;color:var(--t2)">${member.name}</span>
-            </div>` : '<span style="color:var(--t4);font-size:12px">未指派</span>'}
-          </td>
-          <td>
-            <span class="tt-date${overdue?' overdue':''}">${t.dueDate ? fmtDate(t.dueDate) : '—'}</span>
-          </td>
-        </tr>`;
-      }).join('')}
-    </tbody>
-  </table>`;
-}
-
-// ═══════════════════════════════════════════════════
-//  EDITOR STAMP HELPER
-// ═══════════════════════════════════════════════════
-function renderEditStamp(task) {
-  const el = document.getElementById('drLastEdit');
-  if (!el) return;
-  const editor = task.lastEditedBy;
-  const timeStr = fmtRelative(task.updatedAt);
-  if (editor) {
-    const avStyle = editor.photoURL
-      ? `style="width:16px;height:16px;border-radius:50%;object-fit:cover;flex-shrink:0"`
-      : `style="width:16px;height:16px;border-radius:50%;background:${editor.grad};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0"`;
-    const avContent = editor.photoURL
-      ? `<img src="${editor.photoURL}" ${avStyle}>`
-      : `<div ${avStyle}>${editor.initial}</div>`;
-    el.innerHTML = `<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t3)">${avContent}<span>${escHtml(editor.name)}</span><span style="color:var(--t4)">· ${timeStr}</span></span>`;
-  } else {
-    el.textContent = timeStr;
-  }
-}
-
-// ═══════════════════════════════════════════════════
-//  RENDER DRAWER
-// ═══════════════════════════════════════════════════
-function renderDrawer() {
-  const { selectedTaskId, tasks } = store.getState();
-  const task = tasks[selectedTaskId];
-  if (!task) return;
-
-  const member = MEMBERS[task.assigneeId];
-  const proj = PROJECTS_META[task.projectId];
-  const pm = PRIORITY_META[task.priority] || PRIORITY_META.none;
-  const sm = STATUS_META[task.status] || STATUS_META.todo;
-
-  renderEditStamp(task);
-
-  const body = document.getElementById('drawerBody');
-  body.innerHTML = `
-  <!-- TITLE -->
-  <div class="dr-section">
-    <textarea class="dr-task-title" rows="2" id="drTitle"
-      onblur="autoSave('title', this.value)">${escHtml(task.title)}</textarea>
-  </div>
-
-  <!-- CORE PROPERTIES -->
-  <div class="dr-section">
-    <div class="dr-props">
-
-      <div class="dr-prop">
-        <div class="dr-prop-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          狀態
-        </div>
-        <div class="dr-prop-val">
-          <select class="dr-status-sel" id="drStatus"
-            style="background:${sm.bg};color:${sm.color}"
-            onchange="autoSave('status', this.value)">
-            <option value="todo"        ${task.status==='todo'?'selected':''}>待辦</option>
-            <option value="in_progress" ${task.status==='in_progress'?'selected':''}>進行中</option>
-            <option value="in_review"   ${task.status==='in_review'?'selected':''}>審查中</option>
-            <option value="done"        ${task.status==='done'?'selected':''}>已完成</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="dr-prop">
-        <div class="dr-prop-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          優先級
-        </div>
-        <div class="dr-prop-val">
-          <button class="priority-tag ${pm.cls}" id="drPriorityTag"
-            onclick="togglePrioDropdown(event)">${pm.label}</button>
-        </div>
-      </div>
-
-      <div class="dr-prop">
-        <div class="dr-prop-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>
-          專案
-        </div>
-        <div class="dr-prop-val">
-          ${proj ? `<button class="dr-proj-link" onclick="location.href='project-detail.html'">
-            <div class="dr-proj-dot" style="background:${proj.dot}"></div>
-            ${escHtml(proj.name)}
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </button>` : '<span style="color:var(--t4);font-size:12px">未指定</span>'}
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- PEOPLE & DATES -->
-  <div class="dr-section">
-    <div class="dr-props">
-
-      <div class="dr-prop">
-        <div class="dr-prop-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          負責人
-        </div>
-        <div class="dr-prop-val">
-          ${member ? `<div style="display:flex;align-items:center;gap:9px">
-            <div class="dr-av" style="background:${member.grad}">${member.initial}</div>
-            <div class="dr-av-info">
-              <div class="dr-av-name">${member.name}</div>
-              <div class="dr-av-role">${member.role}</div>
-            </div>
-          </div>` : '<span style="color:var(--t4);font-size:12px">未指派</span>'}
-        </div>
-      </div>
-
-      <div class="dr-prop">
-        <div class="dr-prop-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          開始日期
-        </div>
-        <div class="dr-prop-val">
-          <input type="date" class="dr-date-input" value="${task.startDate||''}"
-            onblur="autoSave('startDate', this.value)">
-        </div>
-      </div>
-
-      <div class="dr-prop">
-        <div class="dr-prop-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          截止日期
-        </div>
-        <div class="dr-prop-val">
-          <input type="date" class="dr-date-input" value="${task.dueDate||''}"
-            onblur="autoSave('dueDate', this.value)">
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- DESCRIPTION -->
-  <div class="dr-section">
-    <div class="dr-sec-hdr">描述</div>
-    <textarea class="dr-desc" rows="3" placeholder="新增任務描述…"
-      onblur="autoSave('description', this.value)">${escHtml(task.description||'')}</textarea>
-  </div>
-
-  <!-- URLS -->
-  <div class="dr-section">
-    <div class="dr-sec-hdr">網址</div>
-    <div class="dr-props">
-      <div class="dr-prop">
-        <div class="dr-prop-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          測試網址
-        </div>
-        <div class="dr-url-wrap">
-          <input type="url" class="dr-url-input" placeholder="https://staging…"
-            value="${escHtml(task.testUrl||'')}"
-            onblur="autoSave('testUrl', this.value)">
-          ${task.testUrl ? `<a href="${escHtml(task.testUrl)}" target="_blank" class="dr-url-link">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>` : ''}
-        </div>
-      </div>
-      <div class="dr-prop">
-        <div class="dr-prop-label">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          正式網址
-        </div>
-        <div class="dr-url-wrap">
-          <input type="url" class="dr-url-input" placeholder="https://prod…"
-            value="${escHtml(task.prodUrl||'')}"
-            onblur="autoSave('prodUrl', this.value)">
-          ${task.prodUrl ? `<a href="${escHtml(task.prodUrl)}" target="_blank" class="dr-url-link">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>` : ''}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RELATED DOCS -->
-  <div class="dr-section">
-    <div class="dr-sec-hdr">相關文件</div>
-    <div class="dr-doc-list" id="drDocList">
-      ${(task.relatedDocs||[]).map((doc, i) => `
-      <div class="dr-doc-item" id="doc-${i}">
-        <div class="dr-doc-icon">${doc.endsWith('.pdf') ? '📄' : '🎨'}</div>
-        <div class="dr-doc-name">${escHtml(doc)}</div>
-        <button class="dr-doc-del" onclick="removeDoc(${i})" title="移除">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>`).join('')}
-    </div>
-    <div id="drDocAddWrap" style="margin-top:8px">
-      <button class="dr-add-doc-btn" onclick="showAddDocInput()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        新增文件
-      </button>
-      <div id="drDocInput" style="display:none;gap:6px;margin-top:6px">
-        <input id="drDocInputField" class="kb-inline-input" placeholder="文件名稱 (如：設計稿 Figma)"
-          onkeydown="if(event.key==='Enter')confirmAddDoc();if(event.key==='Escape')hideAddDocInput()">
-        <div class="kb-inline-actions" style="margin-top:6px">
-          <button class="kb-inline-ok" onclick="confirmAddDoc()">新增</button>
-          <button class="kb-inline-cancel" onclick="hideAddDocInput()">取消</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SUB-TASKS -->
-  <div class="dr-section">
-    <div class="dr-sec-hdr">
-      子項目
-      <span style="font-size:11px;color:var(--t3);font-weight:400;letter-spacing:0;text-transform:none">
-        ${(task.todoItems||[]).filter(ti=>ti.completed).length}/${(task.todoItems||[]).length} 完成
-      </span>
-    </div>
-    <div class="dr-subtask-list" id="drSubtaskList">
-      ${(task.todoItems||[]).map((ti, i) => `
-      <div class="dr-subtask-item" id="sti-${ti.id}">
-        <div class="dr-subtask-cb${ti.completed?' checked':''}"
-             onclick="toggleTodo('${ti.id}')">
-          ${ti.completed ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
-        </div>
-        <input class="dr-subtask-text${ti.completed?' done':''}" value="${escHtml(ti.text)}"
-          onblur="updateTodoText('${ti.id}', this.value)"
-          onkeydown="if(event.key==='Enter')this.blur()">
-        <button class="dr-subtask-del" onclick="deleteTodo('${ti.id}')" title="刪除">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>`).join('')}
-    </div>
-    <div id="drAddSubtask">
-      <div class="dr-add-subtask" onclick="showAddSubtask()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        新增子項目
-      </div>
-      <div id="drAddSubtaskInput" style="display:none;padding:4px 0">
-        <input class="kb-inline-input" id="drSubtaskField" placeholder="子項目名稱…"
-          onkeydown="if(event.key==='Enter')confirmAddSubtask();if(event.key==='Escape')hideAddSubtask()">
-        <div class="kb-inline-actions" style="margin-top:6px">
-          <button class="kb-inline-ok" onclick="confirmAddSubtask()">新增</button>
-          <button class="kb-inline-cancel" onclick="hideAddSubtask()">取消</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- POMODORO BUTTON -->
-  <div class="pomo-btn-wrap">
-    <button class="pomo-btn" onclick="startPomodoro()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
-      開始此任務的番茄鐘
-    </button>
-  </div>
-  `;
-}
-
-// ═══════════════════════════════════════════════════
-//  STORE ACTIONS
-// ═══════════════════════════════════════════════════
-function autoSave(field, value) {
-  const { selectedTaskId, tasks } = store.getState();
-  if (!selectedTaskId || !tasks[selectedTaskId]) return;
-  const oldVal  = tasks[selectedTaskId][field];
-  if (oldVal === value) return;
-
-  const isDoneTransition = field === 'status' && value === 'done' && oldVal !== 'done';
-  const taskPriority     = tasks[selectedTaskId].priority;
-
-  const stamp = window.PMProfile?.getEditorStamp() || {};
-  store.setState(s => ({
-    tasks: {
-      ...s.tasks,
-      [selectedTaskId]: {
-        ...s.tasks[selectedTaskId],
-        [field]: value,
-        updatedAt:    stamp.at || new Date().toISOString(),
-        lastEditedBy: stamp,
-      }
-    }
-  }));
-
-  renderEditStamp(store.getState().tasks[selectedTaskId]);
-  showToast('已自動儲存');
-
-  if (isDoneTransition) {
-    // Let gamification handle re-render after card exit animation
-    onTaskDone(selectedTaskId, taskPriority);
-  } else {
-    renderKanban();
-    renderTable();
-  }
-}
-
-function toggleTodo(todoId) {
-  const { selectedTaskId, tasks } = store.getState();
-  const task = tasks[selectedTaskId];
-  if (!task) return;
-  const stamp = window.PMProfile?.getEditorStamp() || {};
-  store.setState(s => ({
-    tasks: {
-      ...s.tasks,
-      [selectedTaskId]: {
-        ...s.tasks[selectedTaskId],
-        todoItems: s.tasks[selectedTaskId].todoItems.map(ti =>
-          ti.id === todoId ? { ...ti, completed: !ti.completed } : ti
-        ),
-        updatedAt:    stamp.at || new Date().toISOString(),
-        lastEditedBy: stamp,
-      }
-    }
-  }));
-  renderDrawer();
-  renderKanban();
-  renderTable();
-  showToast('已自動儲存');
-}
-
-function updateTodoText(todoId, text) {
-  const { selectedTaskId } = store.getState();
-  const stamp = window.PMProfile?.getEditorStamp() || {};
-  store.setState(s => ({
-    tasks: {
-      ...s.tasks,
-      [selectedTaskId]: {
-        ...s.tasks[selectedTaskId],
-        todoItems: s.tasks[selectedTaskId].todoItems.map(ti =>
-          ti.id === todoId ? { ...ti, text } : ti
-        ),
-        updatedAt:    stamp.at || new Date().toISOString(),
-        lastEditedBy: stamp,
-      }
-    }
-  }));
-  renderEditStamp(store.getState().tasks[selectedTaskId]);
-  showToast('已自動儲存');
-}
-
-function deleteTodo(todoId) {
-  const { selectedTaskId } = store.getState();
-  store.setState(s => ({
-    tasks: {
-      ...s.tasks,
-      [selectedTaskId]: {
-        ...s.tasks[selectedTaskId],
-        todoItems: s.tasks[selectedTaskId].todoItems.filter(ti => ti.id !== todoId),
-        updatedAt: new Date().toISOString(),
-      }
-    }
-  }));
-  renderDrawer();
-  renderKanban();
-  renderTable();
-}
-
-function confirmAddSubtask() {
-  const input = document.getElementById('drSubtaskField');
+function sendComment() {
+  if(!currentTaskId) return;
+  const input = document.getElementById('commentInput');
   const text = input.value.trim();
-  if (!text) return;
-  const { selectedTaskId } = store.getState();
-  store.setState(s => {
-    const task = s.tasks[selectedTaskId];
-    return {
-      tasks: {
-        ...s.tasks,
-        [selectedTaskId]: {
-          ...task,
-          todoItems: [...task.todoItems, {
-            id: uuidv4(), text, completed: false,
-            position: task.todoItems.length,
-            createdAt: new Date().toISOString(),
-          }],
-          updatedAt: new Date().toISOString(),
-        }
-      }
-    };
-  });
+  if(!text) return;
+  const task = getTask(currentTaskId);
+  const comment = {user:'u1', text, time:'方才', id:'c'+Date.now()};
+  task.comments.push(comment);
+  task.log.unshift({action:'新增留言',user:'u1',time:nowStr()});
+  renderComments(task.comments);
+  renderAuditLog(task.log);
   input.value = '';
-  renderDrawer();
-  renderKanban();
-  renderTable();
-  showToast('已新增子項目');
+  saveTasks();
+  document.getElementById('mentionDrop').classList.remove('open');
 }
 
-function removeDoc(index) {
-  const { selectedTaskId } = store.getState();
-  store.setState(s => {
-    const docs = [...(s.tasks[selectedTaskId].relatedDocs || [])];
-    docs.splice(index, 1);
-    return {
-      tasks: {
-        ...s.tasks,
-        [selectedTaskId]: {
-          ...s.tasks[selectedTaskId],
-          relatedDocs: docs,
-          updatedAt: new Date().toISOString(),
-        }
-      }
-    };
-  });
-  renderDrawer();
-  showToast('已移除文件');
+function handleCommentKey(e) {
+  if(e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); sendComment(); }
 }
 
-function confirmAddDoc() {
-  const input = document.getElementById('drDocInputField');
-  const name = input.value.trim();
-  if (!name) return;
-  const { selectedTaskId } = store.getState();
-  store.setState(s => ({
-    tasks: {
-      ...s.tasks,
-      [selectedTaskId]: {
-        ...s.tasks[selectedTaskId],
-        relatedDocs: [...(s.tasks[selectedTaskId].relatedDocs || []), name],
-        updatedAt: new Date().toISOString(),
-      }
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  @MENTION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function handleMentionInput(e) {
+  const val = e.target.value;
+  const pos = e.target.selectionStart;
+  const lastAt = val.lastIndexOf('@', pos);
+  const drop = document.getElementById('mentionDrop');
+
+  if(lastAt >= 0 && pos > lastAt) {
+    const query = val.slice(lastAt + 1, pos).toLowerCase();
+    const matches = MEMBER_LIST.filter(m => m.name.includes(query) || m.id.includes(query));
+    if(matches.length > 0 && !val.slice(lastAt+1).includes(' ')) {
+      drop.innerHTML = matches.map(m =>
+        `<div class="mention-opt" onmousedown="insertMention('${m.name}')">
+          <div class="mention-av" style="background:${m.color}">${m.initial}</div>
+          <span class="mention-name">${m.name}</span>
+        </div>`
+      ).join('');
+      drop.classList.add('open');
+      return;
     }
-  }));
-  input.value = '';
-  renderDrawer();
-  showToast('已新增文件');
-}
-
-// Priority from dropdown
-let prioTarget = null;
-function togglePrioDropdown(e) {
-  const dd = document.getElementById('prioDropdown');
-  const rect = e.target.getBoundingClientRect();
-  dd.style.top = (rect.bottom + 4) + 'px';
-  dd.style.left = rect.left + 'px';
-  dd.classList.toggle('open');
-  prioTarget = e.target;
-  e.stopPropagation();
-}
-
-function setPriority(priority) {
-  document.getElementById('prioDropdown').classList.remove('open');
-  autoSave('priority', priority);
-  // update tag appearance immediately
-  const tag = document.getElementById('drPriorityTag');
-  if (tag) {
-    const pm = PRIORITY_META[priority];
-    tag.className = `priority-tag ${pm.cls}`;
-    tag.textContent = pm.label;
   }
-  renderKanban();
-  renderTable();
+  drop.classList.remove('open');
 }
 
-// Inline add in kanban
-function showInlineAdd(status) {
-  document.querySelectorAll('.kb-inline-add').forEach(el => {
-    el.classList.remove('show');
+function insertMention(name) {
+  const input = document.getElementById('commentInput');
+  const val = input.value;
+  const pos = input.selectionStart;
+  const lastAt = val.lastIndexOf('@', pos);
+  input.value = val.slice(0, lastAt) + '@' + name + ' ' + val.slice(pos);
+  input.focus();
+  document.getElementById('mentionDrop').classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('#mentionDrop') && !e.target.closest('#commentInput')) {
+    document.getElementById('mentionDrop').classList.remove('open');
+  }
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ATTACHMENTS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderAttachments(attachments) {
+  const list = document.getElementById('attachList');
+  if(!attachments.length) { list.innerHTML = ''; return; }
+  list.innerHTML = attachments.map((a,i) => `
+    <div class="attach-item">
+      <div class="attach-icon" style="width:28px;height:28px;border-radius:6px;background:var(--purple-d);display:flex;align-items:center;justify-content:center;color:var(--purple);flex-shrink:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+      </div>
+      <span class="attach-name">${a.name}</span>
+      <span class="attach-size">${a.size}</span>
+      <button class="attach-rm" onclick="removeAttachment(${i})" title="移除">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function handleFileSelect(e) {
+  const files = Array.from(e.target.files);
+  addAttachments(files);
+}
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('attachDrop').classList.remove('dragover');
+  const files = Array.from(e.dataTransfer.files);
+  addAttachments(files);
+}
+function addAttachments(files) {
+  if(!currentTaskId) return;
+  const task = getTask(currentTaskId);
+  files.forEach(f => {
+    const size = f.size < 1024 ? f.size+'B' : f.size < 1048576 ? (f.size/1024).toFixed(1)+'KB' : (f.size/1048576).toFixed(1)+'MB';
+    task.attachments = task.attachments || [];
+    task.attachments.push({name:f.name, size, time: nowStr()});
+    task.log.unshift({action:`上傳附件「${f.name}」`,user:'u1',time:nowStr()});
   });
-  const wrap = document.getElementById(`inlineAdd-${status}`);
-  if (wrap) {
-    wrap.classList.add('show');
-    document.getElementById(`inlineInput-${status}`)?.focus();
-  }
+  renderAttachments(task.attachments);
+  renderAuditLog(task.log);
+  saveTasks();
+}
+function removeAttachment(idx) {
+  if(!currentTaskId) return;
+  const task = getTask(currentTaskId);
+  task.attachments.splice(idx, 1);
+  renderAttachments(task.attachments);
+  saveTasks();
 }
 
-function hideInlineAdd(status) {
-  const wrap = document.getElementById(`inlineAdd-${status}`);
-  if (wrap) wrap.classList.remove('show');
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  AUDIT LOG
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const ACTION_ICONS = {
+  '建立': '<path d="M12 5v14M5 12h14"/>',
+  '狀態': '<path d="M9 11l3 3L22 4"/>',
+  '指派': '<circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/>',
+  '留言': '<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',
+  '上傳': '<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  '進度': '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+};
+
+function renderAuditLog(log) {
+  const list = document.getElementById('auditList');
+  if(!log.length) { list.innerHTML = '<div style="text-align:center;padding:16px;color:var(--t4);font-size:12px">尚無操作紀錄</div>'; return; }
+  list.innerHTML = log.map(entry => {
+    const m = MEMBERS[entry.user];
+    const iconKey = Object.keys(ACTION_ICONS).find(k => entry.action.startsWith(k)) || '進度';
+    const iconPath = ACTION_ICONS[iconKey];
+    return `<div class="audit-item">
+      <div class="audit-icon">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconPath}</svg>
+      </div>
+      <div class="audit-text">
+        <div class="audit-action">${entry.action}</div>
+        <div class="audit-who">由 ${m?m.name:'系統'}</div>
+        <div class="audit-time">${entry.time}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function handleInlineKey(e, status) {
-  if (e.key === 'Enter') { e.preventDefault(); confirmInlineAdd(status); }
-  if (e.key === 'Escape') hideInlineAdd(status);
-}
-
-function confirmInlineAdd(status) {
-  const input = document.getElementById(`inlineInput-${status}`);
-  const title = input?.value.trim();
-  if (!title) return hideInlineAdd(status);
-
-  const newTask = {
-    id: uuidv4(), title, projectId: 'p1', status, priority: 'medium',
-    assigneeId: 'u1', startDate: '', dueDate: '',
-    description: '', todoItems: [], relatedDocs: [],
-    testUrl: '', prodUrl: '',
-    updatedAt: new Date().toISOString(),
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ADD TASK
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openAddTask(col = 'todo') {
+  const id = 't' + Date.now();
+  const task = {
+    id, col, title: '新增任務', priority: 'medium', tags: [],
+    due: '', progress: 0, assignees: ['u1'], project: '電商平台',
+    desc: '', comments: [], attachments: [],
+    log: [{action:'建立任務', user:'u1', time: nowStr()}]
   };
-
-  store.setState(s => ({ tasks: { ...s.tasks, [newTask.id]: newTask } }));
-  input.value = '';
-  hideInlineAdd(status);
-  renderAll();
-  showToast('已新增任務');
+  TASKS.push(task);
+  saveTasks();
+  renderBoard();
+  updateTaskCountLabel();
+  openDrawer(id);
+  setTimeout(() => { const inp = document.getElementById('drawerTitle'); if(inp){inp.select();} }, 100);
 }
 
-function openNewTaskModal() {
-  const status = store.getState().viewMode === 'kanban' ? 'todo' : 'todo';
-  showInlineAdd(status);
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  VIEW TOGGLE (kanban / list)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function setView(v) {
+  document.getElementById('vt-kanban').classList.toggle('active', v==='kanban');
+  document.getElementById('vt-list').classList.toggle('active', v==='list');
+  if(v === 'list') renderListView();
+  else renderBoard();
 }
 
-function startPomodoro() {
-  const { selectedTaskId } = store.getState();
-  const task = store.getState().tasks[selectedTaskId];
-  if (task) {
-    sessionStorage.setItem('pomo-task', JSON.stringify({ id: task.id, title: task.title }));
-  }
-  window.open('pomodoro-timer.html', '_blank');
+function renderListView() {
+  const board = document.getElementById('kanbanBoard');
+  board.style.cssText = 'display:flex;flex-direction:column;gap:0;min-width:0;width:100%;height:auto';
+  board.innerHTML = `
+    <div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm);width:100%">
+      <div style="display:grid;grid-template-columns:1fr 100px 100px 80px 120px 100px;gap:0;padding:10px 16px;border-bottom:1px solid var(--b1);font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--t4)">
+        <div>任務名稱</div><div>優先級</div><div>狀態</div><div>進度</div><div>截止日</div><div>指派人</div>
+      </div>
+      ${TASKS.filter(t=>{
+        if(searchQuery&&!t.title.toLowerCase().includes(searchQuery.toLowerCase()))return false;
+        if(currentFilter==='urgent'&&t.priority!=='urgent')return false;
+        if(['todo','doing','testing','done'].includes(currentFilter)&&currentFilter!=='all'&&t.col!==currentFilter)return false;
+        return true;
+      }).map(t => {
+        const m = MEMBERS[t.assignees[0]];
+        const pCls={urgent:'cp-urgent',high:'cp-high',medium:'cp-medium',low:'cp-low'};
+        const pLbl={urgent:'緊急',high:'高',medium:'中',low:'低'};
+        const sLbl = COL_CFG[t.col]?.label||t.col;
+        const sColor = COL_CFG[t.col]?.color||'#94A3B8';
+        return `<div onclick="openDrawer('${t.id}')" style="display:grid;grid-template-columns:1fr 100px 100px 80px 120px 100px;gap:0;padding:12px 16px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background .1s" onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">
+          <div style="font-size:13px;font-weight:500;color:var(--t1)">${t.title}</div>
+          <div><span class="card-priority ${pCls[t.priority]}" style="font-size:10px">${pLbl[t.priority]}</span></div>
+          <div><span style="font-size:11px;font-weight:500;color:${sColor}">${sLbl}</span></div>
+          <div style="font-size:12px;color:var(--t3);font-family:'JetBrains Mono',monospace">${t.progress}%</div>
+          <div style="font-size:11px;color:var(--t4);font-family:'JetBrains Mono',monospace">${t.due||'—'}</div>
+          <div>${m?`<div class="av" style="background:${m.color};width:22px;height:22px;font-size:10px">${m.initial}</div>`:''}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
 }
 
-// ═══════════════════════════════════════════════════
-//  DRAWER OPEN/CLOSE
-// ═══════════════════════════════════════════════════
-function openDrawer(taskId) {
-  store.setState({ selectedTaskId: taskId });
-  document.getElementById('drawer').classList.add('open');
-  document.getElementById('drawerOverlay').classList.add('open');
-  renderDrawer();
-  renderKanban();
-  renderTable();
-}
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  AUTOMATION PANEL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function openAutoPanel() { document.getElementById('autoOverlay').classList.add('open'); }
+function closeAutoPanel() { document.getElementById('autoOverlay').classList.remove('open'); }
 
-function closeDrawer() {
-  store.setState({ selectedTaskId: null });
-  document.getElementById('drawer').classList.remove('open');
-  document.getElementById('drawerOverlay').classList.remove('open');
-  renderKanban();
-  renderTable();
-}
-
-// ═══════════════════════════════════════════════════
-//  VIEW TOGGLE & FILTERS
-// ═══════════════════════════════════════════════════
-function setView(mode) {
-  store.setState({ viewMode: mode });
-  const kanban = document.getElementById('viewKanban');
-  const table  = document.getElementById('viewTable');
-  document.getElementById('btnKanban').classList.toggle('active', mode === 'kanban');
-  document.getElementById('btnTable').classList.toggle('active', mode === 'table');
-  kanban.style.display = mode === 'kanban' ? 'flex' : 'none';
-  table.style.display  = mode === 'table'  ? 'block' : 'none';
-  renderAll();
-}
-
-function applyFilters() {
-  const cur = store.getState().filters;
-  store.setState({
-    filters: {
-      projectId:    document.getElementById('filterProject')?.value  ?? cur.projectId,
-      priority:     document.getElementById('filterPriority')?.value ?? cur.priority,
-      assigneeId:   document.getElementById('filterAssignee')?.value ?? cur.assigneeId,
-      search:       document.getElementById('filterSearch')?.value   ?? cur.search,
-      quickFilters: cur.quickFilters,
-    }
-  });
-  updateFilterBadge();
-  renderKanban();
-  renderTable();
-}
-
-function updateFilterBadge() {
-  const filtered   = getFilteredTasks();
-  const totalTasks = Object.keys(store.getState().tasks).length;
-  const countEl    = document.getElementById('filterCount');
-  const advBadge   = document.getElementById('advBadge');
-  const { filters } = store.getState();
-
-  // Header count
-  document.getElementById('hdrCount').textContent = `${filtered.length} 個任務`;
-
-  // Filter count pill
-  if (filtered.length < totalTasks) {
-    countEl.textContent  = `${filtered.length} / ${totalTasks}`;
-    countEl.style.display = 'inline';
-  } else {
-    countEl.style.display = 'none';
-  }
-
-  // Adv filter badge dot — show if any dropdown has a value
-  const hasAdv = filters.projectId || filters.priority || filters.assigneeId;
-  advBadge?.classList.toggle('show', !!hasAdv);
-}
-
-function clearFilters() {
-  const el = id => document.getElementById(id);
-  if (el('filterProject'))  el('filterProject').value  = '';
-  if (el('filterPriority')) el('filterPriority').value = '';
-  if (el('filterAssignee')) el('filterAssignee').value = '';
-  if (el('filterSearch'))   el('filterSearch').value   = '';
-
-  // Deactivate all quick filter buttons
-  ['mine','today','high'].forEach(key => {
-    const btn = document.getElementById(`qf-${key}`);
-    if (btn) { btn.classList.remove('active','active-today','active-high'); }
-  });
-
-  store.setState({
-    filters: { projectId:'', priority:'', assigneeId:'', search:'', quickFilters: new Set() }
-  });
-  updateFilterBadge();
-  renderKanban();
-  renderTable();
-}
-
-function toggleQuickFilter(type) {
-  const { filters } = store.getState();
-  const qf  = new Set(filters.quickFilters);
-  const btn = document.getElementById(`qf-${type}`);
-  const activeClass = type === 'today' ? 'active-today' : type === 'high' ? 'active-high' : 'active';
-
-  if (qf.has(type)) {
-    qf.delete(type);
-    btn?.classList.remove('active', 'active-today', 'active-high');
-  } else {
-    qf.add(type);
-    btn?.classList.add(activeClass);
-  }
-
-  store.setState({ filters: { ...filters, quickFilters: qf } });
-  updateFilterBadge();
-  renderKanban();
-  renderTable();
-}
-
-function toggleAdvFilter() {
-  const panel = document.getElementById('advPanel');
-  const btn   = document.getElementById('advFilterBtn');
-  const open  = panel?.classList.toggle('show');
-  btn?.classList.toggle('open', open);
-}
-
-// ═══════════════════════════════════════════════════
-//  DOC/SUBTASK INPUT SHOW/HIDE
-// ═══════════════════════════════════════════════════
-function showAddDocInput() {
-  document.getElementById('drDocInput').style.display = 'flex';
-  document.getElementById('drDocInput').style.flexDirection = 'column';
-  document.getElementById('drDocInputField')?.focus();
-}
-function hideAddDocInput() {
-  document.getElementById('drDocInput').style.display = 'none';
-}
-function showAddSubtask() {
-  document.getElementById('drAddSubtaskInput').style.display = 'block';
-  document.getElementById('drSubtaskField')?.focus();
-}
-function hideAddSubtask() {
-  document.getElementById('drAddSubtaskInput').style.display = 'none';
-}
-
-// ═══════════════════════════════════════════════════
-//  GAMIFICATION ENGINE
-// ═══════════════════════════════════════════════════
-
-const EXP_TABLE = { urgent:150, high:100, medium:50, low:20, none:10 };
-
-const LEVEL_XP = [0,200,500,1000,1800,3000,4500,6500,9000,12500,17000];
-
-const LEVEL_TITLES = [
-  '','見習 PM','任務新手','專注修煉者','番茄鐘達人',
-  '敏捷精英','衝刺大師','MVP 工程師','傳奇 PM','神話締造者','最強傳說',
-];
-
-function getLevelFromExp(exp) {
-  for (let i = LEVEL_XP.length - 1; i >= 0; i--) {
-    if (exp >= LEVEL_XP[i]) return i + 1;
-  }
-  return 1;
-}
-
-function getLevelProgress(exp) {
-  const level   = getLevelFromExp(exp);
-  const curBase = LEVEL_XP[level - 1] ?? 0;
-  const nextBase= LEVEL_XP[level]     ?? LEVEL_XP[LEVEL_XP.length - 1];
-  const pct     = Math.min(1, (exp - curBase) / (nextBase - curBase));
-  return { level, curBase, nextBase, pct };
-}
-
-function updateXPBar() {
-  const { experience, level } = store.getState().gamification;
-  const { pct, nextBase, curBase } = getLevelProgress(experience);
-
-  const numEl   = document.getElementById('sidebarLevel');
-  const titleEl = document.getElementById('sidebarTitle');
-  const subEl   = document.getElementById('sidebarSub');
-  const fillEl  = document.getElementById('sidebarXpFill');
-  const numEl2  = document.getElementById('sidebarXpNum');
-
-  if (numEl)   numEl.textContent   = level;
-  if (titleEl) titleEl.textContent = LEVEL_TITLES[Math.min(level, LEVEL_TITLES.length-1)] || `Lv.${level}`;
-  if (subEl)   subEl.textContent   = `${experience - curBase} / ${nextBase - curBase} EXP`;
-  if (fillEl)  fillEl.style.width  = `${Math.round(pct * 100)}%`;
-  if (numEl2)  numEl2.textContent  = `${experience} / ${nextBase}`;
-}
-
-function showExpBadge(x, y, amount) {
-  const el = document.createElement('div');
-  el.className = 'exp-badge';
-  el.textContent = `+${amount} EXP`;
-  el.style.left = `${x}px`;
-  el.style.top  = `${y}px`;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1800);
-}
-
-function onTaskDone(taskId, priority) {
-  const cardEl = document.querySelector(`.task-card[data-id="${taskId}"]`);
-  const rect   = cardEl?.getBoundingClientRect();
-
-  // — Confetti burst from card —
-  if (rect && typeof confetti !== 'undefined') {
-    confetti({
-      particleCount: 70,
-      spread: 60,
-      origin: {
-        x: (rect.left + rect.width  / 2) / window.innerWidth,
-        y: (rect.top  + rect.height / 2) / window.innerHeight,
-      },
-      colors: ['#c084fc','#fbbf24','#f472b6','#38bdf8','#4ade80','#fb923c'],
-      gravity: 1.15,
-      scalar: 0.82,
-      ticks: 200,
-    });
-  }
-
-  // — Card exit animation, then re-render —
-  if (cardEl) {
-    cardEl.classList.add('completing');
-    setTimeout(() => {
-      renderKanban();
-      renderTable();
-    }, 480);
-  } else {
-    renderKanban();
-    renderTable();
-  }
-
-  // — EXP award —
-  const gain = EXP_TABLE[priority] || 10;
-  if (rect) showExpBadge(rect.left + rect.width / 2, rect.top + 12, gain);
-
-  const { gamification } = store.getState();
-  const oldLevel = gamification.level;
-  const newExp   = gamification.experience + gain;
-  const newLevel = getLevelFromExp(newExp);
-
-  store.setState({
-    gamification: {
-      ...gamification,
-      experience:     newExp,
-      level:          newLevel,
-      totalCompleted: gamification.totalCompleted + 1,
-    }
-  });
-
-  // Small delay so XP bar animates smoothly after DOM update
-  setTimeout(updateXPBar, 100);
-
-  // — Level up? —
-  if (newLevel > oldLevel) {
-    setTimeout(() => showLevelUpModal(newLevel, gain), 900);
-  }
-}
-
-function showLevelUpModal(level, expGain) {
-  const overlay = document.getElementById('levelupOverlay');
-  const card    = document.getElementById('levelupCard');
-  if (!overlay || !card) return;
-
-  document.getElementById('luNum').textContent   = level;
-  document.getElementById('luTitle').textContent = LEVEL_TITLES[Math.min(level, LEVEL_TITLES.length-1)] || `Lv.${level}`;
-  document.getElementById('luSub').textContent   = '解鎖了新的成就稱號！';
-  document.getElementById('luXpNote').textContent = `+${expGain} EXP 本次獲得`;
-
-  overlay.classList.add('show');
-  card.classList.remove('appear');
-  void card.offsetWidth; // force reflow
-  card.classList.add('appear');
-
-  // Spawn star particles
-  for (let i = 0; i < 12; i++) {
-    const star = document.createElement('div');
-    star.className = 'lu-star';
-    const angle = (Math.PI * 2 / 12) * i;
-    const dist  = 120 + Math.random() * 60;
-    star.style.setProperty('--sx', `${Math.cos(angle) * dist}px`);
-    star.style.setProperty('--sy', `${Math.sin(angle) * dist}px`);
-    star.style.left = '50%'; star.style.top = '50%';
-    star.style.animationDelay = `${0.3 + i * 0.04}s`;
-    star.textContent = ['✦','✧','⋆','★'][i % 4];
-    star.style.color = i % 2 ? '#fbbf24' : '#c084fc';
-    card.appendChild(star);
-  }
-}
-
-function closeLevelup() {
-  const overlay = document.getElementById('levelupOverlay');
-  const card    = document.getElementById('levelupCard');
-  overlay?.classList.remove('show');
-  // Clean up stars
-  card?.querySelectorAll('.lu-star').forEach(s => s.remove());
-}
-
-// ═══════════════════════════════════════════════════
-//  RENDER ALL
-// ═══════════════════════════════════════════════════
-function renderAll() {
-  const { viewMode } = store.getState();
-  renderKanban();
-  renderTable();
-  updateNavChip();
-}
-
-function updateNavChip() {
-  const total = Object.keys(store.getState().tasks).length;
-  document.getElementById('navChip').textContent = total;
-}
-
-// ═══════════════════════════════════════════════════
-//  THEME
-// ═══════════════════════════════════════════════════
-function toggleTheme() {
-  const html = document.documentElement;
-  const current = html.getAttribute('data-theme');
-  html.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
-  localStorage.setItem('theme', html.getAttribute('data-theme'));
-}
-
-// ═══════════════════════════════════════════════════
-//  XSS PROTECTION
-// ═══════════════════════════════════════════════════
-function escHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#039;');
-}
-
-// ═══════════════════════════════════════════════════
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  INIT
-// ═══════════════════════════════════════════════════
-(function init() {
-  // Theme
-  const saved = localStorage.getItem('theme');
-  if (saved) document.documentElement.setAttribute('data-theme', saved);
-
-  // Populate advanced filter selects (inside adv panel)
-  const projSel = document.getElementById('filterProject');
-  Object.values(PROJECTS_META).forEach(p => {
-    const o = document.createElement('option');
-    o.value = p.id; o.textContent = p.name;
-    projSel.appendChild(o);
-  });
-  const assigneeSel = document.getElementById('filterAssignee');
-  Object.values(MEMBERS).forEach(m => {
-    const o = document.createElement('option');
-    o.value = m.id; o.textContent = m.name;
-    assigneeSel.appendChild(o);
-  });
-
-  // Close priority dropdown on outside click
-  document.addEventListener('click', e => {
-    const dd = document.getElementById('prioDropdown');
-    if (!dd.contains(e.target)) dd.classList.remove('open');
-  });
-
-  // Initial badge state
-  updateFilterBadge();
-
-  // Gamification XP bar
-  updateXPBar();
-
-  // Initial render
-  renderAll();
-})();
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+renderBoard();
+updateTaskCountLabel();
 </script>
 </body>
 </html>
