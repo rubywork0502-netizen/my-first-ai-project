@@ -451,6 +451,36 @@ svg.ring{transform:rotate(-90deg)}
 @keyframes fadeInBg{from{opacity:0}to{opacity:1}}
 @keyframes modalUp{from{opacity:0;transform:translateY(-10px) scale(.97)}to{opacity:1;transform:none}}
 
+/* ━━━ MINDSET / 今日金句 CARD ━━━ */
+.mindset-section{
+  display:none;background:var(--s1);border:1px solid var(--b1);
+  border-radius:var(--r);padding:30px 48px 26px;position:relative;
+  overflow:hidden;text-align:center;box-shadow:var(--shadow-sm);
+  animation:up .5s .28s cubic-bezier(.16,1,.3,1) both}
+.mindset-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--grad-main)}
+.mindset-label{
+  font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--t4);font-weight:600;margin-bottom:16px}
+.mindset-qmark{
+  font-family:'Playfair Display',serif;font-style:italic;font-weight:600;
+  font-size:80px;line-height:1;color:rgba(124,58,237,.1);
+  position:absolute;pointer-events:none;user-select:none;
+  transition:color .4s}
+.mindset-qmark.open{top:-6px;left:18px}
+.mindset-qmark.close{bottom:-18px;right:18px;transform:rotate(180deg)}
+.mindset-section:hover .mindset-qmark{color:rgba(124,58,237,.18)}
+.mindset-motto{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:22px;line-height:1.75;letter-spacing:.022em;
+  background:linear-gradient(135deg,#7C3AED 0%,#EC4899 55%,#F97316 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  max-width:680px;margin:0 auto;position:relative;z-index:1}
+.mindset-goal{
+  margin-top:12px;font-size:12.5px;color:var(--t3);font-weight:500;
+  letter-spacing:.01em;display:none;position:relative;z-index:1}
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    PAGE: POMODORO TIMER
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -918,6 +948,15 @@ svg.ring{transform:rotate(-90deg)}
           <div class="sb-stat"><div class="sb-stat-n" style="color:var(--purple)">11</div><div class="sb-stat-l">進行中</div></div>
           <div class="sb-stat"><div class="sb-stat-n" style="color:var(--amber)">42</div><div class="sb-stat-l">Story pts</div></div>
         </div>
+      </div>
+
+      <!-- 今日金句 -->
+      <div class="mindset-section" id="mindsetSection">
+        <div class="mindset-qmark open">"</div>
+        <div class="mindset-qmark close">"</div>
+        <div class="mindset-label">今日金句</div>
+        <div class="mindset-motto" id="mindsetMotto"></div>
+        <div class="mindset-goal" id="mindsetGoal"></div>
       </div>
 
       <!-- Bottom grid: tasks | right stack -->
@@ -1473,8 +1512,7 @@ const root = document.documentElement;
 /* ── TASK CHECKBOX & SYNC ── */
 function navigateToTask(id, e) {
   if (e.target.closest('.task-cb, .task-action-btn')) return;
-  localStorage.setItem('pms-open-task', id);
-  location.href = 'tasks.html';
+  location.href = 'project-detail.html?tab=kanban&highlight=' + id;
 }
 
 function toggleTask(e, id) {
@@ -1562,16 +1600,19 @@ tick(); setInterval(tick, 1000);
     })();
     const day = s.dailyData[today];
     if (!day) return;
-    const mottoEl = document.getElementById('mindsetMotto');
-    const goalEl  = document.getElementById('mindsetGoal');
+    const sectionEl = document.getElementById('mindsetSection');
+    const mottoEl  = document.getElementById('mindsetMotto');
+    const goalEl   = document.getElementById('mindsetGoal');
+    let hasContent = false;
     if (day.motto && day.motto.trim()) {
       mottoEl.textContent = '\u201C' + day.motto.trim() + '\u201D';
-      mottoEl.className = 'mindset-motto';
+      hasContent = true;
     }
     if (day.goal && day.goal.trim()) {
-      goalEl.textContent = '🎯 ' + day.goal.trim();
-      goalEl.style.display = '';
+      goalEl.textContent = '\uD83C\uDFAF ' + day.goal.trim();
+      goalEl.style.display = 'block';
     }
+    if (hasContent) sectionEl.style.display = 'block';
   } catch(e) {}
 })();
 
