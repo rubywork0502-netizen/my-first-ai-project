@@ -7,7 +7,9 @@
     "allow": [
       "Bash(node:*)",
       "Bash(powershell:*)",
-      "Bash(start:*)"
+      "Bash(start:*)",
+      "Bash(wc *)",
+      "Bash(git add *)"
     ],
     "deny": [
       "Read(./.env)",
