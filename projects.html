@@ -20,20 +20,21 @@ svg{display:block;flex-shrink:0}
   --bg:#F8FAFC; --s1:#FFFFFF; --s2:#F8FAFC; --s3:#F1F5F9; --s4:#E8EDF4;
   --b1:#E2E8F0; --b2:#CBD5E1; --b3:#94A3B8;
   --t1:#0F172A; --t2:#334155; --t3:#64748B; --t4:#94A3B8;
-  --purple:#7C3AED; --purple-d:rgba(124,58,237,.1); --purple-g:rgba(124,58,237,.06);
-  --cyan:#0EA5E9;   --cyan-d:rgba(14,165,233,.1);
+  --purple:#8B5CF6; --purple-d:rgba(139,92,246,.11); --purple-g:rgba(139,92,246,.06);
+  --cyan:#38BDF8;   --cyan-d:rgba(56,189,248,.1);
   --teal:#0D9488;   --teal-d:rgba(13,148,136,.1);
   --green:#10B981;  --green-d:rgba(16,185,129,.12);
   --amber:#F59E0B;  --amber-d:rgba(245,158,11,.12);
   --orange:#F97316; --orange-d:rgba(249,115,22,.12);
   --pink:#EC4899;   --pink-d:rgba(236,72,153,.12);
   --red:#EF4444;    --red-d:rgba(239,68,68,.12);
-  --grad-main:linear-gradient(135deg,#7C3AED 0%,#0EA5E9 100%);
+  --grad-main:linear-gradient(135deg,#A78BFA 0%,#60A5FA 100%);
   --grad-life:linear-gradient(135deg,#10B981 0%,#0D9488 100%);
+  --grad-fire:linear-gradient(135deg,#EC4899 0%,#F97316 100%);
   --sb-w:220px; --hdr-h:56px; --r:10px; --r-sm:6px;
-  --hdr-bg:rgba(255,255,255,.92);
+  --hdr-bg:rgba(255,255,255,.94);
   --shadow-sm:0 1px 2px rgba(15,23,42,.04),0 4px 8px rgba(15,23,42,.04);
-  --shadow-md:0 4px 8px rgba(15,23,42,.08),0 16px 32px rgba(15,23,42,.08);
+  --shadow-md:0 2px 4px rgba(15,23,42,.06),0 8px 16px rgba(15,23,42,.06);
 }
 [data-theme="dark"] {
   --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
@@ -470,7 +471,7 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
       Planning <span class="tab-count" id="cnt-planning">0</span>
     </button>
     <button class="filter-tab" data-filter="delivering" onclick="setFilter(this,'delivering')">
-      進行中 <span class="tab-count" id="cnt-delivering">0</span>
+      In Progress <span class="tab-count" id="cnt-delivering">0</span>
     </button>
     <button class="filter-tab" data-filter="delivery" onclick="setFilter(this,'delivery')">
       In Delivery <span class="tab-count" id="cnt-delivery">0</span>
@@ -479,7 +480,7 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
       Done <span class="tab-count" id="cnt-done">0</span>
     </button>
     <button class="filter-tab" data-filter="other" onclick="setFilter(this,'other')">
-      其他 <span class="tab-count" id="cnt-other">0</span>
+      Other <span class="tab-count" id="cnt-other">0</span>
     </button>
     <div class="toolbar-gap"></div>
     <div class="view-toggle">
@@ -504,7 +505,7 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
         style="animation-delay:.04s" onclick="location.href='project-detail.html'">
         <div class="card-inner">
           <div class="card-top">
-            <span class="card-status st-delivering">進行中</span>
+            <span class="card-status st-delivering">In Progress</span>
             <span class="card-priority cp-high" style="margin-left:auto"></span>
           </div>
           <div class="card-name">電商平台重構</div>
@@ -615,7 +616,7 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
         style="animation-delay:.16s">
         <div class="card-inner">
           <div class="card-top">
-            <span class="card-status st-other">其他</span>
+            <span class="card-status st-other">Other</span>
             <span class="card-priority cp-urgent" style="margin-left:auto"></span>
           </div>
           <div class="card-name">資料分析儀表板</div>
@@ -679,7 +680,7 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
           </div>
           <div class="card-due late">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            04/20 逾期
+            04/20 Overdue
           </div>
         </div>
       </div>
@@ -736,10 +737,10 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
         <span>時間軸視圖</span>
         <div style="margin-left:8px;font-size:11px;color:var(--t3)">拖曳長條可移動時程，拖曳右側邊緣可調整結束日</div>
         <div class="gantt-legend">
-          <div class="gl-item"><div class="gl-dot" style="background:#7C3AED"></div>交付中</div>
-          <div class="gl-item"><div class="gl-dot" style="background:#F59E0B"></div>規劃中</div>
-          <div class="gl-item"><div class="gl-dot" style="background:#10B981"></div>已完成</div>
-          <div class="gl-item"><div class="gl-dot" style="background:#94A3B8"></div>暫停</div>
+          <div class="gl-item"><div class="gl-dot" style="background:#7C3AED"></div>In Delivery</div>
+          <div class="gl-item"><div class="gl-dot" style="background:#F59E0B"></div>Planning</div>
+          <div class="gl-item"><div class="gl-dot" style="background:#10B981"></div>Done</div>
+          <div class="gl-item"><div class="gl-dot" style="background:#94A3B8"></div>Paused</div>
         </div>
       </div>
       <div class="gantt-body">
@@ -784,10 +785,10 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg)
             <label class="form-label">專案階段</label>
             <select class="form-select" id="projPhase">
               <option value="planning">Planning</option>
-              <option value="delivering">進行中</option>
+              <option value="delivering">In Progress</option>
               <option value="delivery">In Delivery</option>
               <option value="done">Done</option>
-              <option value="other">其他</option>
+              <option value="other">Other</option>
             </select>
           </div>
         </div>
@@ -889,7 +890,7 @@ function buildNames() {
   GANTT_PROJECTS.forEach(p => {
     const row = document.createElement('div');
     row.className = 'gn-row';
-    const statusLabels = {delivering:'交付中',planning:'規劃中',done:'已完成',paused:'暫停'};
+    const statusLabels = {delivering:'In Progress',planning:'Planning',done:'Done',paused:'Paused'};
     row.innerHTML = `
       <div class="gn-color" style="background:${p.color}"></div>
       <div class="gn-info">
@@ -1177,7 +1178,7 @@ function submitProject(e) {
   const startDate = document.getElementById('projStart').value || '';
 
   const statusClasses = {planning:'st-planning',delivering:'st-delivering',delivery:'st-delivery',done:'st-done',other:'st-other'};
-  const statusLabels  = {planning:'Planning',delivering:'進行中',delivery:'In Delivery',done:'Done',other:'其他'};
+  const statusLabels  = {planning:'Planning',delivering:'In Progress',delivery:'In Delivery',done:'Done',other:'Other'};
   const prioClasses   = {urgent:'cp-urgent',high:'cp-high',medium:'cp-medium',low:'cp-low'};
   const pFill = phaseVal === 'done' ? 'done' : phaseVal === 'other' ? 'other' : '';
   const allCards = document.querySelectorAll('#projectGrid .card');

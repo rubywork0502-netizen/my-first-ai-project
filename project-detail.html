@@ -21,11 +21,11 @@ svg{display:block;flex-shrink:0}
   --bg:#F8FAFC;--s1:#FFFFFF;--s2:#F8FAFC;--s3:#F1F5F9;--s4:#E8EDF4;
   --b1:#E2E8F0;--b2:#CBD5E1;--b3:#94A3B8;
   --t1:#0F172A;--t2:#334155;--t3:#64748B;--t4:#94A3B8;
-  --purple:#7C3AED;--purple-d:rgba(124,58,237,.1);--purple-g:rgba(124,58,237,.06);
-  --cyan:#0EA5E9;--teal:#0D9488;--green:#10B981;--green-d:rgba(16,185,129,.1);
-  --amber:#F59E0B;--amber-d:rgba(245,158,11,.1);--orange:#F97316;--orange-d:rgba(249,115,22,.1);
-  --pink:#EC4899;--red:#EF4444;--red-d:rgba(239,68,68,.1);
-  --grad-main:linear-gradient(135deg,#7C3AED 0%,#0EA5E9 100%);
+  --purple:#8B5CF6;--purple-d:rgba(139,92,246,.11);--purple-g:rgba(139,92,246,.06);
+  --cyan:#38BDF8;--teal:#0D9488;--green:#10B981;--green-d:rgba(16,185,129,.12);
+  --amber:#F59E0B;--amber-d:rgba(245,158,11,.12);--orange:#F97316;--orange-d:rgba(249,115,22,.12);
+  --pink:#EC4899;--red:#EF4444;--red-d:rgba(239,68,68,.12);
+  --grad-main:linear-gradient(135deg,#A78BFA 0%,#60A5FA 100%);
   --sb-w:220px;--hdr-h:56px;--tab-h:48px;--r:8px;--r-sm:6px;
   --hdr-bg:rgba(255,255,255,.94);
   --shadow-sm:0 1px 3px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
@@ -226,64 +226,91 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   flex-shrink:0;margin-top:5px}
 
 /* ━━━ KANBAN ━━━ */
-.kanban-scroll{flex:1;overflow:auto;padding:20px 28px;display:flex;gap:14px;
+.kanban-scroll{flex:1;overflow:auto;padding:18px 24px;display:flex;gap:10px;
   min-height:0;align-items:flex-start}
 .kanban-scroll::-webkit-scrollbar{width:4px;height:4px}
-.kanban-scroll::-webkit-scrollbar-thumb{background:rgba(124,58,237,.2);border-radius:2px}
-.k-col{flex:0 0 272px;display:flex;flex-direction:column;
-  background:var(--s3);border:1px solid var(--b1);border-radius:var(--r);
-  max-height:calc(100vh - var(--hdr-h) - var(--tab-h) - 44px)}
-.k-col-hdr{display:flex;align-items:center;gap:7px;padding:12px 14px 10px;
-  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
-  background:var(--s3);border-bottom:1px solid var(--b1);border-radius:var(--r) var(--r) 0 0;
-  flex-shrink:0}
-.col-todo        .k-col-hdr{color:var(--t3)}
-.col-doing       .k-col-hdr{color:var(--cyan)}
-.col-code-review .k-col-hdr{color:#7C3AED}
+.kanban-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:2px}
+
+/* Column */
+.k-col{flex:0 0 252px;display:flex;flex-direction:column;
+  background:var(--s2);border:1px solid var(--b1);border-radius:10px;
+  max-height:calc(100vh - var(--hdr-h) - var(--tab-h) - 44px);overflow:hidden}
+.col-todo        {border-top:2px solid #94A3B8}
+.col-doing       {border-top:2px solid #0EA5E9}
+.col-code-review {border-top:2px solid #8B5CF6}
+.col-in-test     {border-top:2px solid #F59E0B}
+.col-done        {border-top:2px solid #10B981}
+.col-skipped     {border-top:2px solid #9CA3AF}
+
+/* Column header */
+.k-col-hdr{display:flex;align-items:center;gap:7px;padding:11px 13px 10px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.09em;
+  background:transparent;border-bottom:1px solid var(--b1);flex-shrink:0}
+.col-todo        .k-col-hdr{color:#64748B}
+.col-doing       .k-col-hdr{color:#0EA5E9}
+.col-code-review .k-col-hdr{color:#8B5CF6}
 .col-in-test     .k-col-hdr{color:#D97706}
-.col-done        .k-col-hdr{color:var(--green)}
-.col-skipped     .k-col-hdr{color:#6B7280}
+.col-done        .k-col-hdr{color:#10B981}
+.col-skipped     .k-col-hdr{color:#9CA3AF}
 .k-cnt{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
-  background:var(--s1);border:1px solid var(--b1);color:var(--t3);
-  padding:1px 6px;border-radius:8px}
-.k-col.drop-active{outline:2px dashed var(--purple);outline-offset:-1px;background:var(--purple-g)}
-.k-cards{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:7px}
+  color:var(--t4);margin-left:auto}
+.k-col.drop-active{outline:2px dashed var(--purple);outline-offset:-2px;background:rgba(139,92,246,.04)}
+
+/* Cards list */
+.k-cards{flex:1;overflow-y:auto;padding:8px 8px 4px;display:flex;flex-direction:column;gap:5px}
 .k-cards::-webkit-scrollbar{width:3px}
-.k-cards::-webkit-scrollbar-thumb{background:rgba(124,58,237,.15);border-radius:2px}
-.k-placeholder{border:2px dashed var(--purple);border-radius:var(--r-sm);
-  background:var(--purple-g);min-height:56px;transition:min-height .15s}
-.k-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r-sm);
-  padding:12px 13px;cursor:pointer;user-select:none;
-  box-shadow:var(--shadow-sm);transition:transform .18s,box-shadow .18s,opacity .18s,border-color .18s}
-.k-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--b2)}
-.k-card.is-dragging{opacity:.3;transform:scale(.95);pointer-events:none}
-@keyframes cardFlash{0%,100%{border-color:var(--b1)}50%{border-color:var(--purple);box-shadow:0 0 0 3px var(--purple-d)}}
-.k-card.highlight{animation:cardFlash .65s ease-out 3}
-.k-card-title{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:9px;line-height:1.4}
-.k-card-tags{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:9px}
-.k-pri{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
-.pri-urgent{background:rgba(239,68,68,.1);color:#DC2626}
-.pri-high  {background:rgba(249,115,22,.1);color:#EA580C}
-.pri-medium{background:rgba(124,58,237,.1);color:#7C3AED}
-.pri-low   {background:rgba(16,185,129,.1);color:#059669}
-.overdue-tag{font-size:9px;font-weight:700;background:var(--red-d);color:var(--red);
-  padding:2px 7px;border-radius:20px;white-space:nowrap}
+.k-cards::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08);border-radius:2px}
+.k-placeholder{border:1.5px dashed var(--purple);border-radius:7px;
+  background:rgba(139,92,246,.04);min-height:52px;transition:min-height .15s}
+
+/* Card */
+.k-card{background:var(--s1);border:1px solid var(--b1);border-radius:7px;
+  padding:10px 11px 9px 14px;cursor:pointer;user-select:none;
+  box-shadow:none;transition:box-shadow .15s,border-color .15s,transform .15s;
+  position:relative;overflow:hidden}
+.k-card::before{content:'';position:absolute;left:0;top:9px;bottom:9px;
+  width:3px;border-radius:0 2px 2px 0;transition:opacity .15s}
+.k-card[data-priority='urgent']::before{background:#DC2626}
+.k-card[data-priority='high']::before  {background:#EA580C}
+.k-card[data-priority='medium']::before{background:#8B5CF6}
+.k-card[data-priority='low']::before   {background:#10B981}
+.k-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.07);transform:translateY(-1px);border-color:var(--b2)}
+.k-card.is-dragging{opacity:.25;transform:scale(.96);pointer-events:none}
+@keyframes cardFlash{0%,100%{border-color:var(--b1)}50%{border-color:var(--purple);box-shadow:0 0 0 2px rgba(139,92,246,.2)}}
+.k-card.highlight{animation:cardFlash .7s ease-out 3}
+
+.k-card-title{font-size:12.5px;font-weight:500;color:var(--t1);margin-bottom:8px;line-height:1.45}
+.k-card-tags{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.k-pri{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:3px;
+  white-space:nowrap;letter-spacing:.03em}
+.pri-urgent{background:rgba(220,38,38,.08);color:#DC2626}
+.pri-high  {background:rgba(234,88,12,.08); color:#EA580C}
+.pri-medium{background:rgba(139,92,246,.1); color:#7C3AED}
+.pri-low   {background:rgba(16,185,129,.1); color:#059669}
+.overdue-tag{font-size:9px;font-weight:700;background:rgba(239,68,68,.08);color:#DC2626;
+  padding:1px 6px;border-radius:3px;white-space:nowrap}
+
+/* Card footer */
 .k-card-footer{display:flex;align-items:center;gap:6px}
 .k-avs{display:flex}
-.k-av{width:20px;height:20px;border-radius:50%;background:var(--grad-main);
+.k-av{width:18px;height:18px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  font-size:8px;font-weight:700;color:#fff;border:1.5px solid var(--s1);
-  margin-left:-5px;flex-shrink:0;position:relative}
+  font-size:7.5px;font-weight:700;color:#fff;border:1.5px solid var(--s1);
+  margin-left:-4px;flex-shrink:0;position:relative}
 .k-av:first-child{margin-left:0}
-.k-av[title]:hover::after{content:attr(title);position:absolute;bottom:24px;left:50%;
+.k-av[title]:hover::after{content:attr(title);position:absolute;bottom:22px;left:50%;
   transform:translateX(-50%);background:var(--t1);color:var(--s1);
   font-size:10px;font-weight:500;padding:3px 7px;border-radius:4px;white-space:nowrap;
   pointer-events:none;z-index:10}
-.k-due{font-size:10px;color:var(--t4);margin-left:auto;white-space:nowrap}
-.k-due.late{color:var(--red);font-weight:600}
-.k-add-row{display:flex;align-items:center;gap:6px;padding:8px 14px 10px;
-  font-size:11.5px;color:var(--t4);cursor:pointer;transition:color .15s;flex-shrink:0}
-.k-add-row:hover{color:var(--purple)}
+.k-due{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--t4);margin-left:auto;white-space:nowrap}
+.k-due.late{color:#DC2626;font-weight:600}
+
+/* Add row */
+.k-add-row{display:flex;align-items:center;gap:5px;padding:7px 13px 9px;
+  font-size:11px;color:var(--t4);cursor:pointer;transition:color .13s,background .13s;
+  flex-shrink:0;border-top:1px solid var(--b1)}
+.k-add-row:hover{color:var(--purple);background:rgba(139,92,246,.03)}
 
 /* ━━━ GANTT ━━━ */
 .gantt-wrap{flex:1;display:flex;overflow:hidden;min-height:0}
@@ -518,8 +545,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .d-md-toggle:hover{text-decoration:underline}
 .d-desc-area{width:100%;background:var(--s2);border:1px solid var(--b1);
   border-radius:6px;padding:11px 13px;font-size:12.5px;color:var(--t1);
-  resize:vertical;min-height:120px;font-family:'JetBrains Mono',monospace;
-  line-height:1.65;transition:border-color .15s,box-shadow .15s}
+  resize:none;min-height:80px;overflow:hidden;font-family:'JetBrains Mono',monospace;
+  line-height:1.65;transition:border-color .15s,box-shadow .15s;box-sizing:border-box}
 .d-desc-area:focus{border-color:var(--purple);box-shadow:0 0 0 3px var(--purple-d);
   outline:none;background:var(--s1)}
 .d-desc-preview{background:var(--s2);border:1px solid var(--b1);border-radius:6px;
@@ -799,7 +826,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     <span class="proj-name">電商平台重構</span>
     <span class="phase-pill ph-active">
       <svg width="6" height="6" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
-      進行中
+      In Progress
     </span>
     <div class="hdr-gap"></div>
     <button class="icon-btn" onclick="toggleTheme()" title="切換主題">
@@ -1080,13 +1107,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       <!-- Status -->
       <div class="d-prop" onclick="togglePropDD('ddStatus',event)">
         <span class="d-prop-label">狀態</span>
-        <div class="d-prop-val"><span class="d-status-pill ds-todo" id="dStatus">待辦</span></div>
+        <div class="d-prop-val"><span class="d-status-pill ds-todo" id="dStatus">To Do</span></div>
         <div class="d-dropdown" id="ddStatus">
           <div class="d-dd-item" onclick="setPropVal('status','todo',event)">
-            <span class="d-status-pill ds-todo">待辦</span>
+            <span class="d-status-pill ds-todo">To Do</span>
           </div>
           <div class="d-dd-item" onclick="setPropVal('status','doing',event)">
-            <span class="d-status-pill ds-doing">進行中</span>
+            <span class="d-status-pill ds-doing">In Progress</span>
           </div>
           <div class="d-dd-item" onclick="setPropVal('status','code-review',event)">
             <span class="d-status-pill ds-code-review">Code Review</span>
@@ -1095,7 +1122,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
             <span class="d-status-pill ds-in-test">In Test</span>
           </div>
           <div class="d-dd-item" onclick="setPropVal('status','done',event)">
-            <span class="d-status-pill ds-done">完成</span>
+            <span class="d-status-pill ds-done">Done</span>
           </div>
           <div class="d-dd-item" onclick="setPropVal('status','skipped',event)">
             <span class="d-status-pill ds-skipped">Skipped</span>
@@ -1166,7 +1193,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       </div>
       <textarea class="d-desc-area" id="drawerDesc"
         placeholder="輸入任務說明（支援 **粗體**、*斜體*、`程式碼`、- 列表、[ ] 待辦…）"
-        onblur="autoSaveDesc()"></textarea>
+        oninput="autoResizeDesc(this)" onblur="autoSaveDesc()"></textarea>
       <div class="d-desc-preview" id="drawerPreview"></div>
     </div>
 
@@ -1280,7 +1307,7 @@ let activeTaskId = null;
    HELPERS
 ════════════════════════════════════════ */
 const PRI_LABELS = {urgent:'緊急',high:'高',medium:'中',low:'低'};
-const COL_LABELS = {todo:'待辦',doing:'進行中','code-review':'Code Review','in-test':'In Test',done:'完成',skipped:'Skipped'};
+const COL_LABELS = {todo:'To Do',doing:'In Progress','code-review':'Code Review','in-test':'In Test',done:'Done',skipped:'Skipped'};
 
 function getStats() {
   const ts = STATE.tasks;
@@ -1338,7 +1365,7 @@ function renderOverviewTaskList() {
         ${done?'<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg>':''}
       </div>
       <span class="ov-name${done?' done':''}">${t.title}</span>
-      ${od?'<span class="ov-overdue">逾期</span>':''}
+      ${od?'<span class="ov-overdue">Overdue</span>':''}
       <span class="pri-dot pd-${t.priority}"></span>
       <span class="ov-due${od?' style="color:var(--red)"':''}">${t.due}</span>
     `;
@@ -1387,11 +1414,11 @@ function renderRiskWarning() {
    KANBAN
 ════════════════════════════════════════ */
 const COLS = [
-  {id:'todo',          label:'待辦',        cls:'col-todo'        },
-  {id:'doing',         label:'進行中',      cls:'col-doing'       },
+  {id:'todo',          label:'To Do',       cls:'col-todo'        },
+  {id:'doing',         label:'In Progress', cls:'col-doing'       },
   {id:'code-review',   label:'Code Review', cls:'col-code-review' },
   {id:'in-test',       label:'In Test',     cls:'col-in-test'     },
-  {id:'done',          label:'完成',        cls:'col-done'        },
+  {id:'done',          label:'Done',        cls:'col-done'        },
   {id:'skipped',       label:'Skipped',     cls:'col-skipped'     },
 ];
 
@@ -1406,10 +1433,13 @@ function renderKanban() {
     el.className = `k-col ${col.cls}`;
     el.dataset.col = col.id;
     el.innerHTML = `
-      <div class="k-col-hdr">${col.label}<span class="k-cnt">${tasks.length}</span></div>
+      <div class="k-col-hdr">
+        <span>${col.label}</span>
+        <span class="k-cnt">${tasks.length}</span>
+      </div>
       <div class="k-cards" id="col-${col.id}"></div>
       <div class="k-add-row" onclick="addTask('${col.id}')">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增任務
       </div>`;
     wrap.appendChild(el);
     const cards = el.querySelector('.k-cards');
@@ -1432,6 +1462,7 @@ function makeCard(t) {
   el.className = 'k-card';
   el.draggable = true;
   el.dataset.id = t.id;
+  el.dataset.priority = t.priority;
   const od = isOverdue(t);
   const reporterInit = t.reporter.slice(0,1);
   const assigneeInit = t.assignee.slice(0,1);
@@ -1439,7 +1470,7 @@ function makeCard(t) {
     <div class="k-card-title">${t.title}</div>
     <div class="k-card-tags">
       <span class="k-pri pri-${t.priority}">${PRI_LABELS[t.priority]}</span>
-      ${od?'<span class="overdue-tag">逾期</span>':''}
+      ${od?'<span class="overdue-tag">Overdue</span>':''}
     </div>
     <div class="k-card-footer">
       <div class="k-avs">
@@ -1740,8 +1771,10 @@ function openDrawer(id) {
   const descEl = document.getElementById('drawerDesc');
   const prevEl = document.getElementById('drawerPreview');
   descEl.value = task.desc || '';
+  descEl.style.height = 'auto';
   descEl.style.display = '';
   prevEl.style.display = 'none';
+  requestAnimationFrame(() => autoResizeDesc(descEl));
   document.getElementById('mdToggle').textContent = '預覽 Markdown';
 
   // Attachments
@@ -1770,7 +1803,7 @@ function closeDrawer() {
 /* ── Display helpers ── */
 function updateStatusDisplay(col) {
   const el = document.getElementById('dStatus');
-  const map = {todo:['待辦','ds-todo'],doing:['進行中','ds-doing'],'code-review':['Code Review','ds-code-review'],'in-test':['In Test','ds-in-test'],done:['完成','ds-done'],skipped:['Skipped','ds-skipped']};
+  const map = {todo:['To Do','ds-todo'],doing:['In Progress','ds-doing'],'code-review':['Code Review','ds-code-review'],'in-test':['In Test','ds-in-test'],done:['Done','ds-done'],skipped:['Skipped','ds-skipped']};
   const [label,cls] = map[col]||['—','ds-todo'];
   el.className = `d-status-pill ${cls}`;
   el.textContent = label;
@@ -1905,6 +1938,13 @@ function titleKeydown(e) {
 }
 
 /* ── Description (auto-save on blur) ── */
+function autoResizeDesc(el) {
+  el = el || document.getElementById('drawerDesc');
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
 function autoSaveDesc() {
   if (!activeTaskId) return;
   const task = STATE.tasks.find(t=>t.id===activeTaskId);
