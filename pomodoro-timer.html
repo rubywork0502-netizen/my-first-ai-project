@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PMSuite — 番茄鐘</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 button{cursor:pointer;border:none;background:none;font:inherit}
@@ -15,6 +15,29 @@ input,select{font:inherit;border:none;outline:none;background:none}
 svg{display:block;flex-shrink:0}
 
 :root {
+  --bg:#F8FAFC; --s1:#FFFFFF; --s2:#F8FAFC; --s3:#F1F5F9; --s4:#E8EDF4;
+  --b1:#E2E8F0; --b2:#CBD5E1; --b3:#94A3B8;
+  --t1:#0F172A; --t2:#334155; --t3:#64748B; --t4:#94A3B8;
+  --purple:#8B5CF6; --purple-d:rgba(139,92,246,.11); --purple-g:rgba(139,92,246,.06);
+  --cyan:#38BDF8;   --cyan-d:rgba(56,189,248,.1);
+  --teal:#0D9488;   --teal-d:rgba(13,148,136,.1);
+  --green:#10B981;  --green-d:rgba(16,185,129,.12);
+  --amber:#F59E0B;  --amber-d:rgba(245,158,11,.12);
+  --orange:#F97316; --orange-d:rgba(249,115,22,.12);
+  --pink:#EC4899;   --pink-d:rgba(236,72,153,.12);
+  --red:#EF4444;    --red-d:rgba(239,68,68,.12);
+  --grad-main:linear-gradient(135deg,#A78BFA 0%,#60A5FA 100%);
+  --grad-fire:linear-gradient(135deg,#EC4899 0%,#F97316 100%);
+  --grad-cool:linear-gradient(135deg,#0EA5E9 0%,#0D9488 100%);
+  --sb-w:220px; --hdr-h:56px; --r:10px; --r-sm:6px;
+  --hdr-bg:rgba(255,255,255,.94); --ghost-op:.03;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.04),0 4px 8px rgba(15,23,42,.04);
+  --shadow-md:0 2px 4px rgba(15,23,42,.06),0 8px 16px rgba(15,23,42,.06);
+  /* timer accent (changes per mode) */
+  --mode-color:#EC4899;
+  --mode-grad:linear-gradient(135deg,#EC4899,#F97316);
+}
+[data-theme="dark"] {
   --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
   --b1:#1e1c2e; --b2:#2a2840; --b3:#3a3852;
   --t1:#f0edfb; --t2:#9490b0; --t3:#58547a; --t4:#35324a;
@@ -29,32 +52,15 @@ svg{display:block;flex-shrink:0}
   --grad-main:linear-gradient(135deg,#c084fc 0%,#38bdf8 100%);
   --grad-fire:linear-gradient(135deg,#f472b6 0%,#fb923c 100%);
   --grad-cool:linear-gradient(135deg,#38bdf8 0%,#2dd4bf 100%);
-  --sb-w:228px; --hdr-h:58px; --r:10px; --r-sm:6px;
   --hdr-bg:rgba(8,8,15,.9); --ghost-op:.05;
-  /* timer accent (changes per mode) */
-  --mode-color: #f472b6;
-  --mode-grad:  linear-gradient(135deg,#f472b6,#fb923c);
-}
-[data-theme="light"] {
-  --bg:#f4f2fb; --s1:#fff; --s2:#edeaf7; --s3:#e2dff2; --s4:#d5d0ea;
-  --b1:#dbd6f0; --b2:#ccc6e4; --b3:#b8b2d8;
-  --t1:#18142a; --t2:#5a5475; --t3:#9088aa; --t4:#b8b0cc;
-  --purple-d:rgba(192,132,252,.14); --purple-g:rgba(192,132,252,.08);
-  --cyan-d:rgba(56,189,248,.14); --teal-d:rgba(45,212,191,.14);
-  --green-d:rgba(74,222,128,.14); --orange-d:rgba(251,146,60,.14);
-  --hdr-bg:rgba(244,242,251,.92); --ghost-op:.07;
-}
-@media(prefers-color-scheme:light){
-  :root:not([data-theme="dark"]){
-    --bg:#f4f2fb; --s1:#fff; --s2:#edeaf7; --s3:#e2dff2;
-    --b1:#dbd6f0; --b2:#ccc6e4; --b3:#b8b2d8;
-    --t1:#18142a; --t2:#5a5475; --t3:#9088aa; --t4:#b8b0cc;
-    --hdr-bg:rgba(244,242,251,.92); --ghost-op:.07;
-  }
+  --shadow-sm:0 1px 2px rgba(0,0,0,.22),0 4px 16px rgba(0,0,0,.14);
+  --shadow-md:0 2px 4px rgba(0,0,0,.28),0 12px 36px rgba(0,0,0,.22);
+  --mode-color:#f472b6;
+  --mode-grad:linear-gradient(135deg,#f472b6,#fb923c);
 }
 body,aside,.hdr,.panel,.card{transition:background-color .28s,border-color .28s,color .2s}
 
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);
   min-height:100vh;display:flex;overflow:hidden;font-size:14px}
 
 /* ── SIDEBAR (identical to dashboard) ── */
@@ -78,7 +84,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .ni{color:var(--t4);flex-shrink:0;transition:color .15s}
 .nav-item.active .ni{color:var(--purple)}
 .nav-item:hover .ni{color:var(--t2)}
-.nav-chip{margin-left:auto;font-family:'Fira Code',monospace;font-size:10px;font-weight:500;
+.nav-chip{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
   padding:1px 7px;border-radius:10px;background:var(--s3);color:var(--t2);border:1px solid var(--b2)}
 .nav-chip.hot{background:var(--red-d);color:var(--red);border-color:transparent}
 .sb-footer{padding:12px 10px;border-top:1px solid var(--b1)}
@@ -175,7 +181,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .task-sel-divider{height:1px;background:var(--b1)}
 .task-sel-info{display:flex;align-items:center;justify-content:space-between}
 .task-sel-stat{font-size:11.5px;color:var(--t2)}
-.task-sel-stat strong{font-family:'Fira Code',monospace;color:var(--t1)}
+.task-sel-stat strong{font-family:'JetBrains Mono',monospace;color:var(--t1)}
 
 /* ── RIGHT PANEL ── */
 .right-col{display:flex;flex-direction:column;gap:14px}
@@ -211,8 +217,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .hist-info{flex:1;min-width:0}
 .hist-task{font-size:12.5px;font-weight:500;color:var(--t1);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hist-time{font-size:10.5px;color:var(--t3);font-family:'Fira Code',monospace;margin-top:2px}
-.hist-dur{font-family:'Fira Code',monospace;font-size:11px;color:var(--t4);flex-shrink:0}
+.hist-time{font-size:10.5px;color:var(--t3);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.hist-dur{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t4);flex-shrink:0}
 
 /* Completed tasks quick view */
 .completed-task{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--b1)}
@@ -221,7 +227,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .ct-name{font-size:12.5px;color:var(--t1);flex:1;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ct-pts{font-family:'Fira Code',monospace;font-size:10px;color:var(--teal)}
+.ct-pts{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal)}
 
 /* ── animations ── */
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
@@ -508,7 +514,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
             <div class="pdot" style="color:var(--purple);background:var(--purple)"></div>
             計時紀錄
           </div>
-          <span style="font-size:11px;color:var(--t4);font-family:'Fira Code',monospace">今日</span>
+          <span style="font-size:11px;color:var(--t4);font-family:'JetBrains Mono',monospace">今日</span>
         </div>
         <div class="hist-list" id="hist-list">
           <div style="padding:24px;text-align:center;color:var(--t4);font-size:12px">
@@ -534,12 +540,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
           <div class="completed-task" style="opacity:.6">
             <div style="width:16px;height:16px;border-radius:50%;border:1.5px solid var(--b3);flex-shrink:0"></div>
             <span class="ct-name">實作 API 端點</span>
-            <span style="font-family:'Fira Code',monospace;font-size:10px;color:var(--orange)">8pt</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--orange)">8pt</span>
           </div>
           <div class="completed-task" style="opacity:.6">
             <div style="width:16px;height:16px;border-radius:50%;border:1.5px solid var(--b3);flex-shrink:0"></div>
             <span class="ct-name">撰寫測試案例</span>
-            <span style="font-family:'Fira Code',monospace;font-size:10px;color:var(--orange)">5pt</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--orange)">5pt</span>
           </div>
         </div>
       </div>

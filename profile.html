@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PMSuite — 個人設定</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ━━━ RESET ━━━ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -18,6 +18,25 @@ svg{display:block;flex-shrink:0}
 
 /* ━━━ TOKENS ━━━ */
 :root{
+  --bg:#F8FAFC; --s1:#FFFFFF; --s2:#F8FAFC; --s3:#F1F5F9; --s4:#E8EDF4;
+  --b1:#E2E8F0; --b2:#CBD5E1; --b3:#94A3B8;
+  --t1:#0F172A; --t2:#334155; --t3:#64748B; --t4:#94A3B8;
+  --purple:#8B5CF6; --purple-d:rgba(139,92,246,.11); --purple-g:rgba(139,92,246,.06);
+  --cyan:#38BDF8;   --cyan-d:rgba(56,189,248,.1);
+  --teal:#0D9488;   --teal-d:rgba(13,148,136,.1);
+  --green:#10B981;  --green-d:rgba(16,185,129,.12);
+  --amber:#F59E0B;  --amber-d:rgba(245,158,11,.12);
+  --orange:#F97316; --orange-d:rgba(249,115,22,.12);
+  --pink:#EC4899;   --pink-d:rgba(236,72,153,.12);
+  --red:#EF4444;    --red-d:rgba(239,68,68,.12);
+  --grad-main:linear-gradient(135deg,#A78BFA 0%,#60A5FA 100%);
+  --grad-fire:linear-gradient(135deg,#EC4899 0%,#F97316 100%);
+  --sb-w:220px; --hdr-h:56px; --r:10px; --r-sm:6px;
+  --hdr-bg:rgba(255,255,255,.94);
+  --shadow-sm:0 1px 2px rgba(15,23,42,.04),0 4px 8px rgba(15,23,42,.04);
+  --shadow-md:0 2px 4px rgba(15,23,42,.06),0 8px 16px rgba(15,23,42,.06);
+}
+[data-theme="dark"]{
   --bg:#08080f; --s1:#0e0d14; --s2:#141320; --s3:#1c1a2a; --s4:#252336;
   --b1:#1e1c2e; --b2:#2a2840; --b3:#3a3852;
   --t1:#f0edfb; --t2:#9490b0; --t3:#58547a; --t4:#35324a;
@@ -30,25 +49,17 @@ svg{display:block;flex-shrink:0}
   --pink:#f472b6;   --pink-d:rgba(244,114,182,.13);
   --red:#f87171;    --red-d:rgba(248,113,113,.13);
   --grad-main:linear-gradient(135deg,#c084fc 0%,#38bdf8 100%);
-  --sb-w:228px; --hdr-h:58px; --r:10px; --r-sm:6px;
+  --grad-fire:linear-gradient(135deg,#f472b6 0%,#fb923c 100%);
   --hdr-bg:rgba(8,8,15,.9);
-}
-[data-theme="light"]{
-  --bg:#f4f2fb; --s1:#fff; --s2:#edeaf7; --s3:#e2dff2; --s4:#d5d0ea;
-  --b1:#dbd6f0; --b2:#ccc6e4; --b3:#b8b2d8;
-  --t1:#18142a; --t2:#5a5475; --t3:#9088aa; --t4:#b8b0cc;
-  --purple-d:rgba(192,132,252,.14); --cyan-d:rgba(56,189,248,.14);
-  --teal-d:rgba(45,212,191,.14); --green-d:rgba(74,222,128,.14);
-  --amber-d:rgba(251,191,36,.14); --orange-d:rgba(251,146,60,.14);
-  --pink-d:rgba(244,114,182,.14); --red-d:rgba(248,113,113,.14);
-  --hdr-bg:rgba(244,242,251,.92);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.22),0 4px 16px rgba(0,0,0,.14);
+  --shadow-md:0 2px 4px rgba(0,0,0,.28),0 12px 36px rgba(0,0,0,.22);
 }
 
 body,.sidebar,.hdr,.nav-item,.user-row,.settings-card,.member-row,.field-input{
   transition:background-color .25s ease,border-color .25s ease,color .2s ease}
 
 /* ━━━ LAYOUT ━━━ */
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);
   min-height:100vh;display:flex;font-size:14px;line-height:1.5}
 .layout{display:flex;width:100%;min-height:100vh}
 
@@ -122,7 +133,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .perm-admin {background:rgba(192,132,252,.18);color:#c084fc;border:1px solid rgba(192,132,252,.3)}
 .perm-pm    {background:rgba(56,189,248,.15); color:#38bdf8;border:1px solid rgba(56,189,248,.25)}
 .perm-member{background:rgba(74,222,128,.15); color:#4ade80;border:1px solid rgba(74,222,128,.25)}
-.hero-email{font-size:12px;color:var(--t3);font-family:'Fira Code',monospace}
+.hero-email{font-size:12px;color:var(--t3);font-family:'JetBrains Mono',monospace}
 
 /* ━━━ SETTINGS CARD ━━━ */
 .settings-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden}
@@ -169,7 +180,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
 .member-info{flex:1;min-width:0}
 .member-name{font-size:13px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:6px}
-.member-email{font-size:11px;color:var(--t3);font-family:'Fira Code',monospace;
+.member-email{font-size:11px;color:var(--t3);font-family:'JetBrains Mono',monospace;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
 .member-role{font-size:12px;color:var(--t2);flex-shrink:0;min-width:100px}
 .member-perm{font-size:10px;font-weight:700;letter-spacing:.05em;padding:3px 9px;
@@ -201,7 +212,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   padding:14px 16px}
 .security-label{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
   color:var(--t4);margin-bottom:6px}
-.security-val{font-family:'Fira Code',monospace;font-size:12px;color:var(--t2)}
+.security-val{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--t2)}
 .btn-danger{display:flex;align-items:center;gap:8px;padding:9px 18px;border-radius:var(--r-sm);
   background:var(--red-d);border:1px solid rgba(248,113,113,.25);color:var(--red);
   font-size:13px;font-weight:600;transition:all .15s}
@@ -380,7 +391,7 @@ body::after{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;
           <div class="sc-title-dot" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></div>
           工作區成員
         </div>
-        <span style="font-size:11px;color:var(--t4);font-family:'Fira Code',monospace" id="memberCount">0 位成員</span>
+        <span style="font-size:11px;color:var(--t4);font-family:'JetBrains Mono',monospace" id="memberCount">0 位成員</span>
       </div>
       <div class="member-list" id="memberList"></div>
 
