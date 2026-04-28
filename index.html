@@ -686,59 +686,55 @@ svg.ring{transform:rotate(-90deg)}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes barIn{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
 </style>
+<link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
 
 <!-- ━━━━━ SIDEBAR ━━━━━ -->
 <aside class="sidebar">
-  <div class="logo">
-    <div class="logo-icon">P</div>
-    <span class="logo-label">PM<em>Suite</em></span>
-  </div>
-
+  <a class="sidebar-logo" href="index.html">
+    <div class="logo-mark">P</div>
+    <span class="logo-text">PMSuite</span>
+  </a>
   <nav class="nav">
-    <div class="nav-section">主選單</div>
+    <div class="nav-section-label">主選單</div>
     <a class="nav-item active" href="index.html">
-      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
-        <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
-      </svg>控制台
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      控制台
     </a>
     <a class="nav-item" href="projects.html">
-      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-      </svg>專案
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      專案
+    </a>
+    <a class="nav-item" href="tasks.html">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      任務
     </a>
     <a class="nav-item" href="sprint-review.html">
-      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-      </svg>Sprint Review
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Sprint Review
     </a>
-
-    <div class="nav-section">工具</div>
+    <div class="nav-section-label">工具</div>
     <a class="nav-item" href="pomodoro-timer.html">
-      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/>
-      </svg>番茄鐘
-      <span class="nav-chip" id="sb-pomo-chip" style="display:none;background:var(--pink-d);color:var(--pink);border:none">▶</span>
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
+      番茄鐘<span class="nav-badge" id="sb-pomo-chip" style="display:none;background:rgba(236,72,153,.15);color:#ec4899">▶</span>
     </a>
     <a class="nav-item" href="personal-space.html">
-      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M3 21c0-4.2 4-7 9-7s9 2.8 9 7"/><path d="M16.5 3.5c1-1 2.5-.5 3 1s-.5 2.5-1.5 2.5"/></svg>
-      個人中心
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M3 21c0-4.2 4-7 9-7s9 2.8 9 7"/></svg>
+      個人空間
     </a>
-    <a class="nav-item" href="#">
-      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-      </svg>文件
+    <a class="nav-item" href="docs.html">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      文件
     </a>
+    <div class="nav-section-label">個人</div>
     <a class="nav-item" href="profile.html">
-      <svg class="ni" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      設定
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      個人檔案
     </a>
   </nav>
 
-  <!-- Mini timer (shown when timer running & not on timer page) -->
+  <!-- Mini timer (shown when timer running) -->
   <div class="sb-pomo" id="sb-pomo-mini" onclick="location.href='pomodoro-timer.html'">
     <div class="sb-pomo-row">
       <span class="sb-pomo-label" id="sb-mode-label">工作時間</span>
@@ -753,7 +749,10 @@ svg.ring{transform:rotate(-90deg)}
   <div class="sb-footer">
     <div class="user-row">
       <div class="avatar">U</div>
-      <div><div class="user-name">使用者</div><div class="user-role">管理員</div></div>
+      <div class="user-info">
+        <div class="user-name">使用者</div>
+        <div class="user-role">成員</div>
+      </div>
     </div>
   </div>
 </aside>
