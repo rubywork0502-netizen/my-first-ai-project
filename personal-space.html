@@ -58,7 +58,7 @@ svg{display:block;flex-shrink:0}
 
 /* ━━━ BODY & GRAIN ━━━ */
 body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);
-  min-height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5}
+  height:100vh;display:flex;overflow:hidden;font-size:14px;line-height:1.5}
 body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.035'/%3E%3C/svg%3E")}
 
@@ -66,7 +66,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .ps-orbs{display:none}
 
 /* ━━━ SIDEBAR ━━━ */
-.sidebar{width:var(--sb-w);min-height:100vh;background:var(--s1);
+.sidebar{width:var(--sb-w);background:var(--s1);
   border-right:1px solid var(--b1);display:flex;flex-direction:column;
   flex-shrink:0;position:relative;z-index:20}
 .logo{height:var(--hdr-h);display:flex;align-items:center;gap:12px;
@@ -1067,7 +1067,110 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .orb-day-dot.today{background:linear-gradient(135deg,var(--orange),var(--gold));
   box-shadow:0 0 7px rgba(228,122,59,.45);transform:scale(1.3)}
 
+/* ━━━ CAL EXPAND BUTTON ━━━ */
+.cal-expand-btn{
+  width:24px;height:24px;border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--t3);border:1px solid var(--b2);
+  transition:all .15s;margin-left:6px;flex-shrink:0}
+.cal-expand-btn:hover{color:var(--purple);background:var(--purple-d);border-color:rgba(192,132,252,.4)}
+
+/* ━━━ FULL CALENDAR OVERLAY ━━━ */
+.fcal-overlay{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .22s}
+.fcal-overlay.open{opacity:1;pointer-events:all}
+.fcal-modal{
+  background:var(--s1);border:1px solid var(--b1);
+  border-radius:16px;width:min(1100px,96vw);height:min(840px,92vh);
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.3);
+  transform:scale(.96) translateY(14px);
+  transition:transform .25s cubic-bezier(.16,1,.3,1)}
+.fcal-overlay.open .fcal-modal{transform:scale(1) translateY(0)}
+
+.fcal-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 20px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.fcal-hdr-icon{width:30px;height:30px;border-radius:8px;
+  background:rgba(192,132,252,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fcal-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;
+  letter-spacing:.05em;color:var(--t1)}
+.fcal-nav-row{display:flex;align-items:center;gap:7px;margin-left:auto}
+.fcal-month-lbl{
+  min-width:100px;text-align:center;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:15px;letter-spacing:.05em;color:var(--t1)}
+.fcal-view-tabs{display:flex;background:var(--s3);border-radius:5px;padding:2px;gap:1px;margin-left:10px}
+.fcal-vt{text-align:center;font-size:10px;font-weight:700;padding:4px 14px;
+  border-radius:3px;color:var(--t3);cursor:pointer;transition:all .14s;letter-spacing:.04em}
+.fcal-vt.active{background:var(--s1);color:var(--t1);box-shadow:0 1px 3px rgba(15,23,42,.08)}
+.fcal-close-btn{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--t3);border:1px solid var(--b1);
+  transition:all .15s;margin-left:8px;flex-shrink:0}
+.fcal-close-btn:hover{background:var(--red-d);color:var(--red);border-color:rgba(239,68,68,.3)}
+
+.fcal-body{flex:1;display:flex;overflow:hidden;min-height:0}
+.fcal-main{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+  padding:14px 18px 0;min-width:0}
+.fcal-main .cal-dow{margin-bottom:5px}
+.fcal-main .cal-dow-cell{font-size:10px}
+.fcal-main .cal-cells{flex:1;overflow-y:auto;min-height:0}
+.fcal-main .cal-cell{min-height:90px;padding:7px 8px}
+.fcal-main .cal-day-num{font-size:12px;width:22px;height:22px}
+.fcal-main .cal-cell.today .cal-day-num{font-size:11px;width:22px;height:22px}
+.fcal-main .cal-cell.selected .cal-day-num{font-size:11px;width:22px;height:22px}
+.fcal-main .cal-dots{margin-top:5px;gap:3px}
+.fcal-main .cal-dot{width:6px;height:6px}
+.fcal-main .cal-note-snippet{font-size:9.5px;margin-top:3px}
+.fcal-main .cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.fcal-main .cal-wk-col{min-height:180px;border:1px solid var(--b1);border-radius:8px;padding:4px 6px}
+.fcal-main .cal-wk-hdr{margin-bottom:6px}
+.fcal-main .cal-wk-dow{font-size:10px}
+.fcal-main .cal-wk-date{font-size:13px;width:26px;height:26px}
+.fcal-main .cal-wk-task{font-size:10px;padding:3px 7px;margin-bottom:3px}
+.fcal-main .cal-wk-note{font-size:10px;padding:3px 7px;margin-bottom:3px}
+.fcal-main .cal-wk-add{height:24px;font-size:16px}
+
+.fcal-legend{
+  display:flex;gap:8px 14px;flex-wrap:wrap;
+  padding:10px 18px;border-top:1px solid var(--b1);flex-shrink:0}
+
+.fcal-panel{
+  width:280px;min-width:280px;border-left:1px solid var(--b1);
+  display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.fcal-panel-hdr{
+  padding:16px 16px 12px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.fcal-panel-date{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:22px;font-weight:700;color:var(--t1);letter-spacing:.02em}
+.fcal-panel-weekday{font-size:11px;color:var(--t3);margin-top:2px}
+.fcal-panel-add{
+  display:flex;align-items:center;gap:5px;
+  margin-top:10px;padding:7px 12px;border-radius:var(--r-sm);
+  background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.3);
+  color:var(--purple);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .15s;width:100%}
+.fcal-panel-add:hover{background:rgba(192,132,252,.2)}
+.fcal-panel-events{
+  flex:1;overflow-y:auto;
+  padding:12px;display:flex;flex-direction:column;gap:8px}
+.fcal-panel-events::-webkit-scrollbar{width:3px}
+.fcal-panel-events::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.fcal-no-select{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:20px;color:var(--t4)}
+.fcal-no-select .ph-art{font-size:36px;margin-bottom:10px}
+.fcal-no-select .ph-txt{font-size:12px;line-height:1.6}
+
 </style>
+<link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
 
@@ -1083,60 +1186,57 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 
 <!-- ━━━ SIDEBAR ━━━ -->
 <aside class="sidebar">
-  <div class="logo">
-    <div class="logo-icon">PM</div>
-    <div class="logo-label">PM<em>Suite</em></div>
-  </div>
+  <a class="sidebar-logo" href="index.html">
+    <div class="logo-mark">P</div>
+    <span class="logo-text">PMSuite</span>
+  </a>
   <nav class="nav">
-    <div class="nav-section">工作區</div>
+    <div class="nav-section-label">主選單</div>
     <a class="nav-item" href="index.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      總覽
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      控制台
     </a>
     <a class="nav-item" href="projects.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/></svg>
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
       專案
     </a>
     <a class="nav-item" href="tasks.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       任務
     </a>
-    <a class="nav-item" href="project-detail.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-      看板
-    </a>
     <a class="nav-item" href="sprint-review.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Sprint Review
     </a>
-    <div class="nav-section">工具</div>
+    <div class="nav-section-label">工具</div>
     <a class="nav-item" href="pomodoro-timer.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><polyline points="12 9 12 13 15 14"/><path d="M9 2h6M12 2v3"/></svg>
       番茄鐘
     </a>
     <a class="nav-item active" href="personal-space.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M3 21c0-4.2 4-7 9-7s9 2.8 9 7"/><path d="M16.5 3.5c1-1 2.5-.5 3 1s-.5 2.5-1.5 2.5"/></svg>
-      個人中心
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M3 21c0-4.2 4-7 9-7s9 2.8 9 7"/></svg>
+      個人空間
     </a>
-    <a class="nav-item" href="#">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <a class="nav-item" href="docs.html">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       文件
     </a>
+    <div class="nav-section-label">個人</div>
     <a class="nav-item" href="profile.html">
-      <svg class="ni" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      設定
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      個人檔案
     </a>
   </nav>
+  <div class="sun-reminder" id="sunReminder" onclick="document.getElementById('journalTextarea').focus()">
+    <svg class="sun-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <div class="sun-text">今天的晨報<br>還沒填寫喔</div>
+  </div>
   <div class="sb-footer">
-    <div class="sun-reminder" id="sunReminder" onclick="document.getElementById('journalTextarea').focus()">
-      <svg class="sun-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      <div class="sun-text">今天的晨報<br>還沒填寫喔</div>
-    </div>
     <div class="user-row">
-      <div class="av">王</div>
-      <div>
-        <div class="user-name">王小明</div>
-        <div class="user-role">Project Manager</div>
+      <div class="avatar">U</div>
+      <div class="user-info">
+        <div class="user-name">使用者</div>
+        <div class="user-role">成員</div>
       </div>
     </div>
   </div>
@@ -1354,6 +1454,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
                 <div class="cal-vt active" id="calTabMonth" onclick="setCalView('month')">月</div>
                 <div class="cal-vt" id="calTabWeek" onclick="setCalView('week')">週</div>
               </div>
+              <button class="cal-expand-btn" onclick="openFCal()" title="全螢幕檢視">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+              </button>
             </div>
           </div>
           <div class="cal-body">
@@ -2211,6 +2314,10 @@ function renderCalMonth() {
     html += calCellHtml(new Date(calYear, calMonth+1, i), today, byDate, true);
   }
   cells.innerHTML = html;
+  const fcLbl = document.getElementById('fcalMonthLabel');
+  const fcCells = document.getElementById('fcalCells');
+  if (fcLbl) fcLbl.textContent = lbl.textContent;
+  if (fcCells) fcCells.innerHTML = html;
 }
 
 function calCellHtml(date, today, byDate, otherMonth) {
@@ -2275,6 +2382,10 @@ function renderCalWeek() {
     </div>`;
   }
   wrap.innerHTML = html;
+  const fcLbl2 = document.getElementById('fcalMonthLabel');
+  const fcWrap = document.getElementById('fcalWeekCells');
+  if (fcLbl2) fcLbl2.textContent = lbl.textContent;
+  if (fcWrap) fcWrap.innerHTML = html;
 }
 
 function setCalView(v) {
@@ -2283,6 +2394,14 @@ function setCalView(v) {
   document.getElementById('calTabWeek').classList.toggle('active', v==='week');
   document.getElementById('calMonthView').style.display = v==='month' ? '' : 'none';
   document.getElementById('calWeekView').style.display  = v==='week'  ? '' : 'none';
+  const ftm = document.getElementById('fcalTabMonth');
+  const ftw = document.getElementById('fcalTabWeek');
+  const fmv = document.getElementById('fcalMonthView');
+  const fwv = document.getElementById('fcalWeekView');
+  if (ftm) ftm.classList.toggle('active', v==='month');
+  if (ftw) ftw.classList.toggle('active', v==='week');
+  if (fmv) fmv.style.display = v==='month' ? '' : 'none';
+  if (fwv) fwv.style.display = v==='week'  ? '' : 'none';
   renderCal();
 }
 
@@ -2291,6 +2410,65 @@ function calNav(delta) {
   if (calMonth > 11) { calMonth = 0; calYear++; }
   if (calMonth < 0)  { calMonth = 11; calYear--; }
   renderCal();
+}
+
+// ── Full Calendar modal ──────────────────────────────
+function openFCal() {
+  document.getElementById('fcalOverlay').classList.add('open');
+  renderCal();
+  if (selectedCalDate) renderFCPanel(selectedCalDate);
+}
+function closeFCal() {
+  document.getElementById('fcalOverlay').classList.remove('open');
+}
+function fcalNav(d)    { calNav(d); }
+function fcalSetView(v){ setCalView(v); }
+
+function renderFCPanel(key) {
+  const pDate = document.getElementById('fcalPanelDate');
+  const pWd   = document.getElementById('fcalPanelWeekday');
+  const pAdd  = document.getElementById('fcalPanelAdd');
+  const list  = document.getElementById('fcalEventsList');
+  if (!pDate || !list) return;
+
+  const [yr, mo, dy] = key.split('-');
+  const dt  = new Date(+yr, +mo-1, +dy);
+  const WDS = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  pDate.textContent = `${+mo}月${+dy}日`;
+  pWd.textContent   = WDS[dt.getDay()];
+  if (pAdd) pAdd.style.display = '';
+
+  const evts  = CAL_EVENTS[key] || [];
+  const notes = state.calNotes[key] || [];
+  const tasks = getProjectTasks().filter(t => t.dueDate && t.dueDate.split('T')[0] === key);
+
+  if (!tasks.length && !notes.length && !evts.length) {
+    list.innerHTML = `<div class="cal-insights-empty">
+      <div class="ci-empty-art">🌤️</div><div>這天沒有安排的事項</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = [
+    ...tasks.map(t => `<div class="cal-event" style="border-left:2px solid ${PRIO_COLOR[t.priority]||'#9490b0'}">
+      <span class="cal-event-tag" style="background:rgba(127,86,217,.1);color:var(--violet);border:1px solid rgba(127,86,217,.25)">📋 任務</span>
+      <div class="cal-event-body">
+        <div class="cal-event-title">${escHtml(t.title)}</div>
+        <div class="cal-event-meta">${escHtml(t.project||'')}</div>
+      </div></div>`),
+    ...notes.map(n => `<div class="cal-event" style="border-left:2px solid var(--cyan)">
+      <span class="cal-event-tag" style="background:rgba(56,189,248,.1);color:var(--cyan);border:1px solid rgba(56,189,248,.3)">📝 記事</span>
+      <div class="cal-event-body"><div class="cal-event-title">${escHtml(n)}</div></div>
+    </div>`),
+    ...evts.map((e, i) => {
+      const meta = CAL_EVENT_LABELS[e.type] || { tag: e.type, icon: '•' };
+      return `<div class="cal-event cal-event-${e.type}" style="animation-delay:${i*60}ms">
+        <span class="cal-event-tag">${meta.icon} ${meta.tag}</span>
+        <div class="cal-event-body">
+          <div class="cal-event-title">${escHtml(e.title)}</div>
+          <div class="cal-event-meta">${escHtml(e.meta)}</div>
+        </div></div>`;
+    }),
+  ].join('');
 }
 
 // ─── Calendar events mock data (relative to today) ───────────────────
@@ -2353,19 +2531,19 @@ function renderDayInsights(key) {
       <div class="ci-empty-art">🌤️</div>
       <div>這天沒有安排的事項</div>
     </div>`;
-    return;
+  } else {
+    list.innerHTML = evts.map((e, i) => {
+      const meta = CAL_EVENT_LABELS[e.type] || { tag: e.type, icon: '•' };
+      return `<div class="cal-event cal-event-${e.type}" style="animation-delay:${i * 60}ms">
+        <span class="cal-event-tag">${meta.icon} ${meta.tag}</span>
+        <div class="cal-event-body">
+          <div class="cal-event-title">${escHtml(e.title)}</div>
+          <div class="cal-event-meta">${escHtml(e.meta)}</div>
+        </div>
+      </div>`;
+    }).join('');
   }
-
-  list.innerHTML = evts.map((e, i) => {
-    const meta = CAL_EVENT_LABELS[e.type] || { tag: e.type, icon: '•' };
-    return `<div class="cal-event cal-event-${e.type}" style="animation-delay:${i * 60}ms">
-      <span class="cal-event-tag">${meta.icon} ${meta.tag}</span>
-      <div class="cal-event-body">
-        <div class="cal-event-title">${escHtml(e.title)}</div>
-        <div class="cal-event-meta">${escHtml(e.meta)}</div>
-      </div>
-    </div>`;
-  }).join('');
+  renderFCPanel(key);
 }
 
 function openInsightNoteModal(key) {
@@ -2895,5 +3073,83 @@ function renderStatsStrip() {
   renderStatsStrip();
 })();
 </script>
+
+<!-- ══ FULL CALENDAR OVERLAY ══ -->
+<div class="fcal-overlay" id="fcalOverlay" onclick="if(event.target===this)closeFCal()">
+  <div class="fcal-modal" id="fcalModal">
+
+    <!-- Header -->
+    <div class="fcal-hdr">
+      <div class="fcal-hdr-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div class="fcal-title">整合行事曆</div>
+      <div class="fcal-nav-row">
+        <button class="cal-nav-btn" onclick="fcalNav(-1)">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="fcal-month-lbl" id="fcalMonthLabel"></div>
+        <button class="cal-nav-btn" onclick="fcalNav(1)">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="fcal-view-tabs">
+          <div class="fcal-vt active" id="fcalTabMonth" onclick="fcalSetView('month')">月</div>
+          <div class="fcal-vt" id="fcalTabWeek" onclick="fcalSetView('week')">週</div>
+        </div>
+      </div>
+      <button class="fcal-close-btn" onclick="closeFCal()" title="關閉">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="fcal-body">
+
+      <!-- Main calendar area -->
+      <div class="fcal-main">
+        <div id="fcalMonthView">
+          <div class="cal-dow">
+            <div class="cal-dow-cell">日</div><div class="cal-dow-cell">一</div>
+            <div class="cal-dow-cell">二</div><div class="cal-dow-cell">三</div>
+            <div class="cal-dow-cell">四</div><div class="cal-dow-cell">五</div>
+            <div class="cal-dow-cell">六</div>
+          </div>
+          <div class="cal-cells" id="fcalCells"></div>
+        </div>
+        <div id="fcalWeekView" style="display:none">
+          <div class="cal-week" id="fcalWeekCells"></div>
+        </div>
+      </div>
+
+      <!-- Right panel: selected day events -->
+      <div class="fcal-panel">
+        <div class="fcal-panel-hdr">
+          <div class="fcal-panel-date" id="fcalPanelDate">選擇日期</div>
+          <div class="fcal-panel-weekday" id="fcalPanelWeekday">點擊日期查看當天事項</div>
+          <button class="fcal-panel-add" id="fcalPanelAdd" onclick="openInsightNoteModal(selectedCalDate)" style="display:none">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新增記事
+          </button>
+        </div>
+        <div class="fcal-panel-events" id="fcalEventsList">
+          <div class="fcal-no-select">
+            <div class="ph-art">🗓️</div>
+            <div class="ph-txt">點擊日期<br>查看當天事項</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="fcal-legend">
+      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--purple)"></div>截止任務</div>
+      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:var(--cyan)"></div>個人記事</div>
+      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#E47A3B"></div>請假</div>
+      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#38bdf8"></div>會議</div>
+      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:#7F56D9"></div>里程碑</div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
